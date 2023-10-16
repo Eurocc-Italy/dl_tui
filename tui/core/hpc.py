@@ -17,39 +17,14 @@ logger = logging.getLogger(__name__)
 USER = "lbabetto"
 HOST = "login.g100.cineca.it"
 WORKDIR = "/g100/home/userinternal/lbabetto/PROJECTS/1-DTaas/3-test"
+SUBMIT_DIR = "home/centos/TESTS/1-filter"
+SLURM_SCRIPT_PATH = "/g100/home/userinternal/lbabetto/REPOS/DTaaS_TUI/tui/core"
 
 
-def copy_files(files: List[str]):
-    """Copy relevant files to the work directory on G100
+def launch_job():
+    """Launch Slurm job on G100 with the converted user query"""
 
-    Parameters
-    ----------
-    files : List[str]
-        list containing the path to the files to copy
-    """
-
-    stdout, stderr = subprocess.Popen(
-        # key currently necessary, will be removed when we switch to chain user
-        f"scp -i /home/centos/.ssh/luca-hpc {' '.join(str(f) for f in files)} {USER}@{HOST}:{WORKDIR}",
-        shell=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-    ).communicate()
-
-    logger.debug(f"stdout: {str(stdout, 'utf-8')}")
-    logger.debug(f"stderr: {str(stderr, 'utf-8')}")
-
-
-def launch_job(path: str):
-    """Launch Slurm job on G100 with the converted user query
-
-    Parameters
-    ----------
-    path : str
-        path to the Slurm script containing the job info
-    """
-
-    cmd = f"cd {WORKDIR}; sbatch {path}"
+    cmd = f"cd {WORKDIR}; scp vm:{SUBMIT_DIR}/main.py {SLURM_SCRIPT_PATH}/slurm.sh .; sbatch slurm.sh"
 
     stdout, stderr = subprocess.Popen(
         # key currently necessary, will be removed when we switch to chain user
