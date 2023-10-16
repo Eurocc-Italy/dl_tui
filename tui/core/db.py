@@ -6,7 +6,11 @@ Functions and utilities to interface with the MongoDB database on the VM
 Author: @lbabetto
 """
 
+from typing import Callable, Any
+
 from pymongo import MongoClient
+from hpc import copy_files, launch_job
+
 import logging
 
 logger = logging.getLogger(__name__)
@@ -19,37 +23,28 @@ PORT = "27017"
 MONGODB_URI = f"mongodb://{USER}:{PASSWORD}@{IP}:{PORT}/"
 
 
-def connect_to_db(db_name: str, collection_name: str):
-    """Connect to MongoDB database <db_name> and retrieve document <collection_name>
-
-    Parameters
-    ----------
-    db_name : str
-        name of the MongoDB database
-    collection_name : str
-        name of the collection of interest
-
-    Returns
-    -------
-    dict
-        collection in form of json-style dictionary
-    """
+def show_db_details(database: str):
     client = MongoClient(MONGODB_URI)
-    db = client[db_name]
-    collection = db[collection_name]
+    db = client[database]
+    print(f"Database: {database}")
+    print(f"  collections:")
+    for collection in db:
+        print(f"    - {collection}")
 
-    return collection
 
-
-def run_query(db, query):
+def run_query(database: str, collection: str, query: Callable):
     """Wraps the user query function and runs it on the database
 
     Parameters
     ----------
     db : str
+        database containing the collection of interest
+    collection : str
         database collection on which to run the query
-    query : function
-        user function to be wrapped and ran on the database
+    query : Callable
+        user function to be wrapped and run on the database
     """
-    db = connect_to_db(db_name="COCO", collection_name="COCO")
-    query(db)
+    client = MongoClient(MONGODB_URI)
+    db = client[database]
+    data = db[collection]
+    query(data)
