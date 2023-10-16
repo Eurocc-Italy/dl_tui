@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 USER = "lbabetto"
 HOST = "login.g100.cineca.it"
 WORKDIR = "/g100/home/userinternal/lbabetto/PROJECTS/1-DTaas/3-test"
-SUBMIT_DIR = "home/centos/TESTS/1-filter"
+SUBMIT_DIR = "/home/centos/TESTS/1-filter"
 SLURM_SCRIPT_PATH = "/g100/home/userinternal/lbabetto/REPOS/DTaaS_TUI/tui/core"
 
 
