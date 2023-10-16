@@ -6,7 +6,6 @@ Functions and utilities to interface with HPC (G100) from the VM
 Author: @lbabetto
 """
 
-from typing import List
 import subprocess
 
 import logging
@@ -22,7 +21,7 @@ SLURM_SCRIPT_PATH = "/g100/home/userinternal/lbabetto/REPOS/DTaaS_TUI/tui/core"
 
 
 def launch_job():
-    """Launch Slurm job on G100 with the converted user query"""
+    """Launch Slurm job on G100 with the user script"""
 
     cmd = f"cd {WORKDIR}; scp vm:{SUBMIT_DIR}/main.py {SLURM_SCRIPT_PATH}/slurm.sh .; sbatch slurm.sh"
 
