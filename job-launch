@@ -1,0 +1,43 @@
+#!/usr/bin/env python
+
+import os, shutil
+from pprint import pprint
+
+from dotenv import load_dotenv
+from pymongo import MongoClient
+
+# Load config from .env file
+load_dotenv()
+
+MONGODB_URI = "mongodb://user:passwd@131.175.207.101:27017/"
+
+# Connect to MongoDB cluster:
+client = MongoClient(MONGODB_URI)
+
+# Get reference to "COCO" database
+db = client["COCO"]
+# Get reference to "COCO" collection
+coco = db["COCO"]
+
+# Available keys:
+#  - _id        - caption
+#  - id         - segmentation
+#  - path       - area
+#  - height     - iscrowd
+#  - width      - bbox
+#  - captured   - category_id
+#  - category
+
+
+print("  - searching for all entries with category 'hot dog'")
+for entry in coco.find():
+    try:
+        if entry["category"] == "hot dog":
+            print(f"ID {entry['id']:06} : {entry['category']}")
+    except KeyError:  # not all entries have a category
+        pass
+
+print("\n  - saving .jpg relative to the following image:")
+entry = coco.find_one()
+pprint(entry)
+shutil.copy(entry["path"], f"{entry['id']:06}.jpg")
