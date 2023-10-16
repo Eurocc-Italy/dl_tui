@@ -23,7 +23,7 @@ SUBMIT_DIR = "/home/centos/TESTS/1-filter"
 def launch_job():
     """Launch Slurm job on G100 with the user script"""
 
-    cmd = f"cd {WORKDIR}; scp vm:{SUBMIT_DIR}/main.py .; {os.path.dirname(__file__)}/slurm.sh .; sbatch slurm.sh"
+    cmd = f"cd {WORKDIR}; scp vm:{SUBMIT_DIR}/main.py vm:{os.path.dirname(__file__)}/slurm.sh .; sbatch slurm.sh"
 
     stdout, stderr = subprocess.Popen(
         # key currently necessary, will be removed when we switch to chain user
