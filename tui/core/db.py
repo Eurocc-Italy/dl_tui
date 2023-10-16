@@ -28,7 +28,7 @@ def show_db_details(database: str):
     db = client[database]
     print(f"Database: {database}")
     print(f"  collections:")
-    for collection in db:
+    for collection in db.list_collections():
         print(f"    - {collection}")
 
 
