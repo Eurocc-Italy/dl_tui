@@ -42,11 +42,31 @@ def show_db_details(database: str):
 
 
 def filter(database: str, collection: str, filter_dict: Dict[str, Any]):
+    """Filter database collection using a dictionary containing keys, value pairs
+
+    Parameters
+    ----------
+    database : str
+        MongoDB database containing the collection
+    collection : str
+        collection containing the data
+    filter_dict : Dict[str, Any]
+        dictionary containing the key, value pairs to use for filtering
+
+    Returns
+    -------
+    list
+        list containing the collection entries matching the filter
+    """
     client = MongoClient(MONGODB_URI)
     coll = client[database][collection]
 
+    filtered_list = []
+
     for entry in coll.find(filter_dict):
-        return entry
+        filtered_list.append(entry)
+
+    return filtered_list
 
 
 def run_query(database: str, collection: str, query):
