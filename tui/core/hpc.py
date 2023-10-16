@@ -6,6 +6,7 @@ Functions and utilities to interface with HPC (G100) from the VM
 Author: @lbabetto
 """
 
+import os
 import subprocess
 
 import logging
@@ -17,13 +18,12 @@ USER = "lbabetto"
 HOST = "login.g100.cineca.it"
 WORKDIR = "/g100/home/userinternal/lbabetto/PROJECTS/1-DTaas/3-test"
 SUBMIT_DIR = "/home/centos/TESTS/1-filter"
-SLURM_SCRIPT_PATH = "/g100/home/userinternal/lbabetto/REPOS/DTaaS_TUI/tui/core"
 
 
 def launch_job():
     """Launch Slurm job on G100 with the user script"""
 
-    cmd = f"cd {WORKDIR}; scp vm:{SUBMIT_DIR}/main.py {SLURM_SCRIPT_PATH}/slurm.sh .; sbatch slurm.sh"
+    cmd = f"cd {WORKDIR}; scp vm:{SUBMIT_DIR}/main.py {os.path.dirname(__file__)}/slurm.sh .; sbatch slurm.sh"
 
     stdout, stderr = subprocess.Popen(
         # key currently necessary, will be removed when we switch to chain user
