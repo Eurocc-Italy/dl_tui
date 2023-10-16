@@ -29,7 +29,7 @@ def show_db_details(database: str):
     print(f"Database: {database}")
     print(f"  collections:")
     for collection in db.list_collections():
-        print(f"    - {collection}")
+        print(f"    - {collection['name']}")
 
 
 def run_query(database: str, collection: str, query: Callable):
