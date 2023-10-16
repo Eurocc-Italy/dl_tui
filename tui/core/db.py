@@ -7,7 +7,6 @@ Author: @lbabetto
 """
 
 from pymongo import MongoClient
-from hpc import launch_job
 
 from typing import Dict, Any
 from pymongo.database import Database
