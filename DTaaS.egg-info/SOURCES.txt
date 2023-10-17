@@ -1,0 +1,14 @@
+README.md
+setup.py
+DTaaS.egg-info/PKG-INFO
+DTaaS.egg-info/SOURCES.txt
+DTaaS.egg-info/dependency_links.txt
+DTaaS.egg-info/top_level.txt
+tui/main.py
+tui/core/__init__.py
+tui/core/db.py
+tui/core/hpc.py
+tui/core/parse_query.py
+tui/core/slurm.sh
+tui/interface/__init__.py
+tui/interface/tui
