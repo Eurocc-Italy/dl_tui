@@ -9,19 +9,53 @@ Author: @lbabetto
 
 import os
 import subprocess
-from core.db import show_db_details
+from tui.core.db import MONGODB_URI
+from pymongo import MongoClient
 
 import logging
 
 logger = logging.getLogger(__name__)
 
 
+print("")
 print("  ┌─────────────────────────────────────────────────┐")
 print("  │ Digital Twin as a Service - Text User Interface │")
 print("  └─────────────────────────────────────────────────┘")
+print("")
 
-print("  - Retrieving database information")
-print("  - Available databases:")
+# Asking user to select database and collection
 
-# Temporary, will need to be replaced with chain user and relative home directory
-SUBMIT_DIR = "/home/centos/TESTS/2-tui"
+client = MongoClient(MONGODB_URI)
+
+print("Available databases: | ", end="")
+for db in client.list_database_names():
+    if db in ["admin", "config", "local"]:
+        continue
+    print(f"{db} | ", end="")
+
+db = input("\nSelect database: ")
+if db not in client.list_database_names():
+    raise ValueError(f"Incorrect database '{db}'")
+
+print("\nAvailable collections: | ", end="")
+for coll in client[db].list_collection_names():
+    print(f"{db} | ", end="")
+
+coll = input("\nSelect collection: ")
+if coll not in client[db].list_collection_names():
+    raise ValueError(f"Incorrect collection '{coll}'")
+
+keys = {}
+for entry in client[db][coll].find():
+    for key in entry.keys():
+        if key not in keys.keys():
+            keys[key] = 0
+        else:   
+            keys[key] += 1
+
+print("\nAvailable keys:\n")
+print("  key                entries")
+print("  --------------------------")
+for key, count in keys.items():
+    print(f"  {key:20}{count}")
+
