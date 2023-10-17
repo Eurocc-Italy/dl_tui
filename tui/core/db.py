@@ -24,8 +24,8 @@ PORT = "27017"
 MONGODB_URI = f"mongodb://{USER}:{PASSWORD}@{IP}:{PORT}/"
 
 
-def show_db_details(database: str):
-    """Show database details (collections, ...)
+def show_db_details():
+    """Show MongoDB details (databases, collections, ...)
 
     Parameters
     ----------
@@ -33,11 +33,10 @@ def show_db_details(database: str):
         name of the database
     """
     client = MongoClient(MONGODB_URI)
-    db = client[database]
-    print(f"Database: {database}")
-    print(f"  - Collections:")
-    for collection in db.list_collections():
-        print(f"    - {collection['name']}")
+    for database in client.list_database_names():
+        print(f"{database}")
+        for collection in client[database].list_collection_names():
+            print(f"  {collection}")
 
 
 def filter(database: str, collection: str, filter_dict: Dict[str, Any]):
