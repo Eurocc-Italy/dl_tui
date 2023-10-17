@@ -39,7 +39,7 @@ if db not in client.list_database_names():
 
 print("\nAvailable collections: | ", end="")
 for coll in client[db].list_collection_names():
-    print(f"{db} | ", end="")
+    print(f"{coll} | ", end="")
 
 coll = input("\nSelect collection: ")
 if coll not in client[db].list_collection_names():
