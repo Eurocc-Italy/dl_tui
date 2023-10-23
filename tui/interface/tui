@@ -31,6 +31,8 @@ PORT = "27017"
 
 MONGODB_URI = f"mongodb://{USER}:{PASSWORD}@{IP}:{PORT}/"
 
+client = MongoClient(MONGODB_URI)
+
 
 def print_info():
     """Print database info (available databases, collections, keywords)"""
