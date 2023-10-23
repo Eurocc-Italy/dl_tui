@@ -13,12 +13,12 @@ import subprocess
 # Temporary, will need to be replaced with chain user and relative home directory
 USER = "lbabetto"
 HOST = "login.g100.cineca.it"
-WORKDIR = "/g100/home/userinternal/lbabetto/PROJECTS/1-DTaas/4-image-process"
-SUBMIT_DIR = "/home/centos/TESTS/3-image-process"
+WORKDIR = f"/g100/home/userinternal/lbabetto/PROJECTS/1-DTaas/{os.path.basename(os.getcwd())}"
+SUBMIT_DIR = os.getcwd()
 
 
 def launch_job(script, files):
-    """Launch Slurm job on G100 with the user script"""
+    """Launch Slurm job on G100 with the user script on the files returned by the TUI filter"""
 
     with open("FILES", "w") as f:
         for file in files:
