@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 USER = "lbabetto"
 HOST = "login.g100.cineca.it"
 WORKDIR = "/g100/home/userinternal/lbabetto/PROJECTS/1-DTaas/4-image-process"
-SUBMIT_DIR = "/home/centos/TESTS/1-filter"
+SUBMIT_DIR = "/home/centos/TESTS/3-image-process"
 
 
 def launch_job(script, files):
