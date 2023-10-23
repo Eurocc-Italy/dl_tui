@@ -25,7 +25,7 @@ def launch_job(script, files):
 
     with open("FILES", "w") as f:
         for file in files:
-            f.write(file)
+            f.write(f"{file}\n")
 
     cmd = f"cd {WORKDIR}; scp vm:{SUBMIT_DIR}/{script} vm:{SUBMIT_DIR}/FILES vm:{os.path.dirname(__file__)}/slurm.sh .; sed -i 's/SCRIPT/{script}/' slurm.sh; sbatch slurm.sh"
 
