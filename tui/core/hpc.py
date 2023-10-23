@@ -9,9 +9,6 @@ Author: @lbabetto
 import os
 import subprocess
 
-import logging
-
-logger = logging.getLogger(__name__)
 
 # Temporary, will need to be replaced with chain user and relative home directory
 USER = "lbabetto"

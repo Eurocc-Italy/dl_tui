@@ -6,9 +6,6 @@ Functions and utilities to interface with the MongoDB database on the VM
 Author: @lbabetto
 """
 
-import logging
-
-logger = logging.getLogger(__name__)
 
 USER = "user"
 PASSWORD = "passwd"
