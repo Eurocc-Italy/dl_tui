@@ -24,7 +24,12 @@ print("  │ Digital Twin as a Service - Text User Interface │")
 print("  └─────────────────────────────────────────────────┘")
 print("")
 
-client = MongoClient(MONGODB_URI)
+USER = "user"
+PASSWORD = "passwd"
+IP = "localhost"
+PORT = "27017"
+
+MONGODB_URI = f"mongodb://{USER}:{PASSWORD}@{IP}:{PORT}/"
 
 
 def print_info():
