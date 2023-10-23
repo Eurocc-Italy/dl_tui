@@ -6,4 +6,4 @@
 #SBATCH --ntasks-per-node=1
 module load python
 source $HOME/virtualenvs/dev/bin/activate
-python ./main.py > output.out 2> error.err
+python ./SCRIPT FILES > output.out 2> error.err

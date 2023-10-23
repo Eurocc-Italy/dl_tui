@@ -20,10 +20,14 @@ WORKDIR = "/g100/home/userinternal/lbabetto/PROJECTS/1-DTaas/3-test"
 SUBMIT_DIR = "/home/centos/TESTS/1-filter"
 
 
-def launch_job():
+def launch_job(script, files):
     """Launch Slurm job on G100 with the user script"""
 
-    cmd = f"cd {WORKDIR}; scp vm:{SUBMIT_DIR}/main.py vm:{os.path.dirname(__file__)}/slurm.sh .; sbatch slurm.sh"
+    with open("FILES", "w") as f:
+        for file in files:
+            f.write(file)
+
+    cmd = f"cd {WORKDIR}; scp vm:{SUBMIT_DIR}/{script} vm:{SUBMIT_DIR}/FILES vm:{os.path.dirname(__file__)}/slurm.sh .; sed -i 's/SCRIPT/{script}/' slurm.sh; sbatch slurm.sh"
 
     stdout, stderr = subprocess.Popen(
         # key currently necessary, will be removed when we switch to chain user

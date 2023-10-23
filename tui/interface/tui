@@ -8,8 +8,9 @@ Author: @lbabetto
 """
 
 import os
-import subprocess
+import sys
 from tui.core.db import MONGODB_URI
+from tui.core.hpc import launch_job
 from pymongo import MongoClient
 
 import logging
@@ -23,39 +24,60 @@ print("  │ Digital Twin as a Service - Text User Interface │")
 print("  └─────────────────────────────────────────────────┘")
 print("")
 
-# Asking user to select database and collection
-
 client = MongoClient(MONGODB_URI)
 
-print("Available databases: | ", end="")
-for db in client.list_database_names():
-    if db in ["admin", "config", "local"]:
-        continue
-    print(f"{db} | ", end="")
+def print_info():
+    """Print database info (available databases, collections, keywords)"""
+    print("\n" + "─"*os.get_terminal_size()[0])
+    print("\nDATABASES:")
+    databases = []
+    for db in client.list_database_names():
+        if db not in ["admin", "config", "local"]:
+            databases.append(db)
 
-db = input("\nSelect database: ")
-if db not in client.list_database_names():
-    raise ValueError(f"Incorrect database '{db}'")
+            print(f"  - {db}")
 
-print("\nAvailable collections: | ", end="")
-for coll in client[db].list_collection_names():
-    print(f"{coll} | ", end="")
+    print("\n" + "─"*os.get_terminal_size()[0])
+    for db in databases:
+        print(f"\nCOLLECTIONS (database {db}):")
+        for coll in client[db].list_collection_names():
+            print(f"  - {coll}")
 
-coll = input("\nSelect collection: ")
-if coll not in client[db].list_collection_names():
-    raise ValueError(f"Incorrect collection '{coll}'")
+    print("\n" + "─"*os.get_terminal_size()[0])
+    for db in databases:
+        for coll in client[db].list_collection_names():
+            keys = {}
+            for entry in client[db][coll].find():
+                for key in entry.keys():
+                    if key not in keys.keys():
+                        keys[key] = 0
+                    else:   
+                        keys[key] += 1
 
-keys = {}
-for entry in client[db][coll].find():
-    for key in entry.keys():
-        if key not in keys.keys():
-            keys[key] = 0
-        else:   
-            keys[key] += 1
+            print(f"\nAvailable keys (DATABASE: {db} | COLLECTION: {coll}):\n")
+            print("  key                entries")
+            print("  --------------------------")
+            for key, count in keys.items():
+                print(f"  {key:20}{count}")
 
-print("\nAvailable keys:\n")
-print("  key                entries")
-print("  --------------------------")
-for key, count in keys.items():
-    print(f"  {key:20}{count}")
+# Reading flags from CLI
+flags = {"database": None, "collection": None, "filters": {}, "script": None,}
+curr_flag = ""
+for key in sys.argv[1:]:
+    if key.startswith("--"):
+        curr_flag = key.lstrip("-")
+    else:
+        if curr_flag == "filters":
+            sep = key.find("=")
+            flags[curr_flag].update({key[:sep]: key[sep+1:]})
+        else:
+            flags[curr_flag] = key
+
+filtered = []
+for entry in client[flags["database"]][flags["collection"]].find(flags["filters"]):
+    filtered.append(entry["path"])
+
+if flags["script"]:
+    launch_job(flags["script"], filtered)
+    
 
