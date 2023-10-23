@@ -80,6 +80,8 @@ for key in sys.argv[1:]:
         else:
             flags[curr_flag] = key
 
+print(flags)
+
 filtered = []
 for entry in client[flags["database"]][flags["collection"]].find(flags["filters"]):
     filtered.append(entry["path"])
