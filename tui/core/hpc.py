@@ -12,7 +12,7 @@ import subprocess
 
 # Temporary, will need to be replaced with chain user and relative home directory
 USER = "lbabetto"
-HOST = "login.g100.cineca.it"
+HOST = "g100"
 WORKDIR = f"/g100/home/userinternal/lbabetto/PROJECTS/1-DTaas/{os.path.basename(os.getcwd())}"
 SUBMIT_DIR = os.getcwd()
 
