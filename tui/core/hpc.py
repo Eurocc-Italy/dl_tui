@@ -37,5 +37,5 @@ def launch_job(script, files):
         stderr=subprocess.PIPE,
     ).communicate()
 
-    logger.debug(f"stdout: {str(stdout, 'utf-8')}")
-    logger.debug(f"stderr: {str(stderr, 'utf-8')}")
+    print(f"stdout: {str(stdout, 'utf-8')}")
+    print(f"stderr: {str(stderr, 'utf-8')}")
