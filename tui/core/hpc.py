@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 # Temporary, will need to be replaced with chain user and relative home directory
 USER = "lbabetto"
 HOST = "login.g100.cineca.it"
-WORKDIR = "/g100/home/userinternal/lbabetto/PROJECTS/1-DTaas/3-test"
+WORKDIR = "/g100/home/userinternal/lbabetto/PROJECTS/1-DTaas/4-image-process"
 SUBMIT_DIR = "/home/centos/TESTS/1-filter"
 
 
