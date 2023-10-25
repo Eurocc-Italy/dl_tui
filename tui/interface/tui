@@ -7,10 +7,9 @@ Text user interface for the DTaaS service
 Author: @lbabetto
 """
 
-import os
-import sys
 from tui.core.db import MONGODB_URI
 from tui.core.hpc import launch_job
+from tui.core.utils import read_cl, generate_file_list, print_info, FILE_LIST
 from pymongo import MongoClient
 
 USER = "user"
@@ -22,56 +21,11 @@ MONGODB_URI = f"mongodb://{USER}:{PASSWORD}@{IP}:{PORT}/"
 
 client = MongoClient(MONGODB_URI)
 
-# Reading flags from CLI
-flags = {
-    "info": False,
-    "database": None,
-    "collection": None,
-    "filters": {},
-    "script": None,
-}
-curr_flag = ""
-for key in sys.argv[1:]:
-    if key.startswith("--"):
-        curr_flag = key.lstrip("-")
-    else:
-        if curr_flag == "filters":
-            sep = key.find("=")
-            flags[curr_flag].update({key[:sep]: key[sep + 1 :]})
-        elif curr_flag == "info":
-            flags[curr_flag] = True
-        else:
-            flags[curr_flag] = key
-
-print(flags)
-
-FILE_LIST = []
-for entry in client[flags["database"]][flags["collection"]].find(flags["filters"]):
-    FILE_LIST.append(entry["path"])
+flags = read_cl()
+generate_file_list(client=client, flags=flags)
 
 if flags["info"]:
-    print("\n" + "─" * os.get_terminal_size()[0])
-    print(f"\nDATABASE: {flags['database']}")
-    print(f"Collections:")
-    for coll in client[flags["database"]].list_collection_names():
-        print(f"  - {coll}")
-
-    print("\n" + "─" * os.get_terminal_size()[0])
-    for db in flags["database"]:
-        for coll in client[db].list_collection_names():
-            keys = {}
-            for entry in client[db][coll].find():
-                for key in entry.keys():
-                    if key not in keys.keys():
-                        keys[key] = 0
-                    else:
-                        keys[key] += 1
-
-            print(f"\nAvailable keys (DATABASE: {db} | COLLECTION: {coll}):\n")
-            print("  key                entries")
-            print("  --------------------------")
-            for key, count in keys.items():
-                print(f"  {key:20}{count}")
+    print_info(client=client, flags=flags)
 
 if flags["script"]:
     launch_job(flags["script"], FILE_LIST)
