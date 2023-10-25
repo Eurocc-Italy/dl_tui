@@ -13,13 +13,6 @@ from tui.core.db import MONGODB_URI
 from tui.core.hpc import launch_job
 from pymongo import MongoClient
 
-
-print("")
-print("  ┌─────────────────────────────────────────────────┐")
-print("  │ Digital Twin as a Service - Text User Interface │")
-print("  └─────────────────────────────────────────────────┘")
-print("")
-
 USER = "user"
 PASSWORD = "passwd"
 IP = "localhost"
