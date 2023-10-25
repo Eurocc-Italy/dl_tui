@@ -29,26 +29,42 @@ MONGODB_URI = f"mongodb://{USER}:{PASSWORD}@{IP}:{PORT}/"
 
 client = MongoClient(MONGODB_URI)
 
+# Reading flags from CLI
+flags = {
+    "info": False,
+    "database": None,
+    "collection": None,
+    "filters": {},
+    "script": None,
+}
+curr_flag = ""
+for key in sys.argv[1:]:
+    if key.startswith("--"):
+        curr_flag = key.lstrip("-")
+    else:
+        if curr_flag == "filters":
+            sep = key.find("=")
+            flags[curr_flag].update({key[:sep]: key[sep + 1 :]})
+        elif curr_flag == "info":
+            flags[curr_flag] = True
+        else:
+            flags[curr_flag] = key
 
-def print_info():
-    """Print database info (available databases, collections, keywords)"""
+print(flags)
+
+FILE_LIST = []
+for entry in client[flags["database"]][flags["collection"]].find(flags["filters"]):
+    FILE_LIST.append(entry["path"])
+
+if flags["info"]:
     print("\n" + "─" * os.get_terminal_size()[0])
-    print("\nDATABASES:")
-    databases = []
-    for db in client.list_database_names():
-        if db not in ["admin", "config", "local"]:
-            databases.append(db)
-
-            print(f"  - {db}")
+    print(f"\nDATABASE: {flags['database']}")
+    print(f"Collections:")
+    for coll in client[flags["database"]].list_collection_names():
+        print(f"  - {coll}")
 
     print("\n" + "─" * os.get_terminal_size()[0])
-    for db in databases:
-        print(f"\nCOLLECTIONS (database {db}):")
-        for coll in client[db].list_collection_names():
-            print(f"  - {coll}")
-
-    print("\n" + "─" * os.get_terminal_size()[0])
-    for db in databases:
+    for db in flags["database"]:
         for coll in client[db].list_collection_names():
             keys = {}
             for entry in client[db][coll].find():
@@ -64,30 +80,5 @@ def print_info():
             for key, count in keys.items():
                 print(f"  {key:20}{count}")
 
-
-# Reading flags from CLI
-flags = {
-    "database": None,
-    "collection": None,
-    "filters": {},
-    "script": None,
-}
-curr_flag = ""
-for key in sys.argv[1:]:
-    if key.startswith("--"):
-        curr_flag = key.lstrip("-")
-    else:
-        if curr_flag == "filters":
-            sep = key.find("=")
-            flags[curr_flag].update({key[:sep]: key[sep + 1 :]})
-        else:
-            flags[curr_flag] = key
-
-print(flags)
-
-filtered = []
-for entry in client[flags["database"]][flags["collection"]].find(flags["filters"]):
-    filtered.append(entry["path"])
-
 if flags["script"]:
-    launch_job(flags["script"], filtered)
+    launch_job(flags["script"], FILE_LIST)
