@@ -20,11 +20,7 @@ SUBMIT_DIR = os.getcwd()
 def launch_job(script, files):
     """Launch Slurm job on G100 with the user script on the files returned by the TUI filter"""
 
-    with open("FILES", "w") as f:
-        for file in files:
-            f.write(f"{file}\n")
-
-    cmd = f"cd {WORKDIR}; scp vm:{SUBMIT_DIR}/{script} vm:{SUBMIT_DIR}/FILES vm:{os.path.dirname(__file__)}/slurm.sh .; sed -i 's/SCRIPT/{script}/' slurm.sh; sbatch slurm.sh"
+    cmd = f"cd {WORKDIR}; scp vm:{SUBMIT_DIR}/{script} vm:{os.path.dirname(__file__)}/slurm.sh .; sed -i 's/SCRIPT/{script}/' slurm.sh; sbatch slurm.sh"
 
     stdout, stderr = subprocess.Popen(
         # key currently necessary, will be removed when we switch to chain user
