@@ -175,7 +175,7 @@ def sql_to_mongo(query):
     query_dict = {}
     _ = map(query_dict.update, ret)
     # return query_dict
-    return spec_str(spec)
+    return spec
 
 
 def spec_str(spec):
