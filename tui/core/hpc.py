@@ -31,7 +31,8 @@ CLIENT = MongoClient(MONGODB_URI)
 def launch_job(script, files):
     """Launch Slurm job on G100 with the user script on the files returned by the TUI filter"""
 
-    cmd = f"cd {HPC_WORKDIR}; scp vm:{VM_SUBMIT_DIR}/{script} vm:{os.path.dirname(__file__)}/slurm.sh .; sed -i 's/SCRIPT/{os.path.dirname(__file__)}/wrapper.py/' slurm.sh; sbatch slurm.sh"
+    CORE = os.path.dirname(__file__)
+    cmd = f"cd {HPC_WORKDIR}; scp vm:{VM_SUBMIT_DIR}/{script} vm:{CORE}/slurm.sh .; sed -i 's/SCRIPT/{CORE}\/wrapper.py/' slurm.sh; sbatch slurm.sh"
 
     stdout, stderr = subprocess.Popen(
         # key currently necessary, will be removed when we switch to chain user
