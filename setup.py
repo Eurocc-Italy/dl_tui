@@ -9,9 +9,7 @@ setup(
         "tui": [
             "*",
             "core/*",
-            "interface/*",
         ],
     },
-    scripts=["tui/interface/tui"],
     install_requires=[],
 )
