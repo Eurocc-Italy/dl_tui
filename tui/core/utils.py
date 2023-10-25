@@ -35,6 +35,9 @@ def read_cl():
     return flags
 
 
+FILE_LIST = []
+
+
 def generate_file_list(client, flags):
     """Generates a file list matching the user query
 
@@ -45,8 +48,7 @@ def generate_file_list(client, flags):
     flags : dict
         dictionary (generated from read_cl function) containing the db info and query
     """
-    global FILE_LIST
-    FILE_LIST = []
+
     for entry in client[flags["database"]][flags["collection"]].find(flags["filters"]):
         FILE_LIST.append(entry["path"])
 
