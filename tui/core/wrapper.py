@@ -42,7 +42,7 @@ logger.addHandler(c_handler)
 logger.addHandler(f_handler)
 
 test_query = {
-    "--query": """SELECT * FROM datalake WHERE category = motorcycle AND width > 640""",
+    "--query": """SELECT * FROM datalake WHERE category = motorcycle AND width > 600""",
     "--script": """$(cat script.py)""",
 }
 
@@ -62,7 +62,6 @@ query_fields = mongo_query[1]
 logger.info(f"MongoDB query filter: {query_filters}")
 logger.info(f"MongoDB query fields: {query_fields}")
 
-exit()
 
 # Reading script from API input and converting to local file (will be put in HPC workdir when called by hpc module)
 with open("script.py", "w") as f:
@@ -71,18 +70,35 @@ with open("script.py", "w") as f:
 
 # Generating "input" file list according to user query and initializing "output" files list
 files_in = []
-for entry in hpc.CLIENT["datalake"]["metadata"].find(mongo_query):
+for entry in hpc.CLIENT["datalake"]["metadata"].find(query_filters):
     files_in.append(entry["path"])
 files_out = []
+logger.debug(f"Query results:")
+for file in files_in:
+    logger.debug(file)
 
 # Running user-provided Python script
-sys.path.append(hpc.VM_SUBMIT_DIR)
-from script import main
+sys.path.insert(0, hpc.VM_SUBMIT_DIR)
 
-result = main(files_in, files_out)
-if result == "xnWRq#XjhbpcQwDcgRGMQBPP!h2hxMtuW63UyB4buEH&@B52E&C^&L3HcDY7QSje":
-    print("NO SCRIPT FOUND")
+try:
+    from script import main
+
+    files_out = main(files_in)
+except:
+    msg = "main function not found in script, or does not accept a list of paths as input."
+    print(msg)
+    logger.error(msg)
+
+if type(files_out) != list:
+    raise TypeError("main function does not return a list of paths.")
+
+if files_out == "xnWRq#XjhbpcQwDcgRGMQBPP!h2hxMtuW63UyB4buEH&@B52E&C^&L3HcDY7QSje":
+    logger.info("No script found, returning queried file list as output.")
+    files_out = files_in
 
 # Saving output files and telling user where to find them
+logger.debug(f"Processed results:")
+for file in files_out:
+    logger.debug(file)
 for file in files_out:
     print(file)

@@ -7,7 +7,7 @@ DTaaS.egg-info/top_level.txt
 tui/__init__.py
 tui/core/__init__.py
 tui/core/hpc.py
+tui/core/script.py
 tui/core/slurm.sh
-tui/core/sql2mongo.py
-tui/core/utils.py
+tui/core/wrapper.log
 tui/core/wrapper.py

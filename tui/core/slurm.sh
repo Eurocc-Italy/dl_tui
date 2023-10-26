@@ -5,5 +5,5 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 module load python
-source $HOME/virtualenvs/dev/bin/activate
+source $HOME/virtualenvs/dtaas/bin/activate
 python SCRIPT API_INPUT
