@@ -8,6 +8,10 @@ import os
 import subprocess
 from pymongo import MongoClient
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 # Temporary, will need to be replaced with chain user and relative home directory
 

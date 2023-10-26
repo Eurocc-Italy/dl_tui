@@ -1,0 +1,4 @@
+2023-10-26 15:52:56,039 - __main__ - INFO - MongoDB query filter: {'$and': [{'category': 'motorcycle'}, {'width': {'$gt': 640}}]}
+2023-10-26 15:52:56,039 - __main__ - INFO - MongoDB query fields: {}
+2023-10-26 15:53:01,291 - __main__ - INFO - MongoDB query filter: {'$and': [{'category': 'motorcycle'}, {'width': {'$gt': 640}}]}
+2023-10-26 15:53:01,291 - __main__ - INFO - MongoDB query fields: {}

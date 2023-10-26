@@ -17,8 +17,29 @@ Author: @lbabetto
 
 import sys
 from tui.core import hpc
-from tui.core.sql2mongo import sql_to_mongo
+from sqlparse.builders.mongo_builder import MongoQueryBuilder
 import argparse
+
+import logging
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+# Create handlers
+c_handler = logging.StreamHandler()
+f_handler = logging.FileHandler("wrapper.log")
+
+# Create formatters and add it to handlers
+c_format = logging.Formatter("%(name)s - %(levelname)s - %(message)s")
+f_format = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+c_handler.setLevel(logging.INFO)
+f_handler.setLevel(logging.DEBUG)
+c_handler.setFormatter(c_format)
+f_handler.setFormatter(f_format)
+
+# Add handlers to the logger
+logger.addHandler(c_handler)
+logger.addHandler(f_handler)
 
 test_query = {
     "--query": """SELECT * FROM datalake WHERE category = motorcycle AND width > 640""",
@@ -30,10 +51,18 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--query", type=str, required=True)
 parser.add_argument("--script", type=str, required=False)
 args = parser.parse_args()
+logger.debug(f"API input: {args}")
 
 # Reading SQL query from API --query input and converting to MongoDB query
 sql_query = args.query
-mongo_query = sql_to_mongo(sql_query)
+builder = MongoQueryBuilder()
+mongo_query = builder.parse_and_build(sql_query)
+query_filters = mongo_query[0]
+query_fields = mongo_query[1]
+logger.info(f"MongoDB query filter: {query_filters}")
+logger.info(f"MongoDB query fields: {query_fields}")
+
+exit()
 
 # Reading script from API input and converting to local file (will be put in HPC workdir when called by hpc module)
 with open("script.py", "w") as f:
