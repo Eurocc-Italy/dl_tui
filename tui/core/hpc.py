@@ -1,8 +1,6 @@
 """
 Functions and utilities to interface with HPC (G100) from the VM
 
-!!! WIP !!!
-
 Author: @lbabetto
 """
 
@@ -12,6 +10,7 @@ from pymongo import MongoClient
 
 
 # Temporary, will need to be replaced with chain user and relative home directory
+
 # HPC
 HPC_USER = "lbabetto"
 HPC_HOST = "g100"
@@ -28,11 +27,14 @@ MONGODB_URI = f"mongodb://{DB_USER}:{DB_PASSWORD}@{DB_IP}:{DB_PORT}/"
 CLIENT = MongoClient(MONGODB_URI)
 
 
-def launch_job(script, files):
+def launch_job(api_input):
     """Launch Slurm job on G100 with the user script on the files returned by the TUI filter"""
 
-    CORE = os.path.dirname(__file__)
-    cmd = f"cd {HPC_WORKDIR}; scp vm:{VM_SUBMIT_DIR}/{script} vm:{CORE}/slurm.sh .; sed -i 's/SCRIPT/{CORE}\/wrapper.py/' slurm.sh; sbatch slurm.sh"
+    REPO_DIR = "/g100/home/userinternal/lbabetto/REPOS/DTaaS_TUI/tui/core/"
+    cmd = f"cd {HPC_WORKDIR}; \
+        cp {REPO_DIR}slurm.sh .; \
+        sed -i 's/SCRIPT/{REPO_DIR}wrapper.py/' slurm.sh; \
+        sed -i 's/API_INPUT/{api_input}/' slurm.sh;"  # sbatch slurm.sh"
 
     stdout, stderr = subprocess.Popen(
         # key currently necessary, will be removed when we switch to chain user

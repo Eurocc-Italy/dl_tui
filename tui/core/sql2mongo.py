@@ -1,17 +1,15 @@
-#!/usr/bin/env python
-#
-# Command line utility to run SQL queries against a mongodb database
-# or to show what the SQL query will map to in mongo shell.
-# http://docs.mongodb.org/manual/reference/sql-comparison/
-# http://www.querymongo.com/
-#
+"""
+Functions and utilities to convert SQL queries into Mongo spec.
+
+Based on the original work of @martinslabber (https://github.com/martinslabber/pysql2mongo)
+
+Author: @lbabetto
+"""
 
 
 def sql_to_mongo(query):
     """Convert an SQL query to a mongo spec.
-    This only supports select statements. For now.
-    :param query: String. A SQL query.
-    :return: None or a dictionary containing a mongo spec.
+    Currently only supports select statements.
 
     Parameters
     ----------
@@ -93,10 +91,8 @@ def sql_to_mongo(query):
             else:
                 return {"${}".format(tokens[1]): [tokens[0], tokens[2]]}
 
-    # TODO: Reduce list of imported functions.
     from pyparsing import (
         Word,
-        alphas,
         CaselessKeyword,
         Group,
         Optional,
@@ -106,15 +102,9 @@ def sql_to_mongo(query):
         alphanums,
         OneOrMore,
         quotedString,
-        Combine,
         Keyword,
-        Literal,
-        replaceWith,
         oneOf,
         nums,
-        removeQuotes,
-        QuotedString,
-        Dict,
     )
 
     LPAREN, RPAREN = map(Suppress, "()")
@@ -174,30 +164,5 @@ def sql_to_mongo(query):
 
     query_dict = {}
     _ = map(query_dict.update, ret)
-    # return query_dict
+    # return query_dict # currently not working, don't know why...
     return spec
-
-
-def spec_str(spec):
-    """
-    Change a spec to the json object format used in mongo.
-    eg. Print dict in python gives: {'a':'b'}
-        mongo shell would do {a:'b'}
-        Mongo shell can handle both formats but it looks more like the
-        official docs to keep to their standard.
-    :param spec: Dictionary. A mongo spec.
-    :return: String. The spec as it is represended in the mongodb shell examples.
-    """
-
-    if spec is None:
-        return "{}"
-    if isinstance(spec, list):
-        out_str = "[" + ", ".join([spec_str(x) for x in spec]) + "]"
-    elif isinstance(spec, dict):
-        out_str = "{" + ", ".join(["{}:{}".format(x, spec_str(spec[x])) for x in sorted(spec)]) + "}"
-    elif spec and isinstance(spec, str) and not spec.isdigit():
-        out_str = "'" + spec + "'"
-    else:
-        out_str = spec
-
-    return out_str
