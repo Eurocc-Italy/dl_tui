@@ -1,1 +1,1 @@
-TUI for DTaaS project.
+Query/processing interface for the DL/DTaaS project.

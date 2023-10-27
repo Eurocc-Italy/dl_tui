@@ -3,12 +3,11 @@ from setuptools import setup
 setup(
     name="DTaaS",
     version="0.0.1",
-    description="TUI for DTaaS",
-    packages=["tui"],
+    description="Query/Process interface for DTaaS",
+    packages=["dtaas"],
     package_data={
-        "tui": [
+        "dtaas": [
             "*",
-            "core/*",
         ],
     },
     install_requires=[],
