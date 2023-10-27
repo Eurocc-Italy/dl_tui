@@ -12,7 +12,7 @@ import json
 
 import logging
 
-logging.basicConfig(filename="logfile.log", filemode="w", level=logging.DEBUG)
+logging.basicConfig(filename="logfile.log", format="%(levelname)s: %(message)s", level=logging.DEBUG)
 
 # Needed for dtaas_wrapper
 SUBMIT_DIR = os.getcwd()

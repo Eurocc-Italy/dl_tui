@@ -21,7 +21,7 @@ from sqlparse.builders.mongo_builder import MongoQueryBuilder
 
 import logging
 
-logging.basicConfig(filename="logfile.log", filemode="w", level=logging.DEBUG)
+logging.basicConfig(filename="logfile.log", format="%(levelname)s: %(message)s", level=logging.DEBUG)
 
 # Reading SQL query from QUERY file, as parsed by launcher.py...
 with open("QUERY", "r") as f:
