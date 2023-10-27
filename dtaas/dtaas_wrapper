@@ -20,6 +20,7 @@ from dtaas.launcher import CLIENT, SUBMIT_DIR
 from sqlparse.builders.mongo_builder import MongoQueryBuilder
 
 import logging
+logging.basicConfig(filename='logfile.log', filemode='w', level=logging.DEBUG)
 
 # Reading SQL query from QUERY file, as parsed by launcher.py...
 with open("QUERY", "r") as f:
