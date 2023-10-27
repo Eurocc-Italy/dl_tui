@@ -6,4 +6,4 @@
 #SBATCH --ntasks-per-node=1
 module load python
 source $HOME/virtualenvs/dtaas/bin/activate
-python WRAPPER
+dtaas_wrapper

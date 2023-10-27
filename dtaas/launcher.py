@@ -41,7 +41,6 @@ def launch_job():
         cp {REPO_DIR}slurm.sh .; \
         scp vm:{VM_SUBMIT_DIR}/QUERY .;\
         scp vm:{VM_SUBMIT_DIR}/script.py .;\
-        sed -i 's/WRAPPER/{REPO_DIR}wrapper.py/' slurm.sh; \
         sbatch slurm.sh"
 
     logger.debug("Launching command via ssh:")

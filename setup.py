@@ -10,5 +10,6 @@ setup(
             "*",
         ],
     },
+    scripts=["dtaas/dtaas_wrapper"],
     install_requires=[],
 )
