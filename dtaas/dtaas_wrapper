@@ -19,7 +19,7 @@ import shutil
 from dtaas.launcher import CLIENT, SUBMIT_DIR
 from sqlparse.builders.mongo_builder import MongoQueryBuilder
 
-import dtaas.utils
+from dtaas import utils
 
 config = utils.load_config()
 

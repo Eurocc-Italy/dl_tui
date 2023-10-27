@@ -8,7 +8,7 @@ import os
 import subprocess
 from pymongo import MongoClient
 import argparse
-import dtaas.utils
+from dtaas import utils
 
 # Needed for dtaas_wrapper
 SUBMIT_DIR = os.getcwd()
