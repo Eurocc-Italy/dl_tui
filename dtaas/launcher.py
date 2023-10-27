@@ -12,8 +12,6 @@ import json
 
 import logging
 
-logger = logging.getLogger(__name__)
-
 # Needed for dtaas_wrapper
 SUBMIT_DIR = os.getcwd()
 
@@ -44,8 +42,8 @@ def launch_job():
         scp vm:{SUBMIT_DIR}/* .;\
         sbatch slurm.sh"
 
-    logger.debug("Launching command via ssh:")
-    logger.debug(cmd)
+    logging.debug("Launching command via ssh:")
+    logging.debug(cmd)
 
     stdout, stderr = subprocess.Popen(
         # key currently necessary, will be removed when we switch to chain user
@@ -60,37 +58,19 @@ def launch_job():
 
 
 if __name__ == "__main__":
-    logger.setLevel(logging.DEBUG)
-
-    # Create handlers
-    c_handler = logging.StreamHandler()
-    f_handler = logging.FileHandler("dtaas.log")
-
-    # Create formatters and add it to handlers
-    c_format = logging.Formatter("%(name)s - %(levelname)s - %(message)s")
-    f_format = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-    c_handler.setLevel(logging.INFO)
-    f_handler.setLevel(logging.DEBUG)
-    c_handler.setFormatter(c_format)
-    f_handler.setFormatter(f_format)
-
-    # Add handlers to the logger
-    logger.addHandler(c_handler)
-    logger.addHandler(f_handler)
-
     # Parsing API input, requires --query keyword, with optional --script
     parser = argparse.ArgumentParser()
     parser.add_argument("--query", type=str, required=True)
     parser.add_argument("--script", type=str, required=False)
     args = parser.parse_args()
-    logger.debug(f"API input: {args}")
+    logging.debug(f"API input: {args}")
 
-    logger.info(f"User query: {args.query}")
+    logging.info(f"User query: {args.query}")
     with open("QUERY", "w") as f:
         f.write(args.query)
 
     if args.script != "":
-        logger.info("User-provided Python script found.")
+        logging.info("User-provided Python script found.")
         with open("script.py", "w") as f:
             f.write(args.script)
 
