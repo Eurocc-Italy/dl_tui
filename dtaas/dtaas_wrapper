@@ -20,7 +20,8 @@ from dtaas.launcher import CLIENT, SUBMIT_DIR
 from sqlparse.builders.mongo_builder import MongoQueryBuilder
 
 import logging
-logging.basicConfig(filename='logfile.log', filemode='w', level=logging.DEBUG)
+
+logging.basicConfig(filename="logfile.log", filemode="w", level=logging.DEBUG)
 
 # Reading SQL query from QUERY file, as parsed by launcher.py...
 with open("QUERY", "r") as f:
@@ -43,27 +44,21 @@ logging.debug(f"Query results:")
 for file in files_in:
     logging.debug(file)
 
-# Running user-provided Python script
-sys.path.insert(0, SUBMIT_DIR)
-
-
 try:
+    # Running user-provided Python script
+    sys.path.insert(0, SUBMIT_DIR)
     from script import main
 
     files_out = main(files_in)
 except ModuleNotFoundError:
-    logging.info("User-provided input not found.")
+    logging.info("User-provided input not found, returning queried file list as output.")
+    files_out = files_in
 except ImportError:
     logging.error("Did not find `main` function in user-provided script. ABORTING.")
     exit()
 
-
 if type(files_out) != list:
     raise TypeError("`main` function does not return a list of paths.")
-
-if files_out == "xnWRq#XjhbpcQwDcgRGMQBPP!h2hxMtuW63UyB4buEH&@B52E&C^&L3HcDY7QSje":
-    logging.info("No script found, returning queried file list as output.")
-    files_out = files_in
 
 # Saving output files and telling user where to find them
 logging.debug(f"Processed results:")
@@ -72,8 +67,7 @@ for file in files_out:
 
 os.makedirs(f"RESULTS", exist_ok=True)
 for file in files_out:
-    print(file, f"RESULTS/{os.path.basename(file)}")
     shutil.copy(file, f"RESULTS/{os.path.basename(file)}")
-os.system("zip -r results.zip RESULTS")
+os.system("zip -r results.zip RESULTS/*")
 shutil.rmtree("RESULTS")
 logging.info("Processed files available in the results.zip archive")
