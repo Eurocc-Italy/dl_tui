@@ -40,8 +40,7 @@ def launch_job():
         mkdir dtaas_tui_tests/{os.path.basename(os.getcwd())}; \
         cd dtaas_tui_tests/{os.path.basename(os.getcwd())}; \
         cp {REPO_DIR}slurm.sh .; \
-        scp vm:{VM_SUBMIT_DIR}/QUERY .;\
-        scp vm:{VM_SUBMIT_DIR}/script.py .;\
+        scp vm:{VM_SUBMIT_DIR}/* .;\
         sbatch slurm.sh"
 
     logger.debug("Launching command via ssh:")
