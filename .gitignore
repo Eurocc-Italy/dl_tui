@@ -1,5 +1,5 @@
 # VSCode
-.vscode/
+**.vscode/
 
 # Local History for Visual Studio Code
 .history/
@@ -8,7 +8,7 @@
 *.vsix
 
 # Byte-compiled / optimized / DLL files
-__pycache__/
+**__pycache__/
 *.py[cod]
 *$py.class
 
