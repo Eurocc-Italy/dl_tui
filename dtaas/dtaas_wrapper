@@ -63,7 +63,7 @@ for file in files_in:
     logger.debug(file)
 
 # Running user-provided Python script
-sys.path.insert(0, launcher.VM_SUBMIT_DIR)
+sys.path.insert(0, launcher.SUBMIT_DIR)
 
 try:
     from script import main

@@ -8,27 +8,28 @@ import os
 import subprocess
 from pymongo import MongoClient
 import argparse
-
+import json
 
 import logging
 
 logger = logging.getLogger(__name__)
 
+# Needed for dtaas_wrapper
+SUBMIT_DIR = os.getcwd()
 
-# Temporary, will need to be replaced with chain user and relative home directory
+# read default configuration file
+with open(f"{os.path.dirname(__file__)}/config.json", "r") as f:
+    config = json.load(f)
 
-# HPC
-HPC_USER = "lbabetto"
-HPC_HOST = "g100"
+# read custom configuration file, if present
+if os.path.exists("config.json"):
+    with open(f"config.json", "r") as f:
+        new_config = json.load(f)
+    for key in new_config:
+        config[key].update(new_config[key])
 
-# MongoDB
-VM_SUBMIT_DIR = os.getcwd()
-DB_USER = "user"
-DB_PASSWORD = "passwd"
-DB_IP = "131.175.207.101"
-DB_PORT = "27017"
 
-MONGODB_URI = f"mongodb://{DB_USER}:{DB_PASSWORD}@{DB_IP}:{DB_PORT}/"
+MONGODB_URI = f"mongodb://{config['MONGO']['user']}:{config['MONGO']['password']}@{config['MONGO']['ip']}:{config['MONGO']['port']}/"
 CLIENT = MongoClient(MONGODB_URI)
 
 
@@ -40,7 +41,7 @@ def launch_job():
         mkdir dtaas_tui_tests/{os.path.basename(os.getcwd())}; \
         cd dtaas_tui_tests/{os.path.basename(os.getcwd())}; \
         cp {REPO_DIR}slurm.sh .; \
-        scp vm:{VM_SUBMIT_DIR}/* .;\
+        scp vm:{SUBMIT_DIR}/* .;\
         sbatch slurm.sh"
 
     logger.debug("Launching command via ssh:")
@@ -48,7 +49,7 @@ def launch_job():
 
     stdout, stderr = subprocess.Popen(
         # key currently necessary, will be removed when we switch to chain user
-        f"ssh -i /home/centos/.ssh/luca-hpc {HPC_USER}@{HPC_HOST} '{cmd}'",
+        f"ssh -i /home/centos/.ssh/luca-hpc {config['HPC']['user']}@{config['HPC']['host']} '{cmd}'",
         shell=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
