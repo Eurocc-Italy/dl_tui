@@ -54,8 +54,8 @@ def launch_job():
         stderr=subprocess.PIPE,
     ).communicate()
 
-    print(f"stdout: {str(stdout, 'utf-8')}")
-    print(f"stderr: {str(stderr, 'utf-8')}")
+    if "Submitted batch job" not in stdout:
+        raise RuntimeError("Something gone wrong, job was not launched.")
 
 
 if __name__ == "__main__":
