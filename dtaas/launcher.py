@@ -54,7 +54,7 @@ def launch_job():
         stderr=subprocess.PIPE,
     ).communicate()
 
-    if "Submitted batch job" not in stdout:
+    if "Submitted batch job" not in str(stdout, encoding="utf-8"):
         raise RuntimeError("Something gone wrong, job was not launched.")
 
 
