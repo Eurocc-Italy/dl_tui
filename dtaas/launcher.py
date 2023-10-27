@@ -38,11 +38,11 @@ def launch_job():
 
     REPO_DIR = "/g100/home/userinternal/lbabetto/REPOS/DTaaS_TUI/dtaas/"
     cmd = f"mkdir dtaas_tui_tests; \
-        mkdir dtaas_tui_tests/{os.path.basename(os.getcwd())}; \
-        cd dtaas_tui_tests/{os.path.basename(os.getcwd())}; \
-        cp {REPO_DIR}slurm.sh .; \
-        scp vm:{SUBMIT_DIR}/* .;\
-        sbatch slurm.sh"
+mkdir dtaas_tui_tests/{os.path.basename(os.getcwd())}; \
+cd dtaas_tui_tests/{os.path.basename(os.getcwd())}; \
+cp {REPO_DIR}slurm.sh .; \
+scp vm:{SUBMIT_DIR}/* .;\
+sbatch slurm.sh"
 
     logging.debug("Launching command via ssh:")
     logging.debug(cmd)
