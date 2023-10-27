@@ -14,7 +14,8 @@ which will be run on HPC.
 Author: @lbabetto
 """
 
-import sys
+import os, sys
+import shutil
 from dtaas import launcher
 from sqlparse.builders.mongo_builder import MongoQueryBuilder
 
@@ -22,6 +23,23 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+logger.setLevel(logging.DEBUG)
+
+# Create handlers
+c_handler = logging.StreamHandler()
+f_handler = logging.FileHandler("wrapper.log")
+
+# Create formatters and add it to handlers
+c_format = logging.Formatter("%(name)s - %(levelname)s - %(message)s")
+f_format = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+c_handler.setLevel(logging.INFO)
+f_handler.setLevel(logging.DEBUG)
+c_handler.setFormatter(c_format)
+f_handler.setFormatter(f_format)
+
+# Add handlers to the logger
+logger.addHandler(c_handler)
+logger.addHandler(f_handler)
 
 # Reading SQL query from QUERY file, as parsed by launcher.py...
 with open("QUERY", "r") as f:
@@ -67,5 +85,10 @@ if files_out == "xnWRq#XjhbpcQwDcgRGMQBPP!h2hxMtuW63UyB4buEH&@B52E&C^&L3HcDY7QSj
 logger.debug(f"Processed results:")
 for file in files_out:
     logger.debug(file)
+
+os.makedirs(f"RESULTS", exist_ok=True)
 for file in files_out:
-    print(file)
+    shutil.copy(file, f"RESULTS/{file}")
+os.system("zip -r results.zip RESULTS")
+shutil.rmtree("RESULTS")
+logger.info("Processed files available in the results.zip archive")
