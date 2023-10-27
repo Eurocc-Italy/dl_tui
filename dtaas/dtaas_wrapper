@@ -70,12 +70,12 @@ try:
 
     files_out = main(files_in)
 except:
-    msg = "main function not found in script, or does not accept a list of paths as input."
+    msg = "`main` function not found in script, or does not accept a list of paths as input."
     print(msg)
     logger.error(msg)
 
 if type(files_out) != list:
-    raise TypeError("main function does not return a list of paths.")
+    raise TypeError("`main` function does not return a list of paths.")
 
 if files_out == "xnWRq#XjhbpcQwDcgRGMQBPP!h2hxMtuW63UyB4buEH&@B52E&C^&L3HcDY7QSje":
     logger.info("No script found, returning queried file list as output.")
@@ -88,7 +88,8 @@ for file in files_out:
 
 os.makedirs(f"RESULTS", exist_ok=True)
 for file in files_out:
-    shutil.copy(file, f"RESULTS/{file}")
+    print(file, f"RESULTS/{os.path.basename(file)}")
+    shutil.copy(file, f"RESULTS/{os.path.basename(file)}")
 os.system("zip -r results.zip RESULTS")
 shutil.rmtree("RESULTS")
 logger.info("Processed files available in the results.zip archive")
