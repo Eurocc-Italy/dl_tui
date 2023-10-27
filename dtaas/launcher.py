@@ -20,7 +20,6 @@ logger = logging.getLogger(__name__)
 # HPC
 HPC_USER = "lbabetto"
 HPC_HOST = "g100"
-HPC_WORKDIR = f"/g100/home/userinternal/lbabetto/PROJECTS/1-DTaas/{os.path.basename(os.getcwd())}"
 
 # MongoDB
 VM_SUBMIT_DIR = os.getcwd()
@@ -37,7 +36,9 @@ def launch_job():
     """Launch Slurm job on G100 with the user script on the files returned by the TUI filter"""
 
     REPO_DIR = "/g100/home/userinternal/lbabetto/REPOS/DTaaS_TUI/dtaas/"
-    cmd = f"cd {HPC_WORKDIR}; \
+    cmd = f"mkdir dtaas_tui_tests; \
+        mkdir dtaas_tui_tests/{os.path.basename(os.getcwd())}; \
+        cd dtaas_tui_tests/{os.path.basename(os.getcwd())}; \
         cp {REPO_DIR}slurm.sh .; \
         scp vm:{VM_SUBMIT_DIR}/QUERY .;\
         scp vm:{VM_SUBMIT_DIR}/script.py .;\
