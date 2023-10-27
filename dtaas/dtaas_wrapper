@@ -16,7 +16,7 @@ Author: @lbabetto
 
 import os, sys
 import shutil
-from dtaas import launcher
+from dtaas.launcher import CLIENT, SUBMIT_DIR
 from sqlparse.builders.mongo_builder import MongoQueryBuilder
 
 import logging
@@ -55,7 +55,7 @@ logger.info(f"MongoDB query fields: {query_fields}")
 
 # Generating "input" file list according to user query and initializing "output" files list
 files_in = []
-for entry in launcher.CLIENT["datalake"]["metadata"].find(query_filters):
+for entry in CLIENT["datalake"]["metadata"].find(query_filters):
     files_in.append(entry["path"])
 files_out = []
 logger.debug(f"Query results:")
@@ -63,7 +63,7 @@ for file in files_in:
     logger.debug(file)
 
 # Running user-provided Python script
-sys.path.insert(0, launcher.SUBMIT_DIR)
+sys.path.insert(0, SUBMIT_DIR)
 
 try:
     from script import main
