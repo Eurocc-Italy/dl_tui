@@ -3,9 +3,9 @@
 Wrapper which does the following:
 
   1. Takes user SQL query and converts it to Mongo spec using custom sqlparse codebase (@lbabetto/sqlparse)
-  2. Runs query on HPC and retrieves the matching files, generating a list with the paths to the files
+  2. Runs query and retrieves the matching files, generating a list with the paths to the files
   3. Takes the user-provided python script and runs it on HPC, feeding the input files list to the "main" function
-  4. Saves the processed files (of any kind, user-defined) in a directory which the user can then download
+  4. Saves the processed files (of any kind, user-defined) in a zipped archive which the user can then download
 
 NOTE: User script must have a "main(input_files)" function which takes as argument a lists of paths with the
 input files and returns a list of paths with the output/processed files. This "main" function will be the one
