@@ -1,5 +1,5 @@
 """
-Functions and utilities to interface with HPC (G100) from the VM
+Functions to interface with HPC (G100) from the VM
 
 Author: @lbabetto
 """
@@ -8,25 +8,20 @@ import os
 import subprocess
 from pymongo import MongoClient
 import argparse
-import json
-
-import logging
-
-logging.basicConfig(filename="logfile.log", format="%(levelname)s: %(message)s", level=logging.DEBUG)
+import dtaas.utils
 
 # Needed for dtaas_wrapper
 SUBMIT_DIR = os.getcwd()
 
-# read default configuration file
-with open(f"{os.path.dirname(__file__)}/config.json", "r") as f:
-    config = json.load(f)
+config = utils.load_config()
 
-# read custom configuration file, if present
-if os.path.exists("config.json"):
-    with open(f"config.json", "r") as f:
-        new_config = json.load(f)
-    for key in new_config:
-        config[key].update(new_config[key])
+import logging
+
+logging.basicConfig(
+    filename=config["LOGGING"]["logfile"],
+    format=config["LOGGING"]["format"],
+    level=config["LOGGING"]["level"].upper(),
+)
 
 
 MONGODB_URI = f"mongodb://{config['MONGO']['user']}:{config['MONGO']['password']}@{config['MONGO']['ip']}:{config['MONGO']['port']}/"

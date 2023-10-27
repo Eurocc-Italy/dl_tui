@@ -8,5 +8,10 @@
     "password": "passwd",
     "ip": "131.175.207.101",
     "port": "27017"
+  },
+  "LOGGING": {
+    "logfile": "logfile.log",
+    "format": "%(asctime)s - %(levelname)s: %(message)s",
+    "level": "DEBUG"
   }
 }

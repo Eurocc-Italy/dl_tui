@@ -19,9 +19,17 @@ import shutil
 from dtaas.launcher import CLIENT, SUBMIT_DIR
 from sqlparse.builders.mongo_builder import MongoQueryBuilder
 
+import dtaas.utils
+
+config = utils.load_config()
+
 import logging
 
-logging.basicConfig(filename="logfile.log", format="%(levelname)s: %(message)s", level=logging.DEBUG)
+logging.basicConfig(
+    filename=config["LOGGING"]["logfile"],
+    format=config["LOGGING"]["format"],
+    level=config["LOGGING"]["level"].upper(),
+)
 
 # Reading SQL query from QUERY file, as parsed by launcher.py...
 with open("QUERY", "r") as f:
