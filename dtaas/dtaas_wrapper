@@ -34,18 +34,26 @@ logging.basicConfig(
 # Reading SQL query from QUERY file, as parsed by launcher.py...
 with open("QUERY", "r") as f:
     sql_query = f.readline()
+    # remove quotation marks, as it breaks the parser
+    sql_query = sql_query.replace('"', "")
+    sql_query = sql_query.replace("'", "")
 
 # ...and converting to MongoDB query
 builder = MongoQueryBuilder()
-mongo_query = builder.parse_and_build(sql_query)
-query_filters = mongo_query[0]
-query_fields = mongo_query[1]
+try:
+    mongo_query = builder.parse_and_build(sql_query)
+    query_filters = mongo_query[0]
+    query_fields = mongo_query[1]
+except IndexError:
+    logging.warning("Missing WHERE clause from SQL query, returning ALL data in the database.")
+    query_fields = "{}"
+    query_filters = "{}"
 logging.info(f"MongoDB query filter: {query_filters}")
 logging.info(f"MongoDB query fields: {query_fields}")
 
 # Generating "input" file list according to user query and initializing "output" files list
 files_in = []
-for entry in CLIENT["datalake"]["metadata"].find(query_filters):
+for entry in CLIENT[config["database"]][config["collection"]].find(query_filters):
     files_in.append(entry["path"])
 files_out = []
 logging.debug(f"Query results:")
