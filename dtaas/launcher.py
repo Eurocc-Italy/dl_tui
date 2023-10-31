@@ -46,7 +46,7 @@ mkdir dtaas_tui_tests/{os.path.basename(os.getcwd())}; \
 cd dtaas_tui_tests/{os.path.basename(os.getcwd())}; \
 sbatch -p {partition} -A {account} -t {walltime} -N {nodes} --ntasks-per-node 48 --wrap '{wrap_cmd}'"
 
-    print(f"Launching command via ssh: {ssh_cmd}")
+    logging.debug(f"Launching command via ssh: {ssh_cmd}")
 
     stdout, stderr = subprocess.Popen(
         # TODO: key currently necessary, will be removed when we switch to chain user
