@@ -1,6 +1,7 @@
 {
   "GENERAL": {
-    "repo_dir": "/g100/home/userinternal/lbabetto/REPOS/DTaaS_TUI/dtaas/"
+    "repo_dir": "/g100/home/userinternal/lbabetto/REPOS/DTaaS_TUI/dtaas/",
+    "venv_path": "/g100/home/userinternal/lbabetto/virtualenvs/dtaas/bin/activate"
   },
   "HPC": {
     "user": "lbabetto",

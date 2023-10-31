@@ -32,6 +32,10 @@ logging.info(f"Connected to client: {MONGODB_URI}")
 def launch_job():
     """Launch Slurm job on G100 with the user script on the files returned by the TUI filter"""
 
+    cmd = f"module load python; \
+source {config['GENERAL']['venv_path']}; \
+python {config['GENERAL']['repo_dir']}/dtaas_wrapper.py"
+
     cmd = f"mkdir dtaas_tui_tests; \
 export REPO_DIR={config['general']['repo_dir']}; \
 mkdir dtaas_tui_tests/{os.path.basename(os.getcwd())}; \
