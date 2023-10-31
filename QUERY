@@ -1,0 +1,1 @@
+SELECT number_of_reviews, bedrooms FROM listingsAndReviews WHERE name = 'Ribeira Charming Duplex'

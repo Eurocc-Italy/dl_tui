@@ -1,0 +1,1 @@
+{"MONGO": {"user": "user", "password": "passwd", "ip": "localhost", "port": "27017", "database": "sample_airbnb", "collection": "listingsAndReviews"}, "LOGGING": {"logfile": "logfile.log", "format": "%(message)s", "level": "DEBUG"}}

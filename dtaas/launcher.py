@@ -26,6 +26,7 @@ logging.basicConfig(
 
 MONGODB_URI = f"mongodb://{config['MONGO']['user']}:{config['MONGO']['password']}@{config['MONGO']['ip']}:{config['MONGO']['port']}/"
 CLIENT = MongoClient(MONGODB_URI)
+logging.info(f"Connected to client: {MONGODB_URI}")
 
 
 def launch_job():

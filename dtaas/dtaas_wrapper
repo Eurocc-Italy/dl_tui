@@ -34,16 +34,19 @@ logging.basicConfig(
 # Reading SQL query from QUERY file, as parsed by launcher.py...
 with open("QUERY", "r") as f:
     sql_query = f.readline()
-    # remove quotation marks, as it breaks the parser
-    sql_query = sql_query.replace('"', "")
-    sql_query = sql_query.replace("'", "")
+    # # remove quotation marks, as it breaks the parser
+    # sql_query = sql_query.replace('"', "")
+    # sql_query = sql_query.replace("'", "")
 
 # ...and converting to MongoDB query
 builder = MongoQueryBuilder()
 try:
     mongo_query = builder.parse_and_build(sql_query)
     query_filters = mongo_query[0]
-    query_fields = mongo_query[1]
+    try:
+        query_fields = mongo_query[1]["fields"]
+    except KeyError:
+        query_fields = {}
 except IndexError:
     logging.warning("Missing WHERE clause from SQL query, returning ALL data in the database.")
     query_fields = "{}"
@@ -53,12 +56,10 @@ logging.info(f"MongoDB query fields: {query_fields}")
 
 # Generating "input" file list according to user query and initializing "output" files list
 files_in = []
-for entry in CLIENT[config["database"]][config["collection"]].find(query_filters):
-    files_in.append(entry["path"])
+for entry in CLIENT[config["MONGO"]["database"]][config["MONGO"]["collection"]].find(query_filters, query_fields):
+    files_in.append(entry)
 files_out = []
-logging.debug(f"Query results:")
-for file in files_in:
-    logging.debug(file)
+logging.debug(f"Query results: {[_ for _ in files_in]}")
 
 try:
     # Running user-provided Python script
@@ -77,13 +78,12 @@ if type(files_out) != list:
     raise TypeError("`main` function does not return a list of paths.")
 
 # Saving output files and telling user where to find them
-logging.debug(f"Processed results:")
-for file in files_out:
-    logging.debug(file)
+logging.debug(f"Processed results: {[_ for _ in files_out]}")
 
-os.makedirs(f"RESULTS", exist_ok=True)
-for file in files_out:
-    shutil.copy(file, f"RESULTS/{os.path.basename(file)}")
-os.system("zip -r results.zip RESULTS/*")
-shutil.rmtree("RESULTS")
-logging.info("Processed files available in the results.zip archive")
+if files_out != []:
+    os.makedirs(f"RESULTS", exist_ok=True)
+    for file in files_out:
+        shutil.copy(file, f"RESULTS/{os.path.basename(file)}")
+    os.system("zip -r results.zip RESULTS/*")
+    shutil.rmtree("RESULTS")
+    logging.info("Processed files available in the results.zip archive")
