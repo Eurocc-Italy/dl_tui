@@ -71,5 +71,5 @@ if __name__ == "__main__":
     parser.add_argument("--script", type=str, required=False)
     args = parser.parse_args()
     logging.debug(f"API input (launcher): {args}")
-    exit()
+
     launch_job(query=args.query, script=args.script)
