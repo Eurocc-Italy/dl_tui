@@ -14,7 +14,7 @@ config = {
     "LOGGING": {
         "logfile": "logfile.log",
         "format": "%(message)s",
-        "level": "DEBUG",
+        "level": "INFO",
     },
 }
 
@@ -38,7 +38,8 @@ def run_query(query: str):
     """
     with open("config.json", "w") as f:
         json.dump(config, f)
-    os.system(f'python {TEST_DIR}/../../dtaas/wrapper.py --query """{query}"""')
+    script = """def main(files_in):\n    return []"""
+    os.system(f'python {TEST_DIR}/../../dtaas/wrapper.py --query """{query}""" --script """{script}"""')
     with open("logfile.log", "r") as f:
         for line in f:
             print(line)
