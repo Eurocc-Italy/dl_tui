@@ -46,6 +46,8 @@ mkdir dtaas_tui_tests/{os.path.basename(os.getcwd())}; \
 cd dtaas_tui_tests/{os.path.basename(os.getcwd())}; \
 sbatch -p {partition} -A {account} -t {walltime} -N {nodes} --ntasks-per-node 48 --wrap {wrap_cmd}"
 
+    ssh_cmd = "echo TEST"
+
     logging.debug(f"Launching command via ssh:{ssh_cmd}")
 
     stdout, stderr = subprocess.Popen(
