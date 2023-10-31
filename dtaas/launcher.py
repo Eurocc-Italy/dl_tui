@@ -50,7 +50,7 @@ sbatch -p {partition} -A {account} -t {walltime} -N {nodes} --ntasks-per-node 48
 
     stdout, stderr = subprocess.Popen(
         # TODO: key currently necessary, will be removed when we switch to chain user
-        f"ssh -i /home/centos/.ssh/luca-hpc {config['HPC']['user']}@{config['HPC']['host']} '{ssh_cmd}'",
+        f'ssh -i /home/centos/.ssh/luca-hpc {config["HPC"]["user"]}@{config["HPC"]["host"]} "{ssh_cmd}"',
         shell=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
