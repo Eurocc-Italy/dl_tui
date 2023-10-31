@@ -48,7 +48,7 @@ sbatch -p {partition} -A {account} -t {walltime} -N {nodes} --ntasks-per-node 48
 
     ssh_cmd = "echo TEST"
 
-    logging.debug(f"Launching command via ssh:{ssh_cmd}")
+    print(f"Launching command via ssh: {ssh_cmd}")
 
     stdout, stderr = subprocess.Popen(
         # TODO: key currently necessary, will be removed when we switch to chain user
