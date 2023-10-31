@@ -43,6 +43,7 @@ python {config["HPC"]["repo_dir"]}/wrapper.py --query """{query}""" --script """
     # bash commands to be run via ssh; TODO: decide structure of temporary folders
     ssh_cmd = f"mkdir dtaas_tui_tests; \
 mkdir dtaas_tui_tests/{os.path.basename(os.getcwd())}; \
+scp vm:{os.getcwd()}/config.json .; \
 cd dtaas_tui_tests/{os.path.basename(os.getcwd())}; \
 sbatch -p {partition} -A {account} -t {walltime} -N {nodes} --ntasks-per-node 48 --wrap '{wrap_cmd}'"
 
@@ -71,4 +72,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
     logging.debug(f"API input (launcher): {args}")
 
-    launch_job(query=args.query, script=args.script)
+    print(args.query)
+    print(args.script)
+    # launch_job(query=args.query, script=args.script)
