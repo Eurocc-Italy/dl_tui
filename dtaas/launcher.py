@@ -64,12 +64,11 @@ sbatch -p {partition} -A {account} -t {walltime} -N {nodes} --ntasks-per-node 48
         raise RuntimeError("Something gone wrong, job was not launched.")
 
 
-if __name__ == "__main__":
-    # Parsing API input, requires --query keyword, with optional --script
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--query", type=str, required=True)
-    parser.add_argument("--script", type=str, required=False)
-    args = parser.parse_args()
-    logging.debug(f"API input (launcher): {args}")
-    exit()
-    launch_job(query=args.query, script=args.script)
+# Parsing API input, requires --query keyword, with optional --script
+parser = argparse.ArgumentParser()
+parser.add_argument("--query", type=str, required=True)
+parser.add_argument("--script", type=str, required=False)
+args = parser.parse_args()
+logging.debug(f"API input (launcher): {args}")
+exit()
+launch_job(query=args.query, script=args.script)

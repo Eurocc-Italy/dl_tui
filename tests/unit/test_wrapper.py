@@ -56,6 +56,7 @@ def run_query(query: str, script: str):
 
     os.remove("logfile.log")
     os.remove("config.json")
+    os.remove("results.zip")
 
     return files_in, files_out
 
