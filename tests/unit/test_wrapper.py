@@ -41,11 +41,11 @@ def run_query(query: str, script: str):
     """
     with open("config.json", "w") as f:
         json.dump(config, f)
-    with open("QUERY", "w") as f:
-        f.write(query)
-    with open("script.py", "w") as f:
-        f.write(script)
-    os.system(f"python {TEST_DIR}/../../dtaas/dtaas_wrapper")
+
+    print(f'python {TEST_DIR}/../../dtaas/wrapper.py --query """{query}""" --script """{script}"""')
+
+    os.system(f"python {TEST_DIR}/../../dtaas/wrapper.py --query {query} --script {script}")
+
     with open("logfile.log", "r") as f:
         files_in = []
         files_out = []

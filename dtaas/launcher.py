@@ -6,12 +6,8 @@ Author: @lbabetto
 
 import os
 import subprocess
-from pymongo import MongoClient
 import argparse
 from dtaas import utils
-
-# Needed for dtaas_wrapper
-SUBMIT_DIR = os.getcwd()
 
 config = utils.load_config()
 
@@ -23,37 +19,44 @@ logging.basicConfig(
     level=config["LOGGING"]["level"].upper(),
 )
 
+def launch_job(query, script):
+    """Launch Slurm job on G100 with the user script on the files returned by the TUI filter
 
-MONGODB_URI = f"mongodb://{config['MONGO']['user']}:{config['MONGO']['password']}@{config['MONGO']['ip']}:{config['MONGO']['port']}/"
-CLIENT = MongoClient(MONGODB_URI)
-logging.info(f"Connected to client: {MONGODB_URI}")
+    Parameters
+    ----------
+    query : str
+        SQL query to be passed to the wrapper on HPC
+    script : str
+        Python script for the processing of the query results
+    """
 
+    # SLURM parameters
+    partition = config["HPC"]["partition"]
+    account = config["HPC"]["account"]
+    walltime = config["HPC"]["walltime"]
+    nodes = config["HPC"]["nodes"]
+    wrap_cmd = f"module load python; \
+source {config['HPC']['venv_path']}; \
+python {config['HPC']['repo_dir']}/dtaas_wrapper.py --query {query} --script {script}"
 
-def launch_job():
-    """Launch Slurm job on G100 with the user script on the files returned by the TUI filter"""
-
-    cmd = f"module load python; \
-source {config['GENERAL']['venv_path']}; \
-python {config['GENERAL']['repo_dir']}/dtaas_wrapper.py"
-
-    cmd = f"mkdir dtaas_tui_tests; \
-export REPO_DIR={config['general']['repo_dir']}; \
+    # bash commands to be run via ssh; TODO: decide structure of temporary folders
+    ssh_cmd = f"mkdir dtaas_tui_tests;
 mkdir dtaas_tui_tests/{os.path.basename(os.getcwd())}; \
 cd dtaas_tui_tests/{os.path.basename(os.getcwd())}; \
-cp {config['general']['repo_dir']}slurm.sh .; \
-scp vm:{SUBMIT_DIR}/* .;\
-sbatch slurm.sh"
+sbatch -p {partition} -A {account} -t {walltime} -N {nodes} --ntasks-per-node 48 --wrap {wrap_cmd}"
 
-    logging.debug("Launching command via ssh:")
-    logging.debug(cmd)
+    logging.debug(f"Launching command via ssh:{ssh_cmd}")
 
     stdout, stderr = subprocess.Popen(
-        # key currently necessary, will be removed when we switch to chain user
-        f"ssh -i /home/centos/.ssh/luca-hpc {config['HPC']['user']}@{config['HPC']['host']} '{cmd}'",
+        # TODO: key currently necessary, will be removed when we switch to chain user
+        f"ssh -i /home/centos/.ssh/luca-hpc {config['HPC']['user']}@{config['HPC']['host']} '{ssh_cmd}'",
         shell=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     ).communicate()
+
+    logging.debug(f"stdout: {stdout}")
+    logging.debug(f"stderr: {stderr}")
 
     if "Submitted batch job" not in str(stdout, encoding="utf-8"):
         raise RuntimeError("Something gone wrong, job was not launched.")
@@ -65,15 +68,6 @@ if __name__ == "__main__":
     parser.add_argument("--query", type=str, required=True)
     parser.add_argument("--script", type=str, required=False)
     args = parser.parse_args()
-    logging.debug(f"API input: {args}")
+    logging.debug(f"API input (launcher): {args}")
 
-    logging.info(f"User query: {args.query}")
-    with open("QUERY", "w") as f:
-        f.write(args.query)
-
-    if args.script != "":
-        logging.info("User-provided Python script found.")
-        with open("script.py", "w") as f:
-            f.write(args.script)
-
-    launch_job()
+    launch_job(query=args.query, script=args.script)

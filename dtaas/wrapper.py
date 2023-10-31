@@ -14,10 +14,12 @@ which will be run on HPC.
 Author: @lbabetto
 """
 
-import os, sys
+import os
+import sys
 import shutil
-from dtaas.launcher import CLIENT, SUBMIT_DIR
+from pymongo import MongoClient
 from sqlparse.builders.mongo_builder import MongoQueryBuilder
+from argparse import ArgumentParser
 
 from dtaas import utils
 
@@ -31,14 +33,29 @@ logging.basicConfig(
     level=config["LOGGING"]["level"].upper(),
 )
 
-# Reading SQL query from QUERY file, as parsed by launcher.py...
-with open("QUERY", "r") as f:
-    sql_query = f.readline()
+MONGODB_URI = f"mongodb://{config['MONGO']['user']}:{config['MONGO']['password']}@{config['MONGO']['ip']}:{config['MONGO']['port']}/"
+CLIENT = MongoClient(MONGODB_URI)
+logging.info(f"Connected to client: {MONGODB_URI}")
 
-# ...and converting to MongoDB query
+# parsing input, expecting something like `python wrapper.py --query [...] --script [...]`
+parser = ArgumentParser()
+parser.add_argument("--query", type=str, required=True)
+parser.add_argument("--script", type=str, required=False)
+args = parser.parse_args()
+
+logging.debug(f"API input (wrapper): {args}")
+logging.info(f"User query: {args.query}")
+
+if args.script:
+    logging.info("User-provided Python script found.")
+    logging.info(f"User script: {args.script}")
+    with open("script.py", "w") as f:
+        f.write(args.script)
+
+# converting SQL query to MongoDB spec
 builder = MongoQueryBuilder()
 try:
-    mongo_query = builder.parse_and_build(sql_query)
+    mongo_query = builder.parse_and_build(args.query)
     query_filters = mongo_query[0]
     try:
         query_fields = mongo_query[1]["fields"]
@@ -60,7 +77,7 @@ logging.debug(f"Query results: {files_in}")
 
 try:
     # Running user-provided Python script
-    sys.path.insert(0, SUBMIT_DIR)
+    sys.path.insert(0, ".")
     from script import main
 
     files_out = main(files_in)
@@ -84,3 +101,6 @@ if files_out != []:
     os.system("zip -r results.zip RESULTS/*")
     shutil.rmtree("RESULTS")
     logging.info("Processed files available in the results.zip archive")
+
+# removing temporary script
+os.remove("script.py")

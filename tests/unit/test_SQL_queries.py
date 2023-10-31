@@ -38,9 +38,7 @@ def run_query(query: str):
     """
     with open("config.json", "w") as f:
         json.dump(config, f)
-    with open("QUERY", "w") as f:
-        f.write(query)
-    os.system(f"python {TEST_DIR}/../../dtaas/dtaas_wrapper")
+    os.system(f'python {TEST_DIR}/../../dtaas/wrapper.py --query """{query}"""')
     with open("logfile.log", "r") as f:
         for line in f:
             print(line)
@@ -50,7 +48,6 @@ def run_query(query: str):
                 mongo_fields = line.lstrip("MongoDB query fields: ").rstrip("\n")
 
     os.remove("logfile.log")
-    os.remove("QUERY")
     os.remove("config.json")
 
     return mongo_filter, mongo_fields
@@ -123,12 +120,11 @@ def test_quoted_argument_double():
     except:
         assert False, "Unexpected exception."
     else:
-        assert mongo_filter == "{'width': {'$gt': '600'}}"
+        assert mongo_filter == "{'width': {'$gt': 600}}"
         assert mongo_fields == "{}"
 
 
 # try encasing parameter in "" quotes
-@pytest.mark.xfail  # TODO: quotes in field names are currently not correctly parsed by sqlparse
 def test_quoted_parameter():
     try:
         mongo_filter, mongo_fields = run_query("""SELECT * FROM datalake where "category" = motorcycle""")
@@ -136,6 +132,19 @@ def test_quoted_parameter():
         assert False, "Unexpected exception."
     else:
         assert mongo_filter == "{'category': 'motorcycle'}"
+        assert mongo_fields == "{}"
+
+
+# try with multi-word argument
+def test_multiword_argument():
+    try:
+        mongo_filter, mongo_fields = run_query(
+            """SELECT * FROM datalake where caption = 'a boy wearing headphones using one computer in a long row of computers'"""
+        )
+    except:
+        assert False, "Unexpected exception."
+    else:
+        assert mongo_filter == "{'caption': 'a boy wearing headphones using one computer in a long row of computers'}"
         assert mongo_fields == "{}"
 
 

@@ -1,11 +1,13 @@
 {
-  "GENERAL": {
-    "repo_dir": "/g100/home/userinternal/lbabetto/REPOS/DTaaS_TUI/dtaas/",
-    "venv_path": "/g100/home/userinternal/lbabetto/virtualenvs/dtaas/bin/activate"
-  },
   "HPC": {
     "user": "lbabetto",
-    "host": "g100"
+    "host": "g100",
+    "repo_dir": "/g100/home/userinternal/lbabetto/REPOS/DTaaS_TUI/dtaas/",
+    "venv_path": "/g100/home/userinternal/lbabetto/virtualenvs/dtaas/bin/activate",
+    "partition": "g100_usr_prod",
+    "account": "cin_staff",
+    "walltime": "01:00:00",
+    "nodes": 1
   },
   "MONGO": {
     "user": "user",
