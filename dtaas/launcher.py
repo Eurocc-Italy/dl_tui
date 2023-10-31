@@ -38,7 +38,7 @@ def launch_job(query, script):
     nodes = config["HPC"]["nodes"]
     wrap_cmd = f'module load python; \
 source {config["HPC"]["venv_path"]}; \
-python {config["HPC"]["repo_dir"]}/wrapper.py --query {query} --script {script}'
+python {config["HPC"]["repo_dir"]}/wrapper.py --query """{query}""" --script """{script}"""'
 
     # bash commands to be run via ssh; TODO: decide structure of temporary folders
     ssh_cmd = f'mkdir dtaas_tui_tests; \
@@ -46,11 +46,11 @@ mkdir dtaas_tui_tests/{os.path.basename(os.getcwd())}; \
 cd dtaas_tui_tests/{os.path.basename(os.getcwd())}; \
 sbatch -p {partition} -A {account} -t {walltime} -N {nodes} --ntasks-per-node 48 --wrap "{wrap_cmd}"'
 
-    logging.debug(f"Launching command via ssh: {ssh_cmd}")
+    print(f"Launching command via ssh: {ssh_cmd}")
 
     stdout, stderr = subprocess.Popen(
         # TODO: key currently necessary, will be removed when we switch to chain user
-        f"ssh -i /home/centos/.ssh/luca-hpc {config['HPC']['user']}@{config['HPC']['host']} \"{ssh_cmd}\"",
+        f"ssh -i /home/centos/.ssh/luca-hpc {config['HPC']['user']}@{config['HPC']['host']} '{ssh_cmd}'",
         shell=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
