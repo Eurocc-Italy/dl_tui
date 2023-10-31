@@ -16,7 +16,7 @@ import logging
 logging.basicConfig(
     filename=config["LOGGING"]["logfile"],
     format=config["LOGGING"]["format"],
-    level=config["LOGGING"]["level"].upper(),
+    level=logging.DEBUG,
 )
 
 
