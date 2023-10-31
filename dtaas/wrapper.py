@@ -36,7 +36,7 @@ MONGODB_URI = f"mongodb://{config['MONGO']['user']}:{config['MONGO']['password']
 CLIENT = MongoClient(MONGODB_URI)
 logging.info(f"Connected to client: {MONGODB_URI}")
 
-# parsing input, expecting something like `python wrapper.py --query [...] --script [...]`
+# parsing input, expecting something like `python wrapper.py --query """[...]""" --script """[...]"""`
 parser = ArgumentParser()
 parser.add_argument("--query", type=str, required=True)
 parser.add_argument("--script", type=str, required=False)
