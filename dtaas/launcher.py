@@ -38,7 +38,7 @@ def launch_job(query, script):
     nodes = config["HPC"]["nodes"]
     wrap_cmd = f'module load python; \
 source {config["HPC"]["venv_path"]}; \
-python {config["HPC"]["repo_dir"]}/wrapper.py --query """{query}""" --script """{script}"""'
+python {config["HPC"]["repo_dir"]}/wrapper.py --query {query} --script {script}'
 
     # bash commands to be run via ssh; TODO: decide structure of temporary folders
     ssh_cmd = f'mkdir dtaas_tui_tests; \
