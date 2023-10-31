@@ -65,12 +65,12 @@ def run_query(query: str, script: str):
 
 
 #
-# Testing
+# Testing wrapper functionality, giving SQL queries and running Python processing scripts on the results.
 #
 
 
 # searching for two specific files and returning them in reverse order
-def test_reverse_order():
+def test_search_and_return():
     try:
         files_in, files_out = run_query(
             """SELECT * FROM metadata WHERE id = 554625 OR id = 222564""",

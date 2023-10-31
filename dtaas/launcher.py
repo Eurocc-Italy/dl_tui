@@ -32,11 +32,11 @@ logging.info(f"Connected to client: {MONGODB_URI}")
 def launch_job():
     """Launch Slurm job on G100 with the user script on the files returned by the TUI filter"""
 
-    REPO_DIR = "/g100/home/userinternal/lbabetto/REPOS/DTaaS_TUI/dtaas/"
     cmd = f"mkdir dtaas_tui_tests; \
+export REPO_DIR={config['general']['repo_dir']}; \
 mkdir dtaas_tui_tests/{os.path.basename(os.getcwd())}; \
 cd dtaas_tui_tests/{os.path.basename(os.getcwd())}; \
-cp {REPO_DIR}slurm.sh .; \
+cp {config['general']['repo_dir']}slurm.sh .; \
 scp vm:{SUBMIT_DIR}/* .;\
 sbatch slurm.sh"
 

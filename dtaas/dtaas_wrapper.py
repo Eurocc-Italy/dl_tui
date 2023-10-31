@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 Wrapper which does the following:
 
