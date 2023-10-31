@@ -14,7 +14,7 @@ config = utils.load_config()
 import logging
 
 logging.basicConfig(
-    filename=config["LOGGING"]["logfile"],
+    filename="launcher.log",
     format=config["LOGGING"]["format"],
     level=config["LOGGING"]["level"].upper(),
 )
