@@ -44,7 +44,7 @@ python {config["HPC"]["repo_dir"]}/dtaas_wrapper.py --query """{query}""" --scri
     ssh_cmd = f'mkdir dtaas_tui_tests; \
 mkdir dtaas_tui_tests/{os.path.basename(os.getcwd())}; \
 cd dtaas_tui_tests/{os.path.basename(os.getcwd())}; \
-sbatch -p {partition} -A {account} -t {walltime} -N {nodes} --ntasks-per-node 48 --wrap "{wrap_cmd}"'
+sbatch -p {partition} -A {account} -t {walltime} -N {nodes} --ntasks-per-node 48 --wrap """{wrap_cmd}"""'
 
     print(f"Launching command via ssh: {ssh_cmd}")
 
