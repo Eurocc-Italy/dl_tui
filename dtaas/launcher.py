@@ -38,7 +38,7 @@ def launch_job(query, script):
     nodes = config["HPC"]["nodes"]
     wrap_cmd = f'module load python; \
 source {config["HPC"]["venv_path"]}; \
-python {config["HPC"]["repo_dir"]}/wrapper.py --query \"\"\"{query}\"\"\" --script \"\"\"{script}\"\"\"'
+python {config["HPC"]["repo_dir"]}/wrapper.py --query """{query}""" --script """{script}"""'
 
     # bash commands to be run via ssh; TODO: decide structure of temporary folders
     ssh_cmd = f"mkdir dtaas_tui_tests; \
@@ -67,12 +67,9 @@ sbatch -p {partition} -A {account} -t {walltime} -N {nodes} --ntasks-per-node 48
 if __name__ == "__main__":
     # Parsing API input, requires --query keyword, with optional --script
     parser = argparse.ArgumentParser()
-    # parser.add_argument("--query", type=str, required=True)
+    parser.add_argument("--query", type=str, required=True)
     parser.add_argument("--script", type=str, required=False)
     args = parser.parse_args()
     logging.debug(f"API input (launcher): {args}")
-
-    with open("QUERY", "r") as f:
-        query = f.readline()
-
+    exit()
     launch_job(query=query, script=args.script)
