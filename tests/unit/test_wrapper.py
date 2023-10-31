@@ -42,9 +42,7 @@ def run_query(query: str, script: str):
     with open("config.json", "w") as f:
         json.dump(config, f)
 
-    print(f'python {TEST_DIR}/../../dtaas/wrapper.py --query """{query}""" --script """{script}"""')
-
-    os.system(f"python {TEST_DIR}/../../dtaas/wrapper.py --query {query} --script {script}")
+    os.system(f'python {TEST_DIR}/../../dtaas/wrapper.py --query """{query}""" --script """{script}"""')
 
     with open("logfile.log", "r") as f:
         files_in = []
@@ -57,9 +55,7 @@ def run_query(query: str, script: str):
                 files_out = line.lstrip("Processed results: [").rstrip("]\n").replace("'", "").split(", ")
 
     os.remove("logfile.log")
-    os.remove("QUERY")
     os.remove("config.json")
-    os.remove("script.py")
 
     return files_in, files_out
 
