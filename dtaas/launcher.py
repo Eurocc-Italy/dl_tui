@@ -13,11 +13,11 @@ config = utils.load_config()
 
 import logging
 
-logging.basicConfig(
-    filename=config["LOGGING"]["logfile"],
-    format=config["LOGGING"]["format"],
-    level=config["LOGGING"]["level"].upper(),
-)
+# logging.basicConfig(
+#     filename=config["LOGGING"]["logfile"],
+#     format=config["LOGGING"]["format"],
+#     level=config["LOGGING"]["level"].upper(),
+# )
 
 
 def launch_job(query, script):
