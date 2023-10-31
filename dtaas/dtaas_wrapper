@@ -4,11 +4,12 @@ Wrapper which does the following:
 
   1. Takes user SQL query and converts it to Mongo spec using custom sqlparse codebase (@lbabetto/sqlparse)
   2. Runs query and retrieves the matching files, generating a list with the paths to the files
-  3. Takes the user-provided python script and runs it on HPC, feeding the input files list to the "main" function
-  4. Saves the processed files (of any kind, user-defined) in a zipped archive which the user can then download
+  3. Takes the user-provided python script and runs it locally, feeding the input files list to the `main` function
+  4. Retrieves the output files from the `main` function and saves the files (of any kind, user-defined) in a zipped 
+  archive which the user can then download
 
-NOTE: User script must have a "main(input_files)" function which takes as argument a lists of paths with the
-input files and returns a list of paths with the output/processed files. This "main" function will be the one
+NOTE: User script must have a `main(input_files)` function which takes as argument a lists of paths with the
+input files and returns a list of paths with the output/processed files. This `main` function will be the one
 which will be run on HPC.
 
 Author: @lbabetto
@@ -34,9 +35,6 @@ logging.basicConfig(
 # Reading SQL query from QUERY file, as parsed by launcher.py...
 with open("QUERY", "r") as f:
     sql_query = f.readline()
-    # # remove quotation marks, as it breaks the parser
-    # sql_query = sql_query.replace('"', "")
-    # sql_query = sql_query.replace("'", "")
 
 # ...and converting to MongoDB query
 builder = MongoQueryBuilder()
@@ -57,9 +55,9 @@ logging.info(f"MongoDB query fields: {query_fields}")
 # Generating "input" file list according to user query and initializing "output" files list
 files_in = []
 for entry in CLIENT[config["MONGO"]["database"]][config["MONGO"]["collection"]].find(query_filters, query_fields):
-    files_in.append(entry)
+    files_in.append(entry["path"])
 files_out = []
-logging.debug(f"Query results: {[_ for _ in files_in]}")
+logging.debug(f"Query results: {files_in}")
 
 try:
     # Running user-provided Python script
@@ -78,7 +76,7 @@ if type(files_out) != list:
     raise TypeError("`main` function does not return a list of paths.")
 
 # Saving output files and telling user where to find them
-logging.debug(f"Processed results: {[_ for _ in files_out]}")
+logging.debug(f"Processed results: {files_out}")
 
 if files_out != []:
     os.makedirs(f"RESULTS", exist_ok=True)

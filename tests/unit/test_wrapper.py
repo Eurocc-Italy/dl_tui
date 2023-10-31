@@ -2,9 +2,7 @@ import pytest
 import json
 import os
 
-#
-# using sample data from https://github.com/neelabalan/mongodb-sample-dataset (sample_airbnb dataset)
-#
+# TODO: make a mock test file and test database so the tests do not rely on any previously prepared database
 
 config = {
     "MONGO": {
@@ -12,8 +10,8 @@ config = {
         "password": "passwd",
         "ip": "localhost",
         "port": "27017",
-        "database": "sample_airbnb",
-        "collection": "listingsAndReviews",
+        "database": "datalake",
+        "collection": "metadata",
     },
     "LOGGING": {
         "logfile": "logfile.log",
@@ -54,9 +52,9 @@ def run_query(query: str, script: str):
         for line in f:
             print(line, end="")
             if "Query results:" in line:
-                files_in = json.loads(line.lstrip("Query results:").rstrip("\n"))
+                files_in = line.lstrip("Query results: [").rstrip("]\n").replace("'", "").split(", ")
             if "Processed results:" in line:
-                files_out = json.loads(line.lstrip("Processed results: ").rstrip("\n"))
+                files_out = line.lstrip("Processed results: [").rstrip("]\n").replace("'", "").split(", ")
 
     os.remove("logfile.log")
     os.remove("QUERY")
@@ -71,15 +69,21 @@ def run_query(query: str, script: str):
 #
 
 
-# test
-def test_1():
+# searching for two specific files and returning them in reverse order
+def test_reverse_order():
     try:
         files_in, files_out = run_query(
-            """SELECT number_of_reviews, bedrooms FROM listingsAndReviews WHERE name = 'Ribeira Charming Duplex'""",
-            """def main(files_in):\n    return []""",
+            """SELECT * FROM metadata WHERE id = 554625 OR id = 222564""",
+            """def main(files_in):\n    files_out = files_in\n    files_out.reverse()\n    return files_out""",
         )
     except:
         assert False, "Unexpected exception."
     else:
-        assert files_in == [{"_id": "10006546", "bedrooms": 3, "number_of_reviews": 51}]
-        assert files_out == []
+        assert files_in == [
+            "/home/lbabetto/PROJECTS/DTaaS/data/COCO/COCO_val2014_000000554625.jpg",
+            "/home/lbabetto/PROJECTS/DTaaS/data/COCO/COCO_val2014_000000222564.jpg",
+        ]
+        assert files_out == [
+            "/home/lbabetto/PROJECTS/DTaaS/data/COCO/COCO_val2014_000000222564.jpg",
+            "/home/lbabetto/PROJECTS/DTaaS/data/COCO/COCO_val2014_000000554625.jpg",
+        ]
