@@ -19,6 +19,7 @@ logging.basicConfig(
     level=config["LOGGING"]["level"].upper(),
 )
 
+
 def launch_job(query, script):
     """Launch Slurm job on G100 with the user script on the files returned by the TUI filter
 
@@ -40,7 +41,7 @@ source {config["HPC"]["venv_path"]}; \
 python {config["HPC"]["repo_dir"]}/dtaas_wrapper.py --query """{query}""" --script """{script}"""'
 
     # bash commands to be run via ssh; TODO: decide structure of temporary folders
-    ssh_cmd = f"mkdir dtaas_tui_tests;
+    ssh_cmd = f"mkdir dtaas_tui_tests; \
 mkdir dtaas_tui_tests/{os.path.basename(os.getcwd())}; \
 cd dtaas_tui_tests/{os.path.basename(os.getcwd())}; \
 sbatch -p {partition} -A {account} -t {walltime} -N {nodes} --ntasks-per-node 48 --wrap {wrap_cmd}"

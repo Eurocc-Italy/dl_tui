@@ -8,8 +8,7 @@ Wrapper which does the following:
   archive which the user can then download
 
 NOTE: User script must have a `main(input_files)` function which takes as argument a lists of paths with the
-input files and returns a list of paths with the output/processed files. This `main` function will be the one
-which will be run on HPC.
+input files and returns a list of paths with the output/processed files.
 
 Author: @lbabetto
 """
@@ -42,13 +41,14 @@ parser = ArgumentParser()
 parser.add_argument("--query", type=str, required=True)
 parser.add_argument("--script", type=str, required=False)
 args = parser.parse_args()
-
 logging.debug(f"API input (wrapper): {args}")
+
+# SQL query
 logging.info(f"User query: {args.query}")
 
+# user script (will be deleted at the end of the program)
 if args.script:
-    logging.info("User-provided Python script found.")
-    logging.info(f"User script: {args.script}")
+    logging.info(f"User script: \n{args.script}")
     with open("script.py", "w") as f:
         f.write(args.script)
 
@@ -62,7 +62,7 @@ try:
     except KeyError:
         query_fields = {}
 except IndexError:
-    logging.warning("Missing WHERE clause from SQL query, returning ALL data in the database.")
+    logging.debug("Missing WHERE clause from SQL query, returning all data in the database.")
     query_fields = "{}"
     query_filters = "{}"
 logging.info(f"MongoDB query filter: {query_filters}")
@@ -72,8 +72,8 @@ logging.info(f"MongoDB query fields: {query_fields}")
 files_in = []
 for entry in CLIENT[config["MONGO"]["database"]][config["MONGO"]["collection"]].find(query_filters, query_fields):
     files_in.append(entry["path"])
-files_out = []
 logging.debug(f"Query results: {files_in}")
+files_out = []
 
 try:
     # Running user-provided Python script
@@ -82,7 +82,7 @@ try:
 
     files_out = main(files_in)
 except ModuleNotFoundError:
-    logging.info("User-provided input not found, returning queried file list as output.")
+    logging.info("No processing script found, returning queried file list as output.")
     files_out = files_in
 except ImportError:
     logging.error("Did not find `main` function in user-provided script. ABORTING.")
