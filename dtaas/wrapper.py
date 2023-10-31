@@ -98,7 +98,7 @@ if files_out != []:
     os.makedirs(f"RESULTS", exist_ok=True)
     for file in files_out:
         shutil.copy(file, f"RESULTS/{os.path.basename(file)}")
-    os.system("zip -r results.zip RESULTS/*")
+    shutil.make_archive("results", "zip", "RESULTS")
     shutil.rmtree("RESULTS")
     logging.info("Processed files available in the results.zip archive")
 
