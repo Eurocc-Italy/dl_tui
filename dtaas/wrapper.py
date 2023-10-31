@@ -27,7 +27,7 @@ config = utils.load_config()
 import logging
 
 logging.basicConfig(
-    filename="wrapper.log",
+    filename=config["LOGGING"]["logfile"],
     format=config["LOGGING"]["format"],
     level=config["LOGGING"]["level"].upper(),
 )
