@@ -72,4 +72,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     logging.debug(f"API input (launcher): {args}")
 
-    launch_job(query=args.query, script=args.script)
+    with open("QUERY", "r") as f:
+        query = f.readline()
+
+    launch_job(query=query, script=args.script)
