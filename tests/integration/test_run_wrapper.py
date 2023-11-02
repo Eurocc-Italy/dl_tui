@@ -7,6 +7,7 @@ import pytest
 
 from dtaas.wrapper import run_wrapper
 import os
+import json
 from zipfile import ZipFile
 
 

@@ -7,6 +7,7 @@ import pytest
 
 from dtaas.wrapper import convert_SQL_to_mongo, retrieve_files, run_script, save_output
 import os
+import json
 from zipfile import ZipFile
 
 

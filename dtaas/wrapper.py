@@ -26,18 +26,18 @@ from sqlparse.builders.mongo_builder import MongoQueryBuilder
 
 from dtaas.utils import load_config, parse_cli_input
 
-config = load_config()
+CONFIG = load_config()
 
 import logging
 
 logging.basicConfig(
-    filename=config["LOGGING"]["logfile"],
-    format=config["LOGGING"]["format"],
-    level=config["LOGGING"]["level"].upper(),
-    filemode=config["LOGGING"]["filemode"],
+    filename=CONFIG["LOGGING"]["logfile"],
+    format=CONFIG["LOGGING"]["format"],
+    level=CONFIG["LOGGING"]["level"].upper(),
+    filemode=CONFIG["LOGGING"]["filemode"],
 )
 
-MONGODB_URI = f"mongodb://{config['MONGO']['user']}:{config['MONGO']['password']}@{config['MONGO']['ip']}:{config['MONGO']['port']}/"
+MONGODB_URI = f"mongodb://{CONFIG['MONGO']['user']}:{CONFIG['MONGO']['password']}@{CONFIG['MONGO']['ip']}:{CONFIG['MONGO']['port']}/"
 CLIENT = MongoClient(MONGODB_URI)
 logging.info(f"Connected to client: {MONGODB_URI}")
 
@@ -90,7 +90,7 @@ def retrieve_files(query_filters: Dict[str, str], query_fields: Dict[str, str]) 
         list containing the paths of the files matching the query
     """
     query_matches = []
-    for entry in CLIENT[config["MONGO"]["database"]][config["MONGO"]["collection"]].find(query_filters, query_fields):
+    for entry in CLIENT[CONFIG["MONGO"]["database"]][CONFIG["MONGO"]["collection"]].find(query_filters, query_fields):
         query_matches.append(entry["path"])
     logging.debug(f"Query results: {query_matches}")
     return query_matches

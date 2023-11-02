@@ -12,6 +12,7 @@ def test_search_specific_files():
     """
     Search for two specific files
     """
+
     mongo_filter, mongo_fields = convert_SQL_to_mongo("""SELECT * FROM metadata WHERE id = 554625 OR id = 222564""")
     files_in = retrieve_files(query_filters=mongo_filter, query_fields=mongo_fields)
     assert files_in == [

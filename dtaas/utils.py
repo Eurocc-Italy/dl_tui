@@ -10,13 +10,13 @@ import argparse
 from typing import Dict
 
 
-def load_config():
+def load_config() -> Dict[str, str]:
     """Reads and loads the default config.json file in /etc/default,
     and then (if present) loads the custom config.json file in /etc overwriting default values
 
     Returns
     -------
-    Dict[str]
+    Dict[str, str]
         configuration dictionary
     """
     # read default configuration file
@@ -31,12 +31,12 @@ def load_config():
     return config
 
 
-def parse_cli_input():
+def parse_cli_input() -> (Dict[str, str], Dict[str, str]):
     """Parses command line input, requires --query keyword, with optional --script
 
     Returns
     -------
-    str, str
+    Dict[str, str], Dict[str, str]
         SQL query and Python script provided as --query and --script flags, respectively
     """
 

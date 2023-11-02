@@ -5,6 +5,8 @@ import pytest
 #
 
 from dtaas.wrapper import convert_SQL_to_mongo
+import os
+import json
 
 
 def test_get_everything():
