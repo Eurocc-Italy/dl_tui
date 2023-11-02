@@ -6,21 +6,22 @@ Author: @lbabetto
 
 import os
 import subprocess
+from typing import Dict
 import argparse
 from dtaas.utils import load_config
-
-config = load_config()
 
 import logging
 
 logger = logging.getLogger(__name__)
 
 
-def launch_job(query, script):
+def launch_job(hpc_config: Dict[str, str], query: str, script: str):
     """Launch Slurm job on G100 with the user script on the files returned by the TUI filter
 
     Parameters
     ----------
+    hpc_config : Dict[str, str]
+        dictionary with the relevant data for HPC ( = config["HPC"] dict)
     query : str
         SQL query to be passed to the wrapper on HPC
     script : str
@@ -32,22 +33,21 @@ def launch_job(query, script):
         logger.debug(f"Received script: \n{script}")
 
     # SLURM parameters
-    partition = config["HPC"]["partition"]
-    account = config["HPC"]["account"]
-    walltime = config["HPC"]["walltime"]
-    nodes = config["HPC"]["nodes"]
+    partition = hpc_config["partition"]
+    account = hpc_config["account"]
+    walltime = hpc_config["walltime"]
+    nodes = hpc_config["nodes"]
     wrap_cmd = f'module load python; \
-source {config["HPC"]["venv_path"]}; \
-python {config["HPC"]["repo_dir"]}/wrapper.py --query """{query}""" --script """{script}"""'
+source {hpc_config["venv_path"]}; \
+python {hpc_config["repo_dir"]}/wrapper.py --query """{query}""" --script """{script}"""'
 
     # bash commands to be run via ssh; TODO: decide structure of temporary folders
     ssh_cmd = f"mkdir dtaas_tui_tests; \
 mkdir dtaas_tui_tests/{os.path.basename(os.getcwd())}; \
-scp vm:{os.getcwd()}/config.json .; \
 cd dtaas_tui_tests/{os.path.basename(os.getcwd())}; \
 sbatch -p {partition} -A {account} -t {walltime} -N {nodes} --ntasks-per-node 48 --wrap '{wrap_cmd}'"
 
-    full_ssh_cmd = f'ssh -i /home/centos/.ssh/luca-hpc {config["HPC"]["user"]}@{config["HPC"]["host"]} """{ssh_cmd}"""'
+    full_ssh_cmd = f'ssh -i /home/centos/.ssh/luca-hpc {hpc_config["user"]}@{hpc_config["host"]} """{ssh_cmd}"""'
     logger.debug(f"Launching command via ssh: {ssh_cmd}")
     logger.debug(f"Full ssh command: {full_ssh_cmd}")
 
@@ -67,7 +67,19 @@ sbatch -p {partition} -A {account} -t {walltime} -N {nodes} --ntasks-per-node 48
 
 
 if __name__ == "__main__":
-    # Parsing API input, requires --query keyword, with optional --script
+    # loading config and setting up URI
+    config = load_config()
+    mongodb_uri = f"mongodb://{config['MONGO']['user']}:{config['MONGO']['password']}@{config['MONGO']['ip']}:{config['MONGO']['port']}/"
+
+    # connecting to client
+    logger.info(f"Connecting to client: {mongodb_uri}")
+    client = MongoClient(mongodb_uri)
+
+    # accessing collection
+    logger.info(f"Loading database {config['MONGO']['database']}, collection {config['MONGO']['collection']}")
+    collection = client[config["MONGO"]["database"]][
+        config["MONGO"]["collection"]
+    ]  # Parsing API input, requires --query keyword, with optional --script
     parser = argparse.ArgumentParser()
     parser.add_argument("--query", type=str, required=True)
     parser.add_argument("--script", type=str, required=False)
