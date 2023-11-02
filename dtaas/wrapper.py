@@ -1,5 +1,8 @@
 """
-Wrapper which does the following:
+Wrapper which needs to be run providing a --query flag from command line with a SQL query and (optionally) a 
+--script flag with a Python script in text form. Ideally both flag arguments should be encased in triple quotes
+
+The wrapper then does the following:
 
   1. Takes user SQL query and converts it to Mongo spec using custom sqlparse codebase (@lbabetto/sqlparse)
   2. Runs query and retrieves the matching files, generating a list with the paths to the files
