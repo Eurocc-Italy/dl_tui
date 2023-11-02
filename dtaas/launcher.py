@@ -7,9 +7,9 @@ Author: @lbabetto
 import os
 import subprocess
 import argparse
-from dtaas import utils
+from dtaas.utils import load_config
 
-config = utils.load_config()
+config = load_config()
 
 import logging
 
@@ -17,6 +17,7 @@ logging.basicConfig(
     filename=config["LOGGING"]["logfile"],
     format=config["LOGGING"]["format"],
     level=config["LOGGING"]["level"].upper(),
+    filemode=config["LOGGING"]["filemode"],
 )
 
 
@@ -30,6 +31,10 @@ def launch_job(query, script):
     script : str
         Python script for the processing of the query results
     """
+
+    logging.debug(f"Received query: {query}")
+    if script:
+        logging.debug(f"Received script: \n{script}")
 
     # SLURM parameters
     partition = config["HPC"]["partition"]
@@ -47,18 +52,20 @@ scp vm:{os.getcwd()}/config.json .; \
 cd dtaas_tui_tests/{os.path.basename(os.getcwd())}; \
 sbatch -p {partition} -A {account} -t {walltime} -N {nodes} --ntasks-per-node 48 --wrap '{wrap_cmd}'"
 
+    full_ssh_cmd = f'ssh -i /home/centos/.ssh/luca-hpc {config["HPC"]["user"]}@{config["HPC"]["host"]} """{ssh_cmd}"""'
     logging.debug(f"Launching command via ssh: {ssh_cmd}")
+    logging.debug(f"Full ssh command: {full_ssh_cmd}")
 
     stdout, stderr = subprocess.Popen(
         # TODO: key currently necessary, will be removed when we switch to chain user
-        f'ssh -i /home/centos/.ssh/luca-hpc {config["HPC"]["user"]}@{config["HPC"]["host"]} "{ssh_cmd}"',
+        full_ssh_cmd,
         shell=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     ).communicate()
 
-    logging.debug(f"stdout: {stdout}")
-    logging.debug(f"stderr: {stderr}")
+    logging.debug(f"stdout: {str(stdout, encoding='utf-8')}")
+    logging.debug(f"stderr: {str(stderr, encoding='utf-8')}")
 
     if "Submitted batch job" not in str(stdout, encoding="utf-8"):
         raise RuntimeError("Something gone wrong, job was not launched.")
@@ -71,5 +78,4 @@ if __name__ == "__main__":
     parser.add_argument("--script", type=str, required=False)
     args = parser.parse_args()
     logging.debug(f"API input (launcher): {args}")
-    exit()
-    launch_job(query=query, script=args.script)
+    launch_job(query=args.query, script=args.script)

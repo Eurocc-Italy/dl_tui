@@ -16,13 +16,13 @@ Author: @lbabetto
 import os
 import sys
 import shutil
+from typing import List, Dict
 from pymongo import MongoClient
 from sqlparse.builders.mongo_builder import MongoQueryBuilder
-from argparse import ArgumentParser
 
-from dtaas import utils
+from dtaas.utils import load_config, parse_cli_input
 
-config = utils.load_config()
+config = load_config()
 
 import logging
 
@@ -30,71 +30,119 @@ logging.basicConfig(
     filename=config["LOGGING"]["logfile"],
     format=config["LOGGING"]["format"],
     level=config["LOGGING"]["level"].upper(),
+    filemode=config["LOGGING"]["filemode"],
 )
 
 MONGODB_URI = f"mongodb://{config['MONGO']['user']}:{config['MONGO']['password']}@{config['MONGO']['ip']}:{config['MONGO']['port']}/"
 CLIENT = MongoClient(MONGODB_URI)
 logging.info(f"Connected to client: {MONGODB_URI}")
 
-# parsing input, expecting something like `python wrapper.py --query """[...]""" --script """[...]"""`
-parser = ArgumentParser()
-parser.add_argument("--query", type=str, required=True)
-parser.add_argument("--script", type=str, required=False)
-args = parser.parse_args()
-logging.debug(f"API input (wrapper): {args}")
 
-# SQL query
-logging.info(f"User query: {args.query}")
+def convert_SQL_to_mongo(sql_query: str) -> (Dict[str, str], Dict[str, str]):
+    """Converts SQL query to MongoDB spec
 
-# user script (will be deleted at the end of the program)
-if args.script:
-    logging.info(f"User script: \n{args.script}")
-    with open("script.py", "w") as f:
-        f.write(args.script)
+    Parameters
+    ----------
+    sql_query : str
+        SQL query
 
-# converting SQL query to MongoDB spec
-builder = MongoQueryBuilder()
-try:
-    mongo_query = builder.parse_and_build(args.query)
-    query_filters = mongo_query[0]
+    Returns
+    -------
+    (Dict[str, str], Dict[str, str])
+        dictionaries containing the filters (WHERE) and fields (SELECT) in MongoDB spec
+    """
+    builder = MongoQueryBuilder()
+    logging.info(f"User query: {sql_query}")
+
     try:
-        query_fields = mongo_query[1]["fields"]
-    except KeyError:
-        query_fields = {}
-except IndexError:
-    logging.debug("Missing WHERE clause from SQL query, returning all data in the database.")
-    query_fields = "{}"
-    query_filters = "{}"
-logging.info(f"MongoDB query filter: {query_filters}")
-logging.info(f"MongoDB query fields: {query_fields}")
+        mongo_query = builder.parse_and_build(sql_query)
+        query_filters = mongo_query[0]
+        try:
+            query_fields = mongo_query[1]["fields"]
+        except KeyError:  # if no fields are present, parser does not add the key
+            query_fields = {}
+    except IndexError:
+        logging.debug("Missing WHERE clause from SQL query, returning all data in the database.")
+        query_fields = "{}"
+        query_filters = "{}"
+    logging.info(f"MongoDB query filter: {query_filters}")
+    logging.info(f"MongoDB query fields: {query_fields}")
+    return query_filters, query_fields
 
-# Generating "input" file list according to user query and initializing "output" files list
-files_in = []
-for entry in CLIENT[config["MONGO"]["database"]][config["MONGO"]["collection"]].find(query_filters, query_fields):
-    files_in.append(entry["path"])
-logging.debug(f"Query results: {files_in}")
-files_out = []
 
-try:
-    # Running user-provided Python script
-    sys.path.insert(0, ".")
-    from script import main
+def process_query(query_filters: Dict[str, str], query_fields: Dict[str, str]) -> List[str]:
+    """Generate a file path list according to user query
 
-    files_out = main(files_in)
-except ModuleNotFoundError:
-    logging.info("No processing script found, returning queried file list as output.")
-    files_out = files_in
-except ImportError:
-    logging.error("Did not find `main` function in user-provided script. ABORTING.")
-    exit()
+    Parameters
+    ----------
+    query_filters : Dict[str, str]
+        dictionary containing the query filters in MongoDB spec
+    query_fields : Dict[str, str]
+        dictionary containing the query fields in MongoDB spec
 
-if type(files_out) != list:
-    raise TypeError("`main` function does not return a list of paths.")
+    Returns
+    -------
+    List[str]
+        list containing the paths of the files matching the query
+    """
+    query_matches = []
+    for entry in CLIENT[config["MONGO"]["database"]][config["MONGO"]["collection"]].find(query_filters, query_fields):
+        query_matches.append(entry["path"])
+    logging.debug(f"Query results: {query_matches}")
+    return query_matches
 
-# Saving output files and telling user where to find them
-logging.debug(f"Processed results: {files_out}")
 
-if files_out != []:
+def run_script(script: str) -> List[str]:
+    """Runs the `main` function in the user-provided Python script.
+    This function should take a list of paths as input and return a list of paths as output.
+
+    Parameters
+    ----------
+    script : str
+        Python script provided by the user, to be run on the query results
+
+    Returns
+    -------
+    List[str]
+        list of paths with the output/processed files the user wants to save
+
+    Raises
+    ------
+    TypeError
+        if the user-provided script `main` function does not return a list, abort the run
+    """
+    logging.info(f"User script: \n{script}")
+
+    with open("user_script.py", "w") as f:
+        f.write(script)
+    try:
+        # Running user-provided Python script
+        sys.path.insert(0, ".")
+        from user_script import main
+
+        files_out = main(files_in)
+        os.remove("user_script.py")
+        if type(files_out) != list:
+            raise TypeError("`main` function does not return a list of paths. ABORTING")
+        return files_out
+    except ImportError:
+        logging.error("Did not find `main` function in user-provided script. ABORTING.")
+        exit()
+
+
+def save_output(files_out: List[str]):
+    """_summary_
+
+    Parameters
+    ----------
+    files_out : List[str]
+        list containing the paths to the files to be saved
+    """
+    # TODO: make this consistent with S3 bucket implementation, right now only zips the files.
+    # TODO: add try/except to make sure user returned the correct list of paths.
+
+    logging.debug(f"Processed results: {files_out}")
+
     os.makedirs(f"RESULTS", exist_ok=True)
     for file in files_out:
         shutil.copy(file, f"RESULTS/{os.path.basename(file)}")
@@ -102,5 +150,28 @@ if files_out != []:
     shutil.rmtree("RESULTS")
     logging.info("Processed files available in the results.zip archive")
 
-# removing temporary script
-os.remove("script.py")
+
+def main(sql_query: str, script: str):
+    """Get the SQL query and script, convert them to MongoDB spec, run the process query on the DB retrieving
+    matching files, run the user-provided script (if present), retrieve the output file list from the main function,
+    save the files and zip them in an archive
+
+    Parameters
+    ----------
+    sql_query : str
+        SQL query
+    script : str
+        Python script provided by the user, to be run on the query results
+    """
+    query_filters, query_fields = convert_SQL_to_mongo(sql_query=sql_query)
+    files_in = process_query(query_fields=query_fields, query_filters=query_filters)
+    if script:
+        files_out = run_script(script=script)
+        save_output(files_out=files_out)
+    else:
+        save_output(files_out=files_in)
+
+
+if __name__ == "__main__":
+    sql_query, script = parse_cli_input()
+    main(sql_query=sql_query, script=script)
