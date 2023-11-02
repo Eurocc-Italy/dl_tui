@@ -133,7 +133,7 @@ def run_script(script: str, files_in: List[str]) -> List[str]:
 
 
 def save_output(files_out: List[str]):
-    """_summary_
+    """Take a list of paths and save the corresponding files in a zipped archive.
 
     Parameters
     ----------

@@ -8,8 +8,10 @@ import pytest
 from dtaas.wrapper import convert_SQL_to_mongo, retrieve_files
 
 
-# searching for two specific files
 def test_search_specific_files():
+    """
+    Search for two specific files
+    """
     mongo_filter, mongo_fields = convert_SQL_to_mongo("""SELECT * FROM metadata WHERE id = 554625 OR id = 222564""")
     files_in = retrieve_files(query_filters=mongo_filter, query_fields=mongo_fields)
     assert files_in == [
@@ -18,8 +20,10 @@ def test_search_specific_files():
     ]
 
 
-# searching for a file that does not exist
 def test_search_missing_entry():
+    """
+    Search for a file that does not exist
+    """
     mongo_filter, mongo_fields = convert_SQL_to_mongo("""SELECT * FROM metadata WHERE id = PIPPO""")
     files_in = retrieve_files(query_filters=mongo_filter, query_fields=mongo_fields)
     assert files_in == []
