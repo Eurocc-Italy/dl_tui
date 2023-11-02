@@ -156,7 +156,7 @@ def save_output(files_out: List[str]):
 def run_wrapper(
     collection: Collection,
     sql_query: str,
-    script: str,
+    script: str = None,
 ):
     """Get the SQL query and script, convert them to MongoDB spec, run the process query on the DB retrieving
     matching files, run the user-provided script (if present), retrieve the output file list from the main function,

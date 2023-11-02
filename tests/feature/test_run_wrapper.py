@@ -17,6 +17,23 @@ def test_search_specific_files(test_collection):
     run_wrapper(
         collection=test_collection,
         sql_query="""SELECT * FROM metadata WHERE id = 554625 OR id = 222564""",
+    )
+
+    assert os.path.exists("results.zip"), "Zipped archive was not created."
+
+    with ZipFile("results.zip", "r") as archive:
+        assert archive.namelist() == ["COCO_val2014_000000222564.jpg", "COCO_val2014_000000554625.jpg"]
+
+    os.remove("results.zip")
+
+
+def test_search_specific_files_reverse(test_collection):
+    """
+    Search for two specific files and save them in reverse order
+    """
+    run_wrapper(
+        collection=test_collection,
+        sql_query="""SELECT * FROM metadata WHERE id = 554625 OR id = 222564""",
         script="""def main(files_in):\n files_out=files_in.copy()\n files_out.reverse()\n return files_out""",
     )
 
