@@ -15,6 +15,7 @@ Author: @lbabetto
 
 import os
 import sys
+from importlib import import_module
 import shutil
 from typing import List, Dict
 from pymongo import MongoClient
@@ -70,7 +71,7 @@ def convert_SQL_to_mongo(sql_query: str) -> (Dict[str, str], Dict[str, str]):
     return query_filters, query_fields
 
 
-def process_query(query_filters: Dict[str, str], query_fields: Dict[str, str]) -> List[str]:
+def retrieve_files(query_filters: Dict[str, str], query_fields: Dict[str, str]) -> List[str]:
     """Generate a file path list according to user query
 
     Parameters
@@ -92,14 +93,16 @@ def process_query(query_filters: Dict[str, str], query_fields: Dict[str, str]) -
     return query_matches
 
 
-def run_script(script: str) -> List[str]:
-    """Runs the `main` function in the user-provided Python script.
+def run_script(script: str, files_in: List[str]) -> List[str]:
+    """Runs the `main` function in the user-provided Python script, feeding the paths containted in files_in.
     This function should take a list of paths as input and return a list of paths as output.
 
     Parameters
     ----------
     script : str
         Python script provided by the user, to be run on the query results
+    files_in : List[str]
+        list of path with the files on which to run the script
 
     Returns
     -------
@@ -115,19 +118,18 @@ def run_script(script: str) -> List[str]:
 
     with open("user_script.py", "w") as f:
         f.write(script)
-    try:
-        # Running user-provided Python script
-        sys.path.insert(0, ".")
-        from user_script import main
+    if "user_script" in sys.modules:  # currently not needed, but if in future more than 1 script will be needed...
+        del sys.modules["user_script"]
+    user_module = import_module("user_script")
 
-        files_out = main(files_in)
-        os.remove("user_script.py")
-        if type(files_out) != list:
-            raise TypeError("`main` function does not return a list of paths. ABORTING")
-        return files_out
-    except ImportError:
-        logging.error("Did not find `main` function in user-provided script. ABORTING.")
-        exit()
+    user_main = getattr(user_module, "main")
+
+    files_out = user_main(files_in)
+    os.remove("user_script.py")
+    if type(files_out) != list:
+        raise TypeError("`main` function does not return a list of paths. ABORTING")
+
+    return files_out
 
 
 def save_output(files_out: List[str]):
@@ -151,7 +153,7 @@ def save_output(files_out: List[str]):
     logging.info("Processed files available in the results.zip archive")
 
 
-def main(sql_query: str, script: str):
+def run_wrapper(sql_query: str, script: str):
     """Get the SQL query and script, convert them to MongoDB spec, run the process query on the DB retrieving
     matching files, run the user-provided script (if present), retrieve the output file list from the main function,
     save the files and zip them in an archive
@@ -164,9 +166,9 @@ def main(sql_query: str, script: str):
         Python script provided by the user, to be run on the query results
     """
     query_filters, query_fields = convert_SQL_to_mongo(sql_query=sql_query)
-    files_in = process_query(query_fields=query_fields, query_filters=query_filters)
+    files_in = retrieve_files(query_fields=query_fields, query_filters=query_filters)
     if script:
-        files_out = run_script(script=script)
+        files_out = run_script(script=script, files_in=files_in)
         save_output(files_out=files_out)
     else:
         save_output(files_out=files_in)
@@ -174,4 +176,4 @@ def main(sql_query: str, script: str):
 
 if __name__ == "__main__":
     sql_query, script = parse_cli_input()
-    main(sql_query=sql_query, script=script)
+    run_wrapper(sql_query=sql_query, script=script)
