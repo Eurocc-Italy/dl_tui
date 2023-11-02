@@ -22,24 +22,15 @@ from importlib import import_module
 import shutil
 from typing import List, Dict
 from pymongo import MongoClient
+from pymongo.collection import Collection
 from sqlparse.builders.mongo_builder import MongoQueryBuilder
 
 from dtaas.utils import load_config, parse_cli_input
 
-CONFIG = load_config()
 
 import logging
 
-logging.basicConfig(
-    filename=CONFIG["LOGGING"]["logfile"],
-    format=CONFIG["LOGGING"]["format"],
-    level=CONFIG["LOGGING"]["level"].upper(),
-    filemode=CONFIG["LOGGING"]["filemode"],
-)
-
-MONGODB_URI = f"mongodb://{CONFIG['MONGO']['user']}:{CONFIG['MONGO']['password']}@{CONFIG['MONGO']['ip']}:{CONFIG['MONGO']['port']}/"
-CLIENT = MongoClient(MONGODB_URI)
-logging.info(f"Connected to client: {MONGODB_URI}")
+logger = logging.getLogger(__name__)
 
 
 def convert_SQL_to_mongo(sql_query: str) -> (Dict[str, str], Dict[str, str]):
@@ -56,7 +47,7 @@ def convert_SQL_to_mongo(sql_query: str) -> (Dict[str, str], Dict[str, str]):
         dictionaries containing the filters (WHERE) and fields (SELECT) in MongoDB spec
     """
     builder = MongoQueryBuilder()
-    logging.info(f"User query: {sql_query}")
+    logger.info(f"User query: {sql_query}")
 
     try:
         mongo_query = builder.parse_and_build(sql_query)
@@ -66,19 +57,25 @@ def convert_SQL_to_mongo(sql_query: str) -> (Dict[str, str], Dict[str, str]):
         except KeyError:  # if no fields are present, parser does not add the key
             query_fields = {}
     except IndexError:
-        logging.debug("Missing WHERE clause from SQL query, returning all data in the database.")
+        logger.debug("Missing WHERE clause from SQL query, returning all data in the database.")
         query_fields = "{}"
         query_filters = "{}"
-    logging.info(f"MongoDB query filter: {query_filters}")
-    logging.info(f"MongoDB query fields: {query_fields}")
+    logger.info(f"MongoDB query filter: {query_filters}")
+    logger.info(f"MongoDB query fields: {query_fields}")
     return query_filters, query_fields
 
 
-def retrieve_files(query_filters: Dict[str, str], query_fields: Dict[str, str]) -> List[str]:
+def retrieve_files(
+    collection: Collection,
+    query_filters: Dict[str, str],
+    query_fields: Dict[str, str],
+) -> List[str]:
     """Generate a file path list according to user query
 
     Parameters
     ----------
+    collection : Collection
+        MongoDB collection on which to run the query
     query_filters : Dict[str, str]
         dictionary containing the query filters in MongoDB spec
     query_fields : Dict[str, str]
@@ -90,9 +87,9 @@ def retrieve_files(query_filters: Dict[str, str], query_fields: Dict[str, str]) 
         list containing the paths of the files matching the query
     """
     query_matches = []
-    for entry in CLIENT[CONFIG["MONGO"]["database"]][CONFIG["MONGO"]["collection"]].find(query_filters, query_fields):
+    for entry in collection.find(query_filters, query_fields):
         query_matches.append(entry["path"])
-    logging.debug(f"Query results: {query_matches}")
+    logger.debug(f"Query results: {query_matches}")
     return query_matches
 
 
@@ -117,7 +114,7 @@ def run_script(script: str, files_in: List[str]) -> List[str]:
     TypeError
         if the user-provided script `main` function does not return a list, abort the run
     """
-    logging.info(f"User script: \n{script}")
+    logger.info(f"User script: \n{script}")
 
     with open("user_script.py", "w") as f:
         f.write(script)
@@ -146,30 +143,40 @@ def save_output(files_out: List[str]):
     # TODO: make this consistent with S3 bucket implementation, right now only zips the files.
     # TODO: add try/except to make sure user returned the correct list of paths.
 
-    logging.debug(f"Processed results: {files_out}")
+    logger.debug(f"Processed results: {files_out}")
 
     os.makedirs(f"RESULTS", exist_ok=True)
     for file in files_out:
         shutil.copy(file, f"RESULTS/{os.path.basename(file)}")
     shutil.make_archive("results", "zip", "RESULTS")
     shutil.rmtree("RESULTS")
-    logging.info("Processed files available in the results.zip archive")
+    logger.info("Processed files available in the results.zip archive")
 
 
-def run_wrapper(sql_query: str, script: str):
+def run_wrapper(
+    collection: Collection,
+    sql_query: str,
+    script: str,
+):
     """Get the SQL query and script, convert them to MongoDB spec, run the process query on the DB retrieving
     matching files, run the user-provided script (if present), retrieve the output file list from the main function,
     save the files and zip them in an archive
 
     Parameters
     ----------
+    collection : Collection
+        MongoDB collection on which to run the query
     sql_query : str
         SQL query
     script : str
         Python script provided by the user, to be run on the query results
     """
     query_filters, query_fields = convert_SQL_to_mongo(sql_query=sql_query)
-    files_in = retrieve_files(query_fields=query_fields, query_filters=query_filters)
+    files_in = retrieve_files(
+        collection=collection,
+        query_fields=query_fields,
+        query_filters=query_filters,
+    )
     if script:
         files_out = run_script(script=script, files_in=files_in)
         save_output(files_out=files_out)
@@ -178,5 +185,22 @@ def run_wrapper(sql_query: str, script: str):
 
 
 if __name__ == "__main__":
+    # loading config and setting up URI
+    config = load_config()
+    mongodb_uri = f"mongodb://{config['MONGO']['user']}:{config['MONGO']['password']}@{config['MONGO']['ip']}:{config['MONGO']['port']}/"
+
+    # connecting to client
+    logger.info(f"Connecting to client: {mongodb_uri}")
+    client = MongoClient(mongodb_uri)
+
+    # accessing collection
+    logger.info(f"Loading database {config['MONGO']['database']}, collection {config['MONGO']['collection']}")
+    collection = client[config["MONGO"]["database"]][config["MONGO"]["collection"]]
+
+    # running query and script
     sql_query, script = parse_cli_input()
-    run_wrapper(sql_query=sql_query, script=script)
+    run_wrapper(
+        collection=collection,
+        sql_query=sql_query,
+        script=script,
+    )

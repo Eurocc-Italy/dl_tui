@@ -13,12 +13,7 @@ config = load_config()
 
 import logging
 
-logging.basicConfig(
-    filename=config["LOGGING"]["logfile"],
-    format=config["LOGGING"]["format"],
-    level=config["LOGGING"]["level"].upper(),
-    filemode=config["LOGGING"]["filemode"],
-)
+logger = logging.getLogger(__name__)
 
 
 def launch_job(query, script):
@@ -32,9 +27,9 @@ def launch_job(query, script):
         Python script for the processing of the query results
     """
 
-    logging.debug(f"Received query: {query}")
+    logger.debug(f"Received query: {query}")
     if script:
-        logging.debug(f"Received script: \n{script}")
+        logger.debug(f"Received script: \n{script}")
 
     # SLURM parameters
     partition = config["HPC"]["partition"]
@@ -53,8 +48,8 @@ cd dtaas_tui_tests/{os.path.basename(os.getcwd())}; \
 sbatch -p {partition} -A {account} -t {walltime} -N {nodes} --ntasks-per-node 48 --wrap '{wrap_cmd}'"
 
     full_ssh_cmd = f'ssh -i /home/centos/.ssh/luca-hpc {config["HPC"]["user"]}@{config["HPC"]["host"]} """{ssh_cmd}"""'
-    logging.debug(f"Launching command via ssh: {ssh_cmd}")
-    logging.debug(f"Full ssh command: {full_ssh_cmd}")
+    logger.debug(f"Launching command via ssh: {ssh_cmd}")
+    logger.debug(f"Full ssh command: {full_ssh_cmd}")
 
     stdout, stderr = subprocess.Popen(
         # TODO: key currently necessary, will be removed when we switch to chain user
@@ -64,8 +59,8 @@ sbatch -p {partition} -A {account} -t {walltime} -N {nodes} --ntasks-per-node 48
         stderr=subprocess.PIPE,
     ).communicate()
 
-    logging.debug(f"stdout: {str(stdout, encoding='utf-8')}")
-    logging.debug(f"stderr: {str(stderr, encoding='utf-8')}")
+    logger.debug(f"stdout: {str(stdout, encoding='utf-8')}")
+    logger.debug(f"stderr: {str(stderr, encoding='utf-8')}")
 
     if "Submitted batch job" not in str(stdout, encoding="utf-8"):
         raise RuntimeError("Something gone wrong, job was not launched.")
@@ -77,5 +72,5 @@ if __name__ == "__main__":
     parser.add_argument("--query", type=str, required=True)
     parser.add_argument("--script", type=str, required=False)
     args = parser.parse_args()
-    logging.debug(f"API input (launcher): {args}")
+    logger.debug(f"API input (launcher): {args}")
     launch_job(query=args.query, script=args.script)

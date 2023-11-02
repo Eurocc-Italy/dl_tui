@@ -7,15 +7,15 @@ import pytest
 
 from dtaas.wrapper import run_wrapper
 import os
-import json
 from zipfile import ZipFile
 
 
-def test_search_specific_files():
+def test_search_specific_files(test_collection):
     """
     Search for two specific files
     """
     run_wrapper(
+        collection=test_collection,
         sql_query="""SELECT * FROM metadata WHERE id = 554625 OR id = 222564""",
         script="""def main(files_in):\n files_out=files_in.copy()\n files_out.reverse()\n return files_out""",
     )
