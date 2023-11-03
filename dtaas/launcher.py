@@ -45,7 +45,7 @@ def launch_job(config: Dict[str, str], query_path: str, script_path: str):
     ssh_key = hpc_config["ssh_key"]
     wrap_cmd = f'module load python; \
 source {hpc_config["venv_path"]}; \
-python {hpc_config["repo_dir"]}/wrapper.py --query QUERY --script SCRIPT'
+python {hpc_config["repo_dir"]}/wrapper.py --query {query_path} --script {script_path}'
 
     # bash commands to be run via ssh; TODO: decide structure of temporary folders
     ssh_cmd = f"mkdir {workdir}; \
