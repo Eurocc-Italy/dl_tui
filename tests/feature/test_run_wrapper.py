@@ -7,6 +7,7 @@ import pytest
 
 from dtaas.wrapper import run_wrapper
 import os
+from io import StringIO
 from zipfile import ZipFile
 
 
@@ -14,9 +15,11 @@ def test_search_specific_files(test_collection):
     """
     Search for two specific files
     """
+    query = StringIO("SELECT * FROM metadata WHERE id = 554625 OR id = 222564")
+
     run_wrapper(
         collection=test_collection,
-        sql_query="""SELECT * FROM metadata WHERE id = 554625 OR id = 222564""",
+        sql_query=query,
     )
 
     assert os.path.exists("results.zip"), "Zipped archive was not created."
@@ -27,19 +30,22 @@ def test_search_specific_files(test_collection):
     os.remove("results.zip")
 
 
-def test_search_specific_files_reverse(test_collection):
+def test_search_specific_files_return_only_first(test_collection):
     """
-    Search for two specific files and save them in reverse order
+    Search for two specific files and return just the first item
     """
+    query = StringIO("SELECT * FROM metadata WHERE id = 554625 OR id = 222564")
+    script = StringIO("def main(files_in):\n files_out=files_in.copy()\n return [files_out[0]]")
+
     run_wrapper(
         collection=test_collection,
-        sql_query="""SELECT * FROM metadata WHERE id = 554625 OR id = 222564""",
-        script="""def main(files_in):\n files_out=files_in.copy()\n files_out.reverse()\n return files_out""",
+        sql_query=query,
+        script=script,
     )
 
     assert os.path.exists("results.zip"), "Zipped archive was not created."
 
     with ZipFile("results.zip", "r") as archive:
-        assert archive.namelist() == ["COCO_val2014_000000222564.jpg", "COCO_val2014_000000554625.jpg"]
+        assert archive.namelist() == ["COCO_val2014_000000554625.jpg"]
 
     os.remove("results.zip")

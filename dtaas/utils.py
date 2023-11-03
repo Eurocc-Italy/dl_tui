@@ -8,6 +8,7 @@ import os
 import json
 import argparse
 from typing import Dict
+from io import StringIO
 
 
 def load_config() -> Dict[str, str]:
@@ -31,12 +32,12 @@ def load_config() -> Dict[str, str]:
     return config
 
 
-def parse_cli_input() -> (Dict[str, str], Dict[str, str]):
+def parse_cli_input() -> (StringIO, StringIO):
     """Parses command line input, requires --query keyword, with optional --script
 
     Returns
     -------
-    Dict[str, str], Dict[str, str]
+    StringIO, StringIO
         SQL query and Python script provided as --query and --script flags, respectively
     """
 
@@ -44,5 +45,7 @@ def parse_cli_input() -> (Dict[str, str], Dict[str, str]):
     parser.add_argument("--query", type=str, required=True)
     parser.add_argument("--script", type=str, required=False)
     args = parser.parse_args()
+    sql_query = StringIO(args.query)
+    script = StringIO(args.script)
 
-    return args.query, args.script
+    return sql_query, script
