@@ -7,7 +7,7 @@ Author: @lbabetto
 import os
 import json
 import argparse
-from typing import Dict
+from typing import Dict, Tuple
 from io import StringIO
 
 
@@ -32,20 +32,18 @@ def load_config() -> Dict[str, str]:
     return config
 
 
-def parse_cli_input() -> (StringIO, StringIO):
+def parse_cli_input() -> Tuple[str, str]:
     """Parses command line input, requires --query keyword, with optional --script
 
     Returns
     -------
-    StringIO, StringIO
-        SQL query and Python script provided as --query and --script flags, respectively
+    str, str
+        paths to the files containing the SQL query and Python script
     """
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--query", type=str, required=True)
     parser.add_argument("--script", type=str, required=False)
     args = parser.parse_args()
-    sql_query = StringIO(args.query)
-    script = StringIO(args.script)
 
-    return sql_query, script
+    return args.query, args.script

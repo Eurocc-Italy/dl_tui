@@ -24,7 +24,7 @@ from typing import List, Dict, Tuple
 from pymongo import MongoClient
 from pymongo.collection import Collection
 from sqlparse.builders.mongo_builder import MongoQueryBuilder
-from io import StringIO
+from io import TextIOWrapper
 
 from dtaas.utils import load_config, parse_cli_input
 
@@ -33,13 +33,13 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def convert_SQL_to_mongo(sql_query: StringIO) -> Tuple[Dict[str, str], Dict[str, str]]:
+def convert_SQL_to_mongo(sql_query: str) -> Tuple[Dict[str, str], Dict[str, str]]:
     """Converts SQL query to MongoDB spec
 
     Parameters
     ----------
-    sql_query : StringIO
-        SQL query in StringIO format
+    sql_query : str
+        SQL query
 
     Returns
     -------
@@ -47,12 +47,10 @@ def convert_SQL_to_mongo(sql_query: StringIO) -> Tuple[Dict[str, str], Dict[str,
         dictionaries containing the filters (WHERE) and fields (SELECT) in MongoDB spec
     """
     builder = MongoQueryBuilder()
-    sql_query.seek(0)
-    logger.info(f"User query: {sql_query.read()}")
+    logger.info(f"User query: {sql_query}")
 
     try:
-        sql_query.seek(0)
-        mongo_query = builder.parse_and_build(sql_query.read().rstrip("\n"))
+        mongo_query = builder.parse_and_build(sql_query)
         query_filters = mongo_query[0]
         try:
             query_fields = mongo_query[1]["fields"]
@@ -95,13 +93,13 @@ def retrieve_files(
     return query_matches
 
 
-def run_script(script: StringIO, files_in: List[str]) -> List[str]:
+def run_script(script_file: TextIOWrapper, files_in: List[str]) -> List[str]:
     """Runs the `main` function in the user-provided Python script, feeding the paths containted in files_in.
     This function should take a list of paths as input and return a list of paths as output.
 
     Parameters
     ----------
-    script : StringIO
+    script_file : TextIOWrapper
         Python script provided by the user, to be run on the query results
     files_in : List[str]
         list of path with the files on which to run the script
@@ -116,11 +114,11 @@ def run_script(script: StringIO, files_in: List[str]) -> List[str]:
     TypeError
         if the user-provided script `main` function does not return a list, abort the run
     """
-    logger.info(f"User script: \n{script}")
+    logger.info(f"User script: \n{script_file.read()}")
 
     with open("user_script.py", "w") as f:
-        script.seek(0)
-        f.write(script.read())
+        script_file.seek(0)
+        f.write(script_file.read())
     if "user_script" in sys.modules:  # currently not needed, but if in future more than 1 script will be needed...
         del sys.modules["user_script"]
     user_module = import_module("user_script")
@@ -158,8 +156,8 @@ def save_output(files_out: List[str]):
 
 def run_wrapper(
     collection: Collection,
-    sql_query: StringIO,
-    script: StringIO = None,
+    sql_query: str,
+    script_path: str = None,
 ):
     """Get the SQL query and script, convert them to MongoDB spec, run the process query on the DB retrieving
     matching files, run the user-provided script (if present), retrieve the output file list from the main function,
@@ -169,10 +167,10 @@ def run_wrapper(
     ----------
     collection : Collection
         MongoDB collection on which to run the query
-    sql_query : StringIO
+    sql_query : str
         SQL query
-    script : StringIO, optional
-        Python script provided by the user, to be run on the query results
+    script_path : str, optional
+        path to the Python script provided by the user, to be run on the query results
     """
     query_filters, query_fields = convert_SQL_to_mongo(sql_query=sql_query)
     files_in = retrieve_files(
@@ -180,8 +178,9 @@ def run_wrapper(
         query_fields=query_fields,
         query_filters=query_filters,
     )
-    if script:
-        files_out = run_script(script=script, files_in=files_in)
+    if script_path:
+        with open(script_path, "r") as script_file:
+            files_out = run_script(script_file=script_file, files_in=files_in)
         save_output(files_out=files_out)
     else:
         save_output(files_out=files_in)
@@ -201,9 +200,11 @@ if __name__ == "__main__":
     collection = client[config["MONGO"]["database"]][config["MONGO"]["collection"]]
 
     # running query and script
-    sql_query, script = parse_cli_input()
-    run_wrapper(
-        collection=collection,
-        sql_query=sql_query,
-        script=script,
-    )
+    query_path, script_path = parse_cli_input()
+    with open(query_path) as query_file:
+        sql_query = query_file.read()
+        run_wrapper(
+            collection=collection,
+            sql_query=sql_query,
+            script_path=script_path,
+        )

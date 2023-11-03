@@ -7,7 +7,6 @@ import pytest
 
 from dtaas.wrapper import run_wrapper
 import os
-from io import StringIO
 from zipfile import ZipFile
 
 
@@ -15,7 +14,7 @@ def test_search_specific_files(test_collection):
     """
     Search for two specific files
     """
-    query = StringIO("SELECT * FROM metadata WHERE id = 554625 OR id = 222564")
+    query = "SELECT * FROM metadata WHERE id = 554625 OR id = 222564"
 
     run_wrapper(
         collection=test_collection,
@@ -34,14 +33,18 @@ def test_search_specific_files_return_only_first(test_collection):
     """
     Search for two specific files and return just the first item
     """
-    query = StringIO("SELECT * FROM metadata WHERE id = 554625 OR id = 222564")
-    script = StringIO("def main(files_in):\n files_out=files_in.copy()\n return [files_out[0]]")
+    query = "SELECT * FROM metadata WHERE id = 554625 OR id = 222564"
+    script_content = "def main(files_in):\n files_out=files_in.copy()\n return [files_out[0]]"
+    with open("SCRIPT", "w+") as script_file:
+        script_file.write(script_content)
 
     run_wrapper(
         collection=test_collection,
         sql_query=query,
-        script=script,
+        script_path="SCRIPT",
     )
+
+    os.remove("SCRIPT")
 
     assert os.path.exists("results.zip"), "Zipped archive was not created."
 

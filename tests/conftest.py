@@ -34,3 +34,34 @@ def test_collection():
 
     # removing custom config file
     os.remove(f"{os.path.dirname(os.path.abspath(__file__))}/../etc/config.json")
+
+
+@pytest.fixture(scope="function")
+def generate_script():
+    def _generate_script(script_content: str):
+        script_file = open("SCRIPT", "w+")
+        script_file.write(script_content)
+        return script_file
+
+    yield _generate_script
+    os.remove("SCRIPT")
+
+
+@pytest.fixture(scope="function")
+def save_query():
+    def _save_query(sql_query):
+        with open("QUERY", "w") as f:
+            f.write(sql_query)
+
+    yield _save_query
+    os.remove("QUERY")
+
+
+@pytest.fixture(scope="function")
+def save_script():
+    def _save_script(script_content):
+        with open("SCRIPT", "w") as f:
+            f.write(script_content)
+
+    yield _save_script
+    os.remove("SCRIPT")

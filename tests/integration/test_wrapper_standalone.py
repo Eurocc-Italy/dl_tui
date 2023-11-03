@@ -10,16 +10,14 @@ from io import StringIO
 from zipfile import ZipFile
 
 
-def test_search_specific_files(test_collection):
+def test_search_specific_files(test_collection, save_query):
     """
     Search for two specific files
     """
 
-    sql_query = StringIO("SELECT * FROM metadata WHERE id = 554625 OR id = 222564")
+    save_query("SELECT * FROM metadata WHERE id = 554625 OR id = 222564")
 
-    os.system(
-        f"python {os.path.dirname(os.path.abspath(__file__))}/../../dtaas/wrapper.py --query '{sql_query.read()}'"
-    )
+    os.system(f"python {os.path.dirname(os.path.abspath(__file__))}/../../dtaas/wrapper.py --query QUERY")
 
     assert os.path.exists("results.zip"), "Zipped archive was not created."
 
@@ -29,16 +27,16 @@ def test_search_specific_files(test_collection):
     os.remove("results.zip")
 
 
-def test_search_specific_files_reverse(test_collection):
+def test_search_specific_files_reverse(test_collection, save_query, save_script):
     """
     Search for two specific files and only return the first item
     """
 
-    sql_query = StringIO("SELECT * FROM metadata WHERE id = 554625 OR id = 222564")
-    script = StringIO("def main(files_in):\n files_out=files_in.copy()\n return [files_out[0]]")
+    save_query("SELECT * FROM metadata WHERE id = 554625 OR id = 222564")
+    save_script("def main(files_in):\n files_out=files_in.copy()\n return [files_out[0]]")
 
     os.system(
-        f"python {os.path.dirname(os.path.abspath(__file__))}/../../dtaas/wrapper.py --query '{sql_query.read()}' --script '{script.read()}'"
+        f"python {os.path.dirname(os.path.abspath(__file__))}/../../dtaas/wrapper.py --query QUERY --script SCRIPT"
     )
 
     assert os.path.exists("results.zip"), "Zipped archive was not created."
@@ -49,16 +47,14 @@ def test_search_specific_files_reverse(test_collection):
     os.remove("results.zip")
 
 
-def test_double_quotes_in_SQL(test_collection):
+def test_double_quotes_in_SQL(test_collection, save_query):
     """
     Search for a specific file using double quotes in SQL query
     """
 
-    sql_query = StringIO('SELECT * FROM metadata WHERE captured = "2013-11-14 16:03:19"')
+    save_query('SELECT * FROM metadata WHERE captured = "2013-11-14 16:03:19"')
 
-    os.system(
-        f"python {os.path.dirname(os.path.abspath(__file__))}/../../dtaas/wrapper.py --query '{sql_query.read()}'"
-    )
+    os.system(f"python {os.path.dirname(os.path.abspath(__file__))}/../../dtaas/wrapper.py --query QUERY")
 
     assert os.path.exists("results.zip"), "Zipped archive was not created."
 
@@ -68,17 +64,14 @@ def test_double_quotes_in_SQL(test_collection):
     os.remove("results.zip")
 
 
-def test_single_quotes_in_SQL(test_collection):
+def test_single_quotes_in_SQL(test_collection, save_query):
     """
     Search for a specific file using single quotes in SQL query and replacing them with double quotes.
     """
 
-    sql_query = StringIO("SELECT * FROM metadata WHERE captured = '2013-11-14 16:03:19'")
+    save_query("SELECT * FROM metadata WHERE captured = '2013-11-14 16:03:19'")
 
-    sql_query = sql_query.replace("'", '"')
-    os.system(
-        f"python {os.path.dirname(os.path.abspath(__file__))}/../../dtaas/wrapper.py --query '{sql_query.read()}'"
-    )
+    os.system(f"python {os.path.dirname(os.path.abspath(__file__))}/../../dtaas/wrapper.py --query QUERY")
 
     assert os.path.exists("results.zip"), "Zipped archive was not created."
 
@@ -88,16 +81,16 @@ def test_single_quotes_in_SQL(test_collection):
     os.remove("results.zip")
 
 
-def test_double_quotes_in_script(test_collection):
+def test_double_quotes_in_script(test_collection, save_query, save_script):
     """
     Search for a specific file using double quotes in user script
     """
 
-    sql_query = StringIO("SELECT * FROM metadata WHERE id = 554625")
-    script = StringIO('def main(files_in):\n files_out=files_in.copy()\n print("HELLO!")\n return [files_out[0]]')
+    save_query("SELECT * FROM metadata WHERE id = 554625")
+    save_script('def main(files_in):\n files_out=files_in.copy()\n print("HELLO!")\n return [files_out[0]]')
 
     os.system(
-        f"python {os.path.dirname(os.path.abspath(__file__))}/../../dtaas/wrapper.py --query '{sql_query.read()}' --script '{script.read()}'"
+        f"python {os.path.dirname(os.path.abspath(__file__))}/../../dtaas/wrapper.py --query QUERY --script SCRIPT"
     )
 
     assert os.path.exists("results.zip"), "Zipped archive was not created."
@@ -108,16 +101,16 @@ def test_double_quotes_in_script(test_collection):
     os.remove("results.zip")
 
 
-def test_single_quotes_in_script(test_collection):
+def test_single_quotes_in_script(test_collection, save_query, save_script):
     """
     Search for a specific file using single quotes in user script
     """
 
-    sql_query = StringIO("SELECT * FROM metadata WHERE id = 554625")
-    script = StringIO("def main(files_in):\n files_out=files_in.copy()\n print('HELLO!')\n return [files_out[0]]")
+    save_query("SELECT * FROM metadata WHERE id = 554625")
+    save_script("def main(files_in):\n files_out=files_in.copy()\n print('HELLO!')\n return [files_out[0]]")
 
     os.system(
-        f"python {os.path.dirname(os.path.abspath(__file__))}/../../dtaas/wrapper.py --query '{sql_query.read()}' --script '{script.read()}'"
+        f"python {os.path.dirname(os.path.abspath(__file__))}/../../dtaas/wrapper.py --query QUERY --script SCRIPT"
     )
 
     assert os.path.exists("results.zip"), "Zipped archive was not created."
