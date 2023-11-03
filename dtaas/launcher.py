@@ -51,8 +51,8 @@ python {hpc_config["repo_dir"]}/wrapper.py --query {query_path} --script {script
     ssh_cmd = f"mkdir {workdir}; \
 mkdir {workdir}/{os.path.basename(os.getcwd())}; \
 cd {workdir}/{os.path.basename(os.getcwd())}; \
-scp -i {ssh_key} centos@{config['MONGO']['ip']}:{os.getcwd()}/{query_path} QUERY; \
-scp -i {ssh_key} centos@{config['MONGO']['ip']}:{os.getcwd()}/{script_path} SCRIPT; \
+scp -i {ssh_key} centos@{config['MONGO']['ip']}:{os.getcwd()}/{query_path} {query_path}; \
+scp -i {ssh_key} centos@{config['MONGO']['ip']}:{os.getcwd()}/{script_path} {script_path}; \
 sbatch -p {partition} -A {account} -t {walltime} -N {nodes} --ntasks-per-node 48 --wrap '{wrap_cmd}'"
 
     full_ssh_cmd = f'ssh -i /home/centos/.ssh/luca-hpc {hpc_config["user"]}@{hpc_config["host"]} "{ssh_cmd}"'
