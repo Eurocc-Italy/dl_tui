@@ -29,22 +29,18 @@ def test_search_specific_files(test_collection):
     os.remove("results.zip")
 
 
-def test_search_specific_files_return_only_first(test_collection):
+def test_search_specific_files_return_only_first(test_collection, save_script):
     """
     Search for two specific files and return just the first item
     """
     query = "SELECT * FROM metadata WHERE id = 554625 OR id = 222564"
-    script_content = "def main(files_in):\n files_out=files_in.copy()\n return [files_out[0]]"
-    with open("SCRIPT", "w+") as script_file:
-        script_file.write(script_content)
+    save_script("def main(files_in):\n files_out=files_in.copy()\n return [files_out[0]]")
 
     run_wrapper(
         collection=test_collection,
         sql_query=query,
-        script_path="SCRIPT",
+        script_path="script.py",
     )
-
-    os.remove("SCRIPT")
 
     assert os.path.exists("results.zip"), "Zipped archive was not created."
 

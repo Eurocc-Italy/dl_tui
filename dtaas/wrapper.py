@@ -93,14 +93,14 @@ def retrieve_files(
     return query_matches
 
 
-def run_script(script_file: TextIOWrapper, files_in: List[str]) -> List[str]:
+def run_script(script_path: str, files_in: List[str]) -> List[str]:
     """Runs the `main` function in the user-provided Python script, feeding the paths containted in files_in.
     This function should take a list of paths as input and return a list of paths as output.
 
     Parameters
     ----------
-    script_file : TextIOWrapper
-        Python script provided by the user, to be run on the query results
+    script_file : str
+        path to the Python script provided by the user, to be run on the query results
     files_in : List[str]
         list of path with the files on which to run the script
 
@@ -114,22 +114,19 @@ def run_script(script_file: TextIOWrapper, files_in: List[str]) -> List[str]:
     TypeError
         if the user-provided script `main` function does not return a list, abort the run
     """
-    logger.info(f"User script: \n{script_file.read()}")
+    logger.info(f"User script: {script_path}")
 
-    with open("user_script.py", "w") as f:
-        script_file.seek(0)
-        f.write(script_file.read())
-    if "user_script" in sys.modules:  # currently not needed, but if in future more than 1 script will be needed...
-        del sys.modules["user_script"]
+    module_name = os.path.splitext(script_path)[0]
+    if module_name in sys.modules:  # currently not needed, but if in future more than 1 script will be needed...
+        del sys.modules[module_name]
 
     # loading user script and its main function
     sys.path.insert(0, os.getcwd())
-    user_module = import_module("user_script")
+    user_module = import_module(module_name)
     user_main = getattr(user_module, "main")
 
     # running the main function, retrieving output files and cleaning up
     files_out = user_main(files_in)
-    os.remove("./user_script.py")
     if type(files_out) != list:
         raise TypeError("`main` function does not return a list of paths. ABORTING")
 
@@ -182,8 +179,7 @@ def run_wrapper(
         query_filters=query_filters,
     )
     if script_path:
-        with open(script_path, "r") as script_file:
-            files_out = run_script(script_file=script_file, files_in=files_in)
+        files_out = run_script(script_path=script_path, files_in=files_in)
         save_output(files_out=files_out)
     else:
         save_output(files_out=files_in)

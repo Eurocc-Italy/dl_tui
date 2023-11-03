@@ -36,7 +36,7 @@ def test_search_specific_files_reverse(test_collection, save_query, save_script)
     save_script("def main(files_in):\n files_out=files_in.copy()\n return [files_out[0]]")
 
     os.system(
-        f"python {os.path.dirname(os.path.abspath(__file__))}/../../dtaas/wrapper.py --query QUERY --script SCRIPT"
+        f"python {os.path.dirname(os.path.abspath(__file__))}/../../dtaas/wrapper.py --query QUERY --script script.py"
     )
 
     assert os.path.exists("results.zip"), "Zipped archive was not created."
@@ -90,7 +90,7 @@ def test_double_quotes_in_script(test_collection, save_query, save_script):
     save_script('def main(files_in):\n files_out=files_in.copy()\n print("HELLO!")\n return [files_out[0]]')
 
     os.system(
-        f"python {os.path.dirname(os.path.abspath(__file__))}/../../dtaas/wrapper.py --query QUERY --script SCRIPT"
+        f"python {os.path.dirname(os.path.abspath(__file__))}/../../dtaas/wrapper.py --query QUERY --script script.py"
     )
 
     assert os.path.exists("results.zip"), "Zipped archive was not created."
@@ -110,7 +110,7 @@ def test_single_quotes_in_script(test_collection, save_query, save_script):
     save_script("def main(files_in):\n files_out=files_in.copy()\n print('HELLO!')\n return [files_out[0]]")
 
     os.system(
-        f"python {os.path.dirname(os.path.abspath(__file__))}/../../dtaas/wrapper.py --query QUERY --script SCRIPT"
+        f"python {os.path.dirname(os.path.abspath(__file__))}/../../dtaas/wrapper.py --query QUERY --script script.py"
     )
 
     assert os.path.exists("results.zip"), "Zipped archive was not created."
