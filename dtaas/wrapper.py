@@ -121,8 +121,7 @@ def run_script(script_file: TextIOWrapper, files_in: List[str]) -> List[str]:
         f.write(script_file.read())
     if "user_script" in sys.modules:  # currently not needed, but if in future more than 1 script will be needed...
         del sys.modules["user_script"]
-    print(sys.modules)
-    user_module = import_module(f"{os.getcwd()}/user_script", "user_script")
+    user_module = import_module("user_script")
 
     user_main = getattr(user_module, "main")
 
