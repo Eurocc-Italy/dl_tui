@@ -41,14 +41,15 @@ def launch_job(config: Dict[str, str], query_path: str, script_path: str):
     account = hpc_config["account"]
     walltime = hpc_config["walltime"]
     nodes = hpc_config["nodes"]
+    workdir = hpc_config["workdir"]
     wrap_cmd = f'module load python; \
 source {hpc_config["venv_path"]}; \
 python {hpc_config["repo_dir"]}/wrapper.py --query QUERY --script SCRIPT'
 
     # bash commands to be run via ssh; TODO: decide structure of temporary folders
-    ssh_cmd = f"mkdir dtaas_tui_tests; \
-mkdir dtaas_tui_tests/{os.path.basename(os.getcwd())}; \
-cd dtaas_tui_tests/{os.path.basename(os.getcwd())}; \
+    ssh_cmd = f"mkdir {workdir}; \
+mkdir {workdir}/{os.path.basename(os.getcwd())}; \
+cd {workdir}/{os.path.basename(os.getcwd())}; \
 scp {config['MONGO']['ip']}:{os.getcwd()}/{query_path} QUERY; \
 scp {config['MONGO']['ip']}:{os.getcwd()}/{script_path} SCRIPT; \
 sbatch -p {partition} -A {account} -t {walltime} -N {nodes} --ntasks-per-node 48 --wrap '{wrap_cmd}'"

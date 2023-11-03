@@ -7,7 +7,8 @@
     "partition": "g100_usr_prod",
     "account": "cin_staff",
     "walltime": "01:00:00",
-    "nodes": 1
+    "nodes": 1,
+    "workdir": "/g100/home/userinternal/lbabetto/PROJECTS/1-DTaas/2-query-tests"
   },
   "MONGO": {
     "user": "user",
