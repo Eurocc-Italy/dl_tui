@@ -42,6 +42,7 @@ def launch_job(config: Dict[str, str], query_path: str, script_path: str):
     walltime = hpc_config["walltime"]
     nodes = hpc_config["nodes"]
     workdir = hpc_config["workdir"]
+    ssh_key = hpc_config["ssh_key"]
     wrap_cmd = f'module load python; \
 source {hpc_config["venv_path"]}; \
 python {hpc_config["repo_dir"]}/wrapper.py --query QUERY --script SCRIPT'
@@ -50,8 +51,8 @@ python {hpc_config["repo_dir"]}/wrapper.py --query QUERY --script SCRIPT'
     ssh_cmd = f"mkdir {workdir}; \
 mkdir {workdir}/{os.path.basename(os.getcwd())}; \
 cd {workdir}/{os.path.basename(os.getcwd())}; \
-scp {config['MONGO']['ip']}:{os.getcwd()}/{query_path} QUERY; \
-scp {config['MONGO']['ip']}:{os.getcwd()}/{script_path} SCRIPT; \
+scp -i {ssh_key} {config['MONGO']['ip']}:{os.getcwd()}/{query_path} QUERY; \
+scp -i {ssh_key} {config['MONGO']['ip']}:{os.getcwd()}/{script_path} SCRIPT; \
 sbatch -p {partition} -A {account} -t {walltime} -N {nodes} --ntasks-per-node 48 --wrap '{wrap_cmd}'"
 
     full_ssh_cmd = f'ssh -i /home/centos/.ssh/luca-hpc {hpc_config["user"]}@{hpc_config["host"]} "{ssh_cmd}"'

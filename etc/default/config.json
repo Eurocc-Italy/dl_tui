@@ -2,13 +2,14 @@
   "HPC": {
     "user": "lbabetto",
     "host": "login.g100.cineca.it",
-    "repo_dir": "/g100/home/userinternal/lbabetto/REPOS/DTaaS_TUI/dtaas",
-    "venv_path": "/g100/home/userinternal/lbabetto/virtualenvs/dtaas/bin/activate",
+    "repo_dir": "~/REPOS/DTaaS_TUI/dtaas",
+    "venv_path": "~/virtualenvs/dtaas/bin/activate",
+    "ssh_key": "~/.ssh/vm/my_private.pem",
     "partition": "g100_usr_prod",
     "account": "cin_staff",
     "walltime": "01:00:00",
     "nodes": 1,
-    "workdir": "/g100/home/userinternal/lbabetto/PROJECTS/1-DTaas/2-query-tests"
+    "workdir": "~/PROJECTS/1-DTaas/1-query-tests"
   },
   "MONGO": {
     "user": "user",
