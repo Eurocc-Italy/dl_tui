@@ -9,45 +9,51 @@ import subprocess
 from typing import Dict
 import argparse
 from dtaas.utils import load_config
+from pymongo import MongoClient
 
 import logging
 
 logger = logging.getLogger(__name__)
 
 
-def launch_job(hpc_config: Dict[str, str], query: str, script: str):
+def launch_job(config: Dict[str, str], query_path: str, script_path: str):
     """Launch Slurm job on G100 with the user script on the files returned by the TUI filter
 
     Parameters
     ----------
-    hpc_config : Dict[str, str]
+    config : Dict[str, str]
         dictionary with the relevant data for HPC ( = config["HPC"] dict)
-    query : str
-        SQL query to be passed to the wrapper on HPC
-    script : str
-        Python script for the processing of the query results
+    query_path : str
+        path to the file containing the SQL query
+    script_path : str
+        path to the file containing the Python analysis script
     """
 
-    logger.debug(f"Received query: {query}")
-    if script:
-        logger.debug(f"Received script: \n{script}")
+    with open(query_path, "r") as f:
+        logger.debug(f"Received query: {f.read()}")
+    if script_path:
+        with open(script_path, "r") as f:
+            logger.debug(f"Received script: \n{f.read()}")
 
     # SLURM parameters
+    hpc_config = config["HPC"]
     partition = hpc_config["partition"]
     account = hpc_config["account"]
     walltime = hpc_config["walltime"]
     nodes = hpc_config["nodes"]
     wrap_cmd = f'module load python; \
 source {hpc_config["venv_path"]}; \
-python {hpc_config["repo_dir"]}/wrapper.py --query """{query}""" --script """{script}"""'
+python {hpc_config["repo_dir"]}/wrapper.py --query QUERY --script SCRIPT'
 
     # bash commands to be run via ssh; TODO: decide structure of temporary folders
     ssh_cmd = f"mkdir dtaas_tui_tests; \
 mkdir dtaas_tui_tests/{os.path.basename(os.getcwd())}; \
 cd dtaas_tui_tests/{os.path.basename(os.getcwd())}; \
+scp {config['MONGO']['ip']}:{os.getcwd()}/{query_path} QUERY; \
+scp {config['MONGO']['ip']}:{os.getcwd()}/{script_path} SCRIPT; \
 sbatch -p {partition} -A {account} -t {walltime} -N {nodes} --ntasks-per-node 48 --wrap '{wrap_cmd}'"
 
-    full_ssh_cmd = f'ssh -i /home/centos/.ssh/luca-hpc {hpc_config["user"]}@{hpc_config["host"]} """{ssh_cmd}"""'
+    full_ssh_cmd = f'ssh -i /home/centos/.ssh/luca-hpc {hpc_config["user"]}@{hpc_config["host"]} "{ssh_cmd}"'
     logger.debug(f"Launching command via ssh: {ssh_cmd}")
     logger.debug(f"Full ssh command: {full_ssh_cmd}")
 
@@ -69,17 +75,18 @@ sbatch -p {partition} -A {account} -t {walltime} -N {nodes} --ntasks-per-node 48
 if __name__ == "__main__":
     # loading config and setting up URI
     config = load_config()
-    mongodb_uri = f"mongodb://{config['MONGO']['user']}:{config['MONGO']['password']}@{config['MONGO']['ip']}:{config['MONGO']['port']}/"
+    db = config["MONGO"]
+    mongodb_uri = f"mongodb://{db['user']}:{db['password']}@{db['ip']}:{db['port']}/"
 
     # connecting to client
     logger.info(f"Connecting to client: {mongodb_uri}")
     client = MongoClient(mongodb_uri)
 
     # accessing collection
-    logger.info(f"Loading database {config['MONGO']['database']}, collection {config['MONGO']['collection']}")
-    collection = client[config["MONGO"]["database"]][
-        config["MONGO"]["collection"]
-    ]  # Parsing API input, requires --query keyword, with optional --script
+    logger.info(f"Loading database {db['database']}, collection {db['collection']}")
+    collection = client[config["MONGO"]["database"]][config["MONGO"]["collection"]]
+
+    # Parsing API input, requires --query keyword, with optional --script
     parser = argparse.ArgumentParser()
     parser.add_argument("--query", type=str, required=True)
     parser.add_argument("--script", type=str, required=False)
