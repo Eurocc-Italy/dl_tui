@@ -121,12 +121,12 @@ def run_script(script_file: TextIOWrapper, files_in: List[str]) -> List[str]:
         f.write(script_file.read())
     if "user_script" in sys.modules:  # currently not needed, but if in future more than 1 script will be needed...
         del sys.modules["user_script"]
-    user_module = import_module("user_script")
+    user_module = import_module(".user_script")
 
     user_main = getattr(user_module, "main")
 
     files_out = user_main(files_in)
-    os.remove("user_script.py")
+    os.remove("./user_script.py")
     if type(files_out) != list:
         raise TypeError("`main` function does not return a list of paths. ABORTING")
 
