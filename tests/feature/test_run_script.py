@@ -6,6 +6,8 @@ import pytest
 # TODO: make a mock test file and test database so the tests do not rely on any previously prepared database
 
 from dtaas.wrapper import convert_SQL_to_mongo, retrieve_files, run_script
+import os
+import shutil
 
 
 def test_search_specific_files(test_collection, save_script):
@@ -75,4 +77,15 @@ def test_main_wrong_return(test_collection, save_script):
         files_out = run_script(
             script_path="script.py",
             files_in=files_in,
+        )
+
+
+def test_forbidden_name(test_collection):
+    """
+    Test script with a "forbidden" file name
+    """
+    with pytest.raises(NameError):
+        files_out = run_script(
+            script_path="pymongo.py",
+            files_in=[],
         )

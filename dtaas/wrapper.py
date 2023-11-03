@@ -117,16 +117,26 @@ def run_script(script_path: str, files_in: List[str]) -> List[str]:
     logger.info(f"User script: {script_path}")
 
     module_name = os.path.splitext(script_path)[0]
-    if module_name in sys.modules:  # currently not needed, but if in future more than 1 script will be needed...
-        del sys.modules[module_name]
+    if module_name in sys.modules:
+        raise NameError(
+            f"Cannot use {module_name}.py as file name, as it conflicts with another currently loaded Python library"
+        )
 
-    # loading user script and its main function
+    # loading user script dynamically
     sys.path.insert(0, os.getcwd())
     user_module = import_module(module_name)
-    user_main = getattr(user_module, "main")
+
+    # checking if main function is present
+    try:
+        user_main = getattr(user_module, "main")
+    except AttributeError:
+        del sys.modules[module_name]
+        raise AttributeError(f"{script_path} has no `main` function")
 
     # running the main function, retrieving output files and cleaning up
     files_out = user_main(files_in)
+    del sys.modules[module_name]
+
     if type(files_out) != list:
         raise TypeError("`main` function does not return a list of paths. ABORTING")
 
