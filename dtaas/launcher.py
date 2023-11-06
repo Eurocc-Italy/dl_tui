@@ -1,5 +1,6 @@
 """
-Functions to interface with HPC (G100) from the VM
+Module to interface with HPC (G100) from the VM. The purpose of this module is to take the user query and script,
+send a HPC job on G100 which calls the wrapper.py on the compute nodes and runs the script on the query results.
 
 Author: @lbabetto
 """
@@ -22,15 +23,30 @@ def launch_job(config: Dict[str, str], query_path: str, script_path: str):
     Parameters
     ----------
     config : Dict[str, str]
-        dictionary with the relevant data for HPC ( = config["HPC"] dict)
+        dictionary with the relevant data for the job (taken from load_config)
     query_path : str
         path to the file containing the SQL query
     script_path : str
         path to the file containing the Python analysis script
+
+    Parameters
+    ----------
+    config : Dict[str, str]
+        dictionary with the relevant data for the job (taken from load_config)
+    query_path : str
+        path to the file containing the SQL query
+    script_path : str
+        path to the file containing the Python analysis script
+
+    Raises
+    ------
+    RuntimeError
+        if "Submitted batch job" is not found in stdout, meaning the job was not launched
     """
 
     with open(query_path, "r") as f:
         logger.debug(f"Received query: {f.read()}")
+
     if script_path:
         with open(script_path, "r") as f:
             logger.debug(f"Received script: \n{f.read()}")
@@ -44,28 +60,27 @@ def launch_job(config: Dict[str, str], query_path: str, script_path: str):
     workdir = hpc_config["workdir"]
     ssh_key = hpc_config["ssh_key"]
 
-    if script_path:  # TODO: find a more elegant solution...
-        wrap_cmd = f'module load python; \
-            source {hpc_config["venv_path"]}; \
-            python {hpc_config["repo_dir"]}/wrapper.py --query {query_path} --script {script_path}'
+    wrap_cmd = "module load python; "
+    wrap_cmd += f'source {hpc_config["venv_path"]}; '
+    if script_path:
+        wrap_cmd += f'python {hpc_config["repo_dir"]}/wrapper.py --query {query_path} --script {script_path}'
     else:
-        wrap_cmd = f'module load python; \
-            source {hpc_config["venv_path"]}; \
-            python {hpc_config["repo_dir"]}/wrapper.py --query {query_path}'
+        wrap_cmd += f'python {hpc_config["repo_dir"]}/wrapper.py --query {query_path}'
 
     # bash commands to be run via ssh; TODO: decide structure of temporary folders
-    ssh_cmd = f"mkdir {workdir}; \
-        mkdir {workdir}/{os.path.basename(os.getcwd())}; \
-        cd {workdir}/{os.path.basename(os.getcwd())}; \
-        scp -i {ssh_key} centos@{config['MONGO']['ip']}:{os.getcwd()}/* .; \
-        sbatch -p {partition} -A {account} -t {walltime} -N {nodes} --ntasks-per-node 48 --wrap '{wrap_cmd}'"
+    ssh_cmd = f"mkdir {workdir}; "
+    ssh_cmd += f"mkdir {workdir}/{os.path.basename(os.getcwd())}; "
+    ssh_cmd += f"cd {workdir}/{os.path.basename(os.getcwd())}; "
+    ssh_cmd += f"scp -i {ssh_key} centos@{config['MONGO']['ip']}:{os.getcwd()}/* .; "
+    ssh_cmd += f"sbatch -p {partition} -A {account} -t {walltime} -N {nodes} --ntasks-per-node 48 --wrap '{wrap_cmd}'"
 
+    # TODO: implement ssh via chain user
     full_ssh_cmd = f'ssh -i /home/centos/.ssh/luca-hpc {hpc_config["user"]}@{hpc_config["host"]} "{ssh_cmd}"'
+
     logger.debug(f"Launching command via ssh: {ssh_cmd}")
     logger.debug(f"Full ssh command: {full_ssh_cmd}")
 
     stdout, stderr = subprocess.Popen(
-        # TODO: key currently necessary, will be removed when we switch to chain user
         full_ssh_cmd,
         shell=True,
         stdout=subprocess.PIPE,
@@ -99,4 +114,4 @@ if __name__ == "__main__":
     parser.add_argument("--script", type=str, required=False)
     args = parser.parse_args()
     logger.debug(f"API input (launcher): {args}")
-    launch_job(config=config, query_path=args.query, script_path=args.script)
+    launch_job(config, args.query, args.script)
