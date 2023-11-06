@@ -42,7 +42,7 @@ def convert_SQL_to_mongo(sql_query: str) -> Tuple[Dict[str, str], Dict[str, str]
 
     Returns
     -------
-    (Dict[str, str], Dict[str, str])
+    Tuple[Dict[str, str], Dict[str, str]]
         dictionaries containing the filters (WHERE) and fields (SELECT) in MongoDB spec
     """
     builder = MongoQueryBuilder()
