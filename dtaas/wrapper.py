@@ -24,7 +24,6 @@ from typing import List, Dict, Tuple
 from pymongo import MongoClient
 from pymongo.collection import Collection
 from sqlparse.builders.mongo_builder import MongoQueryBuilder
-from io import TextIOWrapper
 
 from dtaas.utils import load_config, parse_cli_input
 
