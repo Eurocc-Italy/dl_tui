@@ -6,7 +6,6 @@ import pytest
 # TODO: make a mock test file and test database so the tests do not rely on any previously prepared database
 
 import os
-from io import StringIO
 from zipfile import ZipFile
 
 

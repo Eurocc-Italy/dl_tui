@@ -6,8 +6,6 @@ import pytest
 # TODO: make a mock test file and test database so the tests do not rely on any previously prepared database
 
 from dtaas.wrapper import convert_SQL_to_mongo, retrieve_files, run_script
-import os
-import shutil
 
 
 def test_search_specific_files(test_collection, save_script):
