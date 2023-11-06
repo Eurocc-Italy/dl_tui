@@ -17,7 +17,37 @@ def test_collection():
     """
     # creating custom config file
     with open(f"{os.path.dirname(os.path.abspath(__file__))}/../etc/config.json", "w") as f:
-        json.dump({"MONGO": {"ip": "localhost"}}, f)
+        json.dump(
+            {
+                "HPC": {
+                    "user": "lbabetto",
+                    "host": "g100",
+                    "repo_dir": "~/REPOS/DTaaS_TUI/dtaas",
+                    "venv_path": "~/virtualenvs/dtaas/bin/activate",
+                    "ssh_key": "~/.ssh/vm/my_private.pem",
+                    "partition": "g100_usr_prod",
+                    "account": "cin_staff",
+                    "walltime": "01:00:00",
+                    "nodes": 1,
+                    "workdir": "~/PROJECTS/1-DTaas/2-repo-testing",
+                },
+                "MONGO": {
+                    "user": "user",
+                    "password": "passwd",
+                    "ip": "localhost",
+                    "port": "27017",
+                    "database": "datalake",
+                    "collection": "metadata",
+                },
+                "LOGGING": {
+                    "logfile": "logfile.log",
+                    "format": "%(asctime)s - %(levelname)s: %(message)s",
+                    "level": "DEBUG",
+                    "filemode": "w",
+                },
+            },
+            f,
+        )
 
     # loading config and setting up
     config = load_config()

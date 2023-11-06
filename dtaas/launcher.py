@@ -7,7 +7,7 @@ Author: @lbabetto
 
 import os
 import subprocess
-from typing import Dict
+from typing import Dict, Tuple
 import argparse
 from dtaas.utils import load_config
 from pymongo import MongoClient
@@ -17,7 +17,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def launch_job(config: Dict[str, str], query_path: str, script_path: str):
+def launch_job(config: Dict[str, str], query_path: str, script_path: str) -> Tuple[str, str]:
     """Launch Slurm job on G100 with the user script on the files returned by the TUI filter
 
     Parameters
@@ -37,6 +37,11 @@ def launch_job(config: Dict[str, str], query_path: str, script_path: str):
         path to the file containing the SQL query
     script_path : str
         path to the file containing the Python analysis script
+
+    Returns
+    -------
+    Tuple[str, str]
+        stdout and stderr provided by the SSH command
 
     Raises
     ------
@@ -75,7 +80,7 @@ def launch_job(config: Dict[str, str], query_path: str, script_path: str):
     ssh_cmd += f"sbatch -p {partition} -A {account} -t {walltime} -N {nodes} --ntasks-per-node 48 --wrap '{wrap_cmd}'"
 
     # TODO: implement ssh via chain user
-    full_ssh_cmd = f'ssh -i /home/centos/.ssh/luca-hpc {hpc_config["user"]}@{hpc_config["host"]} "{ssh_cmd}"'
+    full_ssh_cmd = f'ssh {hpc_config["user"]}@{hpc_config["host"]} "{ssh_cmd}"'
 
     logger.debug(f"Launching command via ssh: {ssh_cmd}")
     logger.debug(f"Full ssh command: {full_ssh_cmd}")
@@ -87,11 +92,15 @@ def launch_job(config: Dict[str, str], query_path: str, script_path: str):
         stderr=subprocess.PIPE,
     ).communicate()
 
-    logger.debug(f"stdout: {str(stdout, encoding='utf-8')}")
-    logger.debug(f"stderr: {str(stderr, encoding='utf-8')}")
+    stdout = str(stdout, encoding="utf-8")
+    stderr = str(stderr, encoding="utf-8")
+    logger.debug(f"stdout: {stdout}")
+    logger.debug(f"stderr: {stderr}")
 
-    if "Submitted batch job" not in str(stdout, encoding="utf-8"):
-        raise RuntimeError("Something gone wrong, job was not launched.")
+    if "Submitted batch job" not in stdout:
+        raise RuntimeError(f"Something gone wrong, job was not launched.\nstdout: {stdout}\nstderr: {stderr}")
+
+    return stdout, stderr
 
 
 if __name__ == "__main__":
@@ -116,8 +125,10 @@ if __name__ == "__main__":
     logger.debug(f"API input (launcher): {args}")
 
     # Launching job
-    launch_job(
+    stdout, stderr = launch_job(
         config=config,
         query_path=args.query,
         script_path=args.script,
     )
+
+    job_id = stdout.split()[-1]
