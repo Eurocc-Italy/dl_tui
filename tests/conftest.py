@@ -38,7 +38,7 @@ def test_collection():
 
 @pytest.fixture(scope="function")
 def save_query():
-    def _save_query(sql_query):
+    def _save_query(sql_query: str):
         with open("QUERY", "w") as f:
             f.write(sql_query)
 
@@ -48,7 +48,7 @@ def save_query():
 
 @pytest.fixture(scope="function")
 def save_script():
-    def _save_script(script_content):
+    def _save_script(script_content: str):
         with open("script.py", "w") as f:
             f.write(script_content)
 

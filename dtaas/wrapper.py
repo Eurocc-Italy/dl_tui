@@ -198,8 +198,9 @@ def run_wrapper(
     """
 
     query_filters, query_fields = convert_SQL_to_mongo(sql_query)
+    print(query_filters, query_fields)
 
-    files_in = retrieve_files(collection, query_fields, query_filters)
+    files_in = retrieve_files(collection, query_filters, query_fields)
 
     if script_path:
         files_out = run_script(script_path, files_in)
