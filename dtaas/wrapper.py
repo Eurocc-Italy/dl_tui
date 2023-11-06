@@ -52,7 +52,7 @@ def convert_SQL_to_mongo(sql_query: str) -> Tuple[Dict[str, str], Dict[str, str]
     logger.info(f"User query: {sql_query}")
 
     try:
-        mongo_query = builder.parse_and_build(sql_query)
+        mongo_query = builder.parse_and_build(query_string=sql_query)
         query_filters = mongo_query[0]
         try:
             query_fields = mongo_query[1]["fields"]
@@ -93,7 +93,7 @@ def retrieve_files(
 
     query_matches = []
 
-    for entry in collection.find(query_filters, query_fields):
+    for entry in collection.find(filter=query_filters, projection=query_fields):
         query_matches.append(entry["path"])
 
     logger.debug(f"Query results: {query_matches}")
@@ -197,13 +197,16 @@ def run_wrapper(
         path to the Python script provided by the user, to be run on the query results
     """
 
-    query_filters, query_fields = convert_SQL_to_mongo(sql_query)
-    print(query_filters, query_fields)
+    query_filters, query_fields = convert_SQL_to_mongo(sql_query=sql_query)
 
-    files_in = retrieve_files(collection, query_filters, query_fields)
+    files_in = retrieve_files(
+        collection=collection,
+        query_filters=query_filters,
+        query_fields=query_fields,
+    )
 
     if script_path:
-        files_out = run_script(script_path, files_in)
+        files_out = run_script(script_path=script_path, files_in=files_in)
         save_output(files_out)
     else:
         save_output(files_in)
@@ -226,4 +229,8 @@ if __name__ == "__main__":
     query_path, script_path = parse_cli_input()
     with open(query_path) as query_file:
         sql_query = query_file.read()
-        run_wrapper(collection, sql_query, script_path)
+        run_wrapper(
+            collection=collection,
+            sql_query=sql_query,
+            script_path=script_path,
+        )
