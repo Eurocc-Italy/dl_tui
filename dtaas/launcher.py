@@ -80,7 +80,7 @@ def launch_job(config: Dict[str, str], query_path: str, script_path: str) -> Tup
     ssh_cmd += f"sbatch -p {partition} -A {account} -t {walltime} -N {nodes} --ntasks-per-node 48 --wrap '{wrap_cmd}'"
 
     # TODO: implement ssh via chain user
-    full_ssh_cmd = f'ssh {hpc_config["user"]}@{hpc_config["host"]} "{ssh_cmd}"'
+    full_ssh_cmd = f'ssh -i ~/.ssh/luca-g100 {hpc_config["user"]}@{hpc_config["host"]} "{ssh_cmd}"'
 
     logger.debug(f"Launching command via ssh: {ssh_cmd}")
     logger.debug(f"Full ssh command: {full_ssh_cmd}")

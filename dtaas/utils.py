@@ -8,7 +8,6 @@ import os
 import json
 import argparse
 from typing import Dict, Tuple
-from io import StringIO
 
 
 def load_config() -> Dict[str, str]:

@@ -13,6 +13,9 @@ def test_just_search(test_collection, save_query):
     """
     Search for two specific files
     """
+    import os
+
+    os.system("hpc_credential_setup")
 
     save_query("SELECT * FROM metadata WHERE id = 554625 OR id = 222564")
 
