@@ -8,6 +8,8 @@ import pytest
 import os
 from zipfile import ZipFile
 
+from dtaas.launcher import
+
 
 def test_just_search(test_collection, save_query):
     """

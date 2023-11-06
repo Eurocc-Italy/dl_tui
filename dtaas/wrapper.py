@@ -54,7 +54,6 @@ def convert_SQL_to_mongo(sql_query: str) -> Tuple[Dict[str, str], Dict[str, str]
     mongo_query = builder.parse_and_build(query_string=sql_query)
     query_filters = mongo_query[0]
 
-    raise RuntimeError(mongo_query)
     try:
         query_fields = mongo_query[1]["fields"]
     except KeyError:  # if no fields are present, parser does not add the key
