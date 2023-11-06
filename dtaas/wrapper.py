@@ -51,17 +51,14 @@ def convert_SQL_to_mongo(sql_query: str) -> Tuple[Dict[str, str], Dict[str, str]
     builder = MongoQueryBuilder()
     logger.info(f"User query: {sql_query}")
 
+    mongo_query = builder.parse_and_build(query_string=sql_query)
+    query_filters = mongo_query[0]
+
+    raise RuntimeError(mongo_query)
     try:
-        mongo_query = builder.parse_and_build(query_string=sql_query)
-        query_filters = mongo_query[0]
-        try:
-            query_fields = mongo_query[1]["fields"]
-        except KeyError:  # if no fields are present, parser does not add the key
-            query_fields = {}
-    except IndexError:
-        logger.debug("Missing WHERE clause from SQL query, returning all data in the database.")
-        query_fields = "{}"
-        query_filters = "{}"
+        query_fields = mongo_query[1]["fields"]
+    except KeyError:  # if no fields are present, parser does not add the key
+        query_fields = {}
 
     logger.info(f"MongoDB query filter: {query_filters}")
     logger.info(f"MongoDB query fields: {query_fields}")
