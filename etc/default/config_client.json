@@ -1,0 +1,8 @@
+{
+  "user": "user",
+  "password": "passwd",
+  "ip": "131.175.207.101",
+  "port": "27017",
+  "database": "datalake",
+  "collection": "metadata"
+}

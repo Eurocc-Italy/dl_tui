@@ -1,0 +1,12 @@
+{
+  "user": "lbabetto",
+  "host": "login.g100.cineca.it",
+  "repo_dir": "~/REPOS/DTaaS_TUI/dtaas",
+  "venv_path": "~/virtualenvs/dtaas/bin/activate",
+  "ssh_key": "~/.ssh/vm/my_private.pem",
+  "partition": "g100_usr_prod",
+  "account": "cin_staff",
+  "walltime": "01:00:00",
+  "nodes": 1,
+  "workdir": "~/PROJECTS/1-DTaas/1-query-tests"
+}

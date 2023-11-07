@@ -5,8 +5,8 @@ import pytest
 #
 # TODO: make a mock test file and test database so the tests do not rely on any previously prepared database
 
-from dtaas.utils import load_config
-from dtaas.launcher import launch_job
+from tuilib.common import load_config
+from bin.server import launch_job
 
 
 def test_just_search(test_collection, save_query):

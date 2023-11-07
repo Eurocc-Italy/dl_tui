@@ -1,0 +1,50 @@
+#!/usr/bin/env python
+"""
+Wrapper which needs to be run from command line providing the following information in JSON format:
+
+  - query: path to a file containing an SQL query
+  - script (optional): path to a Python script. This Python script must contain a `main` function which takes as input 
+    a list (of file paths), does some user-defined analysis, and returns a list (of file paths) which the wrapper then 
+    takes and stores in a compressed archive. TODO: S3 implementation and POST to datalake.
+
+The wrapper then does the following:
+
+  1. Takes user SQL query and converts it to Mongo spec using a custom sqlparse codebase (@lbabetto/sqlparse)
+  2. Runs query on remote DB and retrieves the matching entries, generating a list with the paths to the files
+  3. Takes the user-provided python script and runs it locally, feeding the input files list to the `main` function
+  4. Retrieves the output files from the `main` function and saves the files (of any kind, user-defined) in a zipped 
+  archive which the user can then download
+
+Author: @lbabetto
+"""
+
+from pymongo import MongoClient
+
+from tuilib.common import Config, UserInput
+from tuilib.client import run_wrapper
+
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+# loading config and setting up MongoDB URI
+config = Config(version="client")
+mongodb_uri = f"mongodb://{config.user}:{config.password}@{config.ip}:{config.port}/"
+
+# connecting to client
+logger.info(f"Connecting to client: {mongodb_uri}")
+client = MongoClient(mongodb_uri)
+
+# accessing collection
+logger.info(f"Loading database {config.database}, collection {config.collection}")
+collection = client[config.database][config.collection]
+
+# running query and script
+user_input = UserInput.from_cli()
+
+run_wrapper(
+    collection=collection,
+    sql_query=user_input.query,
+    script=user_input.script,
+)

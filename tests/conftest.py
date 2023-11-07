@@ -1,9 +1,9 @@
 import pytest
+
 import os
 import json
-
 from pymongo import MongoClient
-from dtaas.utils import load_config
+from tuilib.common import Config
 
 
 @pytest.fixture(scope="session")
@@ -15,72 +15,44 @@ def test_collection():
     Collection
         MongoDB Collection on which to run the tests
     """
-    # creating custom config file
-    with open(f"{os.path.dirname(os.path.abspath(__file__))}/../etc/config.json", "w") as f:
-        json.dump(
-            {
-                "HPC": {
-                    "user": "lbabetto",
-                    "host": "g100",
-                    "repo_dir": "~/REPOS/DTaaS_TUI/dtaas",
-                    "venv_path": "~/virtualenvs/dtaas/bin/activate",
-                    "ssh_key": "~/.ssh/vm/my_private.pem",
-                    "partition": "g100_usr_prod",
-                    "account": "cin_staff",
-                    "walltime": "01:00:00",
-                    "nodes": 1,
-                    "workdir": "~/PROJECTS/1-DTaas/2-repo-testing",
-                },
-                "MONGO": {
-                    "user": "user",
-                    "password": "passwd",
-                    "ip": "localhost",
-                    "port": "27017",
-                    "database": "datalake",
-                    "collection": "metadata",
-                },
-                "LOGGING": {
-                    "logfile": "logfile.log",
-                    "format": "%(asctime)s - %(levelname)s: %(message)s",
-                    "level": "DEBUG",
-                    "filemode": "w",
-                },
-            },
-            f,
-        )
+    # loading config and setting up testing environment
+    with open(
+        f"{os.path.dirname(os.path.abspath(__file__))}/../etc/config_client.json", "w"
+    ) as f:
+        json.dump({"ip": "localhost"}, f)
 
-    # loading config and setting up
-    config = load_config()
-    mongodb_uri = f"mongodb://{config['MONGO']['user']}:{config['MONGO']['password']}@{config['MONGO']['ip']}:{config['MONGO']['port']}/"
+    config = Config(version="client")
+    mongodb_uri = (
+        f"mongodb://{config.user}:{config.password}@{config.ip}:{config.port}/"
+    )
 
     # connecting to client
     client = MongoClient(mongodb_uri)
 
     # accessing collection
-    collection = client[config["MONGO"]["database"]][config["MONGO"]["collection"]]
+    collection = client[config.database][config.collection]
 
     # running tests
     yield collection
 
-    # removing custom config file
-    os.remove(f"{os.path.dirname(os.path.abspath(__file__))}/../etc/config.json")
+    os.remove(f"{os.path.dirname(os.path.abspath(__file__))}/../etc/config_client.json")
 
 
 @pytest.fixture(scope="function")
-def save_query():
-    def _save_query(sql_query: str):
-        with open("QUERY", "w") as f:
-            f.write(sql_query)
+def generate_test_files():
+    """generate a text file to test the library
 
-    yield _save_query
-    os.remove("QUERY")
+    Yields
+    ------
+    str
+        path to the test file
+    """
+    with open("TESTFILE_1.txt", "w") as f:
+        f.write("THIS IS THE FIRST TEST FILE.\n")
+    with open("TESTFILE_2.txt", "w") as f:
+        f.write("THIS IS THE SECOND TEST FILE.\n")
 
+    yield ["TESTFILE_1.txt", "TESTFILE_2.txt"]
 
-@pytest.fixture(scope="function")
-def save_script():
-    def _save_script(script_content: str):
-        with open("script.py", "w") as f:
-            f.write(script_content)
-
-    yield _save_script
-    os.remove("script.py")
+    os.remove("TESTFILE_1.txt")
+    os.remove("TESTFILE_2.txt")
