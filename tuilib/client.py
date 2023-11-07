@@ -6,10 +6,14 @@ Author: @lbabetto
 
 import os
 import sys
-from importlib import import_module
 import shutil
+from sh import pushd
+from tempfile import mkdtemp
+
 from typing import List, Dict, Tuple
 from pymongo.collection import Collection
+
+from importlib import import_module
 from sqlparse.builders.mongo_builder import MongoQueryBuilder
 
 import logging
@@ -80,12 +84,14 @@ def retrieve_files(
     return query_matches
 
 
-def run_script(script: str, files_in: List[str]) -> List[str]:
+def run_script(run_id: str, script: str, files_in: List[str]) -> List[str]:
     """Runs the `main` function in the user-provided Python script, feeding the paths containted in files_in.
     This function must take a list (of file paths) as input and return a list (of file paths) as output.
 
     Parameters
     ----------
+    run_id : str
+        ID univocally identifying the run (preferably in hex form)
     script : str
         content of the Python script provided by the user, to be run on the query results
     files_in : List[str]
@@ -108,27 +114,36 @@ def run_script(script: str, files_in: List[str]) -> List[str]:
 
     logger.info(f"User script:\n{script}")
 
-    with open("user_script.py", "w") as f:
-        f.write(script)
+    tdir = mkdtemp(
+        prefix=str(run_id) + "_",
+        suffix=None,
+        dir=os.getcwd(),
+    )
 
-    # loading user script dynamically
-    user_module = import_module("user_script")
+    with pushd(tdir):
+        with open("user_script.py", "w") as f:
+            f.write(script)
 
-    # checking if main function is present
-    try:
-        user_main = getattr(user_module, "main")
-    except AttributeError:
+        # loading user script dynamically
+        sys.path.insert(0, os.getcwd())
+        user_module = import_module("user_script")
+
+        # checking if main function is present
+        try:
+            user_main = getattr(user_module, "main")
+        except AttributeError:
+            del sys.modules["user_script"]
+            raise AttributeError(f"User-provided script has no `main` function")
+
+        # running the main function, retrieving output files and cleaning up
+        files_out = user_main(files_in)
         del sys.modules["user_script"]
-        raise AttributeError(f"User-provided script has no `main` function")
 
-    # running the main function, retrieving output files and cleaning up
-    files_out = user_main(files_in)
-    del sys.modules["user_script"]
+        if type(files_out) != list:
+            raise TypeError("`main` function does not return a list of paths. ABORTING")
 
-    if type(files_out) != list:
-        raise TypeError("`main` function does not return a list of paths. ABORTING")
+        shutil.rmtree(tdir)
 
-    os.remove("user_script.py")
     return files_out
 
 

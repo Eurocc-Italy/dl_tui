@@ -4,9 +4,11 @@ import os
 import json
 from pymongo import MongoClient
 from tuilib.common import Config
+import shutil
+from glob import glob
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="session", autouse=True)
 def test_collection():
     """Setting up testing environment and yielding test MongoDB collection
 
@@ -36,6 +38,9 @@ def test_collection():
     yield collection
 
     os.remove(f"{os.path.dirname(os.path.abspath(__file__))}/../etc/config_client.json")
+
+    for match in glob("42_*"):
+        shutil.rmtree(match)
 
 
 @pytest.fixture(scope="function")

@@ -47,7 +47,6 @@ def launch_job(config: Config, user_input: UserInput) -> Tuple[str, str]:
     account = config.account
     walltime = config.walltime
     nodes = config.nodes
-    workdir = config.workdir
     ssh_key = config.ssh_key
 
     ### Generating job command
@@ -56,16 +55,18 @@ def launch_job(config: Config, user_input: UserInput) -> Tuple[str, str]:
     # sourcing virtual environment
     wrap_cmd += f"source {config.venv_path}; "
     # calling client version of TUI with common arguments
-    wrap_cmd += f"""dtaas_tui_client {{\"ID\": {user_input.id}, \"query\": \"{user_input.query}\""""
+    wrap_cmd += rf"dtaas_tui_client {{\"ID\": {user_input.id}, \"query\": \"{user_input.query}\""
     # adding script, if one was provided
     if user_input.script:
-        # script = (
-        #     user_input.script.replace("\n", "\\n")
-        #     .replace("'", "\\'")
-        #     .replace('"', '\\"')
-        # )
-        script = re.escape(user_input)
-        wrap_cmd += f""", \"script\": \"{script}\""""
+        script = (  # TODO: implement full list of special characters (better to do as function...)
+            user_input.script.replace("'", r"\'")
+            .replace('"', r"\"")
+            .replace("\n", r"\\n")
+            .replace("*", r"\*")
+            .replace("(", r"\(")
+            .replace(")", r"\)")
+        )
+        wrap_cmd += rf", \"script\": \"{script}\""
     # closing JSON-formatted string and adding a finalizer file once the job is done
     wrap_cmd += "}; touch JOB_DONE"
 
@@ -75,9 +76,7 @@ def launch_job(config: Config, user_input: UserInput) -> Tuple[str, str]:
     ssh_cmd += f"sbatch -p {partition} -A {account} -t {walltime} -N {nodes} --ntasks-per-node 48 --wrap '{wrap_cmd}'"
 
     # TODO: implement ssh via chain user
-    full_ssh_cmd = (
-        f'ssh -i ~/.ssh/luca-g100 {config["user"]}@{config["host"]} "{ssh_cmd}"'
-    )
+    full_ssh_cmd = f'ssh -i {ssh_key} {config["user"]}@{config["host"]} "{ssh_cmd}"'
 
     logger.debug(f"Launching command via ssh: {ssh_cmd}")
     logger.debug(f"Full ssh command: {full_ssh_cmd}")

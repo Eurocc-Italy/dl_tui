@@ -20,8 +20,9 @@ def process_string(string: str) -> str:
     Returns
     -------
     str
-        cleaned string
+        parsed string
     """
+    # TODO: implement full list of special characters
     return (
         string.replace("'", r"\'")
         .replace('"', r"\"")
