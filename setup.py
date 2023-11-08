@@ -6,9 +6,10 @@ setup(
     description="Query/Process interface for DTaaS",
     packages=["dtaas"],
     package_data={
-        "dtaas": [
-            "*",
-        ],
+        "bin": ["*"],
+        "etc": ["*"],
+        "tuilib": ["*"],
     },
+    scripts=["bin/dtaas_tui_client", "bin/dtaas_tui_server"]
     install_requires=[],
 )
