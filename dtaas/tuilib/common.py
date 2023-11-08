@@ -7,11 +7,36 @@ Author: @lbabetto
 import os
 import sys
 import json
+import pickle
 from typing import Dict
 
 import logging
 
 logger = logging.getLogger(__name__)
+
+
+def sanitize_string(string: str):
+    """Sanitize string for use on shell, replacing special characters
+
+    Parameters
+    ----------
+    string : str
+        "raw" string to be sanitized
+
+    Returns
+    -------
+    str
+        sanitized string
+    """
+    sanitized_string = (
+        string.replace("'", r"\'")
+        .replace('"', r"\"")
+        .replace(r"\n", r"\\n")
+        .replace("*", r"\*")
+        .replace("(", r"\(")
+        .replace(")", r"\)")
+    )
+    return sanitized_string
 
 
 class UserInput:
@@ -51,9 +76,29 @@ class UserInput:
             UserInput instance initialized directly from command-line
         """
         user_input = " ".join(sys.argv[1:])
-        print(f"Received input from CLI: {user_input}")
+        logger.info(f"Received input from CLI: {user_input}")
         data = json.loads(user_input)
         return cls(data)
+
+    # TODO: this is not done yet
+    @classmethod
+    def from_bytes(cls, data_bytes: bytes):
+        """Class constructor from serialized pickle object.
+
+        Parameters
+        ----------
+        data_bytes : bytes
+            _description_
+
+        Returns
+        -------
+        UserInput
+            UserInput instance initialized providing a pickle object
+        """
+        data_dict = pickle.loads(data_bytes)
+        logger.info(f"Raw input: {data_bytes}")
+        logger.info(f"Processed input: {data_dict}")
+        return cls(data_dict)
 
 
 class Config:

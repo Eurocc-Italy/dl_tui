@@ -8,7 +8,7 @@ Author: @lbabetto
 
 import subprocess
 from typing import Tuple
-from dtaas.tuilib.common import Config, UserInput
+from dtaas.tuilib.common import Config, UserInput, sanitize_string
 
 import logging
 
@@ -58,22 +58,19 @@ def launch_job(config: Config, user_input: UserInput) -> Tuple[str, str]:
     wrap_cmd += f"source {config.venv_path}; "
 
     # calling client version of TUI with common arguments
-    wrap_cmd += rf"dtaas_tui_client {{\"ID\": {user_input.id}, \"query\": \"{user_input.query}\""
+    wrap_cmd += (
+        f'dtaas_tui_client {{"ID": "{user_input.id}", "query": "{user_input.query}"'
+    )
 
     # adding script, if one was provided
     if user_input.script:
-        script = (  # TODO: implement full list of special characters (better to do as function...)
-            user_input.script.replace("'", r"\'")
-            .replace('"', r"\"")
-            .replace("\n", r"\\n")
-            .replace("*", r"\*")
-            .replace("(", r"\(")
-            .replace(")", r"\)")
-        )
-        wrap_cmd += rf", \"script\": \"{script}\""
+        wrap_cmd += f', "script": "{user_input.script}"'
 
     # closing JSON-formatted string and adding a finalizer file once the job is done
     wrap_cmd += "}; touch JOB_DONE"
+
+    # sanitizing string, escaping special characters
+    wrap_cmd = sanitize_string(wrap_cmd)
 
     ### GENERATING BASH COMMAND TO BE RUN VIA SSH ###
     ssh_cmd = f"mkdir {user_input.id}; "
@@ -84,7 +81,7 @@ def launch_job(config: Config, user_input: UserInput) -> Tuple[str, str]:
     ssh_cmd += f"--wrap '{wrap_cmd}'"
 
     # TODO: implement ssh via chain user
-    full_ssh_cmd = f'ssh -i {ssh_key} {config.user}@{config.host} "{ssh_cmd}"'
+    full_ssh_cmd = rf'ssh -i {ssh_key} {config.user}@{config.host} "{ssh_cmd}"'
 
     logger.debug(f"Launching command via ssh: {ssh_cmd}")
     logger.debug(f"Full ssh command: {full_ssh_cmd}")

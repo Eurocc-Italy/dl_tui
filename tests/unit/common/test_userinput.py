@@ -71,7 +71,7 @@ def test_cli_input_sql(monkeypatch):
         "sys.argv",
         [
             "dtaas_tui_client",
-            """{\"query\": \"SELECT * FROM metadata WHERE ID = 123456\", \"ID\": 42}""",
+            '{"query": "SELECT * FROM metadata WHERE ID = 123456", "ID": 42}',
         ],
     )
 
@@ -92,13 +92,13 @@ def test_cli_input_sql_double_quotes(monkeypatch):
         "sys.argv",
         [
             "dtaas_tui_client",
-            """{\"query\": \"SELECT * FROM metadata WHERE category = \"motorcycle\"\", \"ID\": 42}""",
+            '{"query": "SELECT * FROM metadata WHERE category = "motorcycle"", "ID": 42}',
         ],
     )
 
     user_input = UserInput.from_cli()
 
-    assert user_input.query == "SELECT * FROM metadata WHERE category = 'motorcycle'"
+    assert user_input.query == 'SELECT * FROM metadata WHERE category = "motorcycle"'
     assert user_input.script == None
     assert user_input.id == 42
 
@@ -112,7 +112,7 @@ def test_cli_input_sql_single_quotes(monkeypatch):
         "sys.argv",
         [
             "dtaas_tui_client",
-            """{\"query\": \"SELECT * FROM metadata WHERE category = \'motorcycle\'\", \"ID\": 42}""",
+            """{"query": "SELECT * FROM metadata WHERE category = 'motorcycle'", "ID": 42}""",
         ],
     )
 
@@ -132,13 +132,9 @@ def test_cli_input_script(monkeypatch):
         "sys.argv",
         [
             "dtaas_tui_client",
-            """{\"ID\": 42, \"query\": \"SELECT * FROM metadata WHERE ID = 123456\", \"script\": \"def main(files_in):\\n files_out=files_in.copy()\\n files_out.reverse()\\n return files_out\"}""",
+            r"""{"ID": 42, "query": "SELECT * FROM metadata WHERE ID = 123456", "script": "def main(files_in):\n files_out=files_in.copy()\n files_out.reverse()\n return files_out"}""",
         ],
     )
-
-    import sys
-
-    print(sys.argv)
 
     user_input = UserInput.from_cli()
 
@@ -160,13 +156,9 @@ def test_cli_input_script_double_quotes(monkeypatch):
         "sys.argv",
         [
             "dtaas_tui_client",
-            """{\"ID\": 42, \"query\": \"SELECT * FROM metadata WHERE ID = 123456\", \"script\": \"def main(files_in):\\n files_out=files_in.copy()\\n files_out.reverse()\\n print(\"DONE!\")\n return files_out\"}""",
+            r"""{"ID": 42, "query": "SELECT * FROM metadata WHERE ID = 123456", "script": "def main(files_in):\n files_out=files_in.copy()\n files_out.reverse()\n print("DONE!")\n return files_out"}""",
         ],
     )
-
-    import sys
-
-    print(sys.argv)
 
     user_input = UserInput.from_cli()
 

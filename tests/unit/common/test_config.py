@@ -41,7 +41,9 @@ def default_server():
 
 @pytest.fixture(scope="function")
 def custom_client():
-    with open(f"{os.path.dirname(__file__)}/../../../etc/config_client.json", "w") as f:
+    with open(
+        f"{os.path.dirname(__file__)}/../../../dtaas/etc/config_client.json", "w"
+    ) as f:
         json.dump({"ip": "localhost"}, f)
     config = {
         "user": "user",
@@ -52,12 +54,14 @@ def custom_client():
         "collection": "metadata",
     }
     yield config
-    os.remove(f"{os.path.dirname(__file__)}/../../../etc/config_client.json")
+    os.remove(f"{os.path.dirname(__file__)}/../../../dtaas/etc/config_client.json")
 
 
 @pytest.fixture(scope="function")
 def custom_server():
-    with open(f"{os.path.dirname(__file__)}/../../../etc/config_server.json", "w") as f:
+    with open(
+        f"{os.path.dirname(__file__)}/../../../dtaas/etc/config_server.json", "w"
+    ) as f:
         json.dump({"account": "EUCC_staff"}, f)
     config = {
         "user": "lbabetto",
@@ -66,13 +70,13 @@ def custom_server():
         "venv_path": "~/virtualenvs/dtaas/bin/activate",
         "ssh_key": "~/.ssh/luca-g100",
         "partition": "g100_usr_prod",
-        "account": "cin_staff",
+        "account": "EUCC_staff",
         "mail": "l.babetto@cineca.it",
         "walltime": "01:00:00",
         "nodes": 1,
     }
     yield config
-    os.remove(f"{os.path.dirname(__file__)}/../../../etc/config_server.json")
+    os.remove(f"{os.path.dirname(__file__)}/../../../dtaas/etc/config_server.json")
 
 
 def test_default_client(default_client):
@@ -136,3 +140,11 @@ def test_manual_custom(default_client):
 
     for key, val in config_true.items():
         assert getattr(config_test, key) == val
+
+
+def test_wrong_version():
+    """
+    Test that entering a wrong name version raises an exception.
+    """
+    with pytest.raises(NameError):
+        Config(version="test")
