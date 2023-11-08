@@ -20,8 +20,8 @@ Author: @lbabetto
 
 from pymongo import MongoClient
 
-from tuilib.common import Config, UserInput
-from tuilib.client import run_wrapper
+from dtaas.lib.common import Config, UserInput
+from dtaas.lib.client import wrapper
 
 import logging
 
@@ -43,7 +43,7 @@ collection = client[config.database][config.collection]
 # running query and script
 user_input = UserInput.from_cli()
 
-run_wrapper(
+wrapper(
     collection=collection,
     sql_query=user_input.query,
     script=user_input.script,

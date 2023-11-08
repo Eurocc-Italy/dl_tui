@@ -4,7 +4,7 @@ import pytest
 # Testing run_script function in client.py library
 #
 
-from tuilib.client import run_script
+from dtaas.lib.client import run_script
 
 
 def test_run_script(generate_test_files):
@@ -16,7 +16,7 @@ def test_run_script(generate_test_files):
 
     files_in = generate_test_files
 
-    files_out = run_script(run_id="test_tmpdir", script=script, files_in=files_in)
+    files_out = run_script(script=script, files_in=files_in)
 
     assert files_out == [
         "TESTFILE_2.txt",
@@ -31,7 +31,7 @@ def test_missing_main():
     with pytest.raises(AttributeError):
         script = "answer = 42"
         files_in = []
-        run_script(run_id=42, script=script, files_in=files_in)
+        run_script(script=script, files_in=files_in)
 
 
 def test_main_wrong_return():
@@ -41,4 +41,4 @@ def test_main_wrong_return():
     with pytest.raises(TypeError):
         script = "def main(files_in):\n return 42"
         files_in = []
-        run_script(run_id=42, script=script, files_in=files_in)
+        run_script(script=script, files_in=files_in)

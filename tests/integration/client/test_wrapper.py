@@ -1,11 +1,11 @@
 import pytest
 
 #
-# Testing run_wrapper function in wrapper.py
+# Testing wrapper function in wrapper.py
 #
 # TODO: make a mock test file and test database so the tests do not rely on any previously prepared database
 
-from tuilib.client import run_wrapper
+from lib.client import wrapper
 import os
 from zipfile import ZipFile
 
@@ -16,7 +16,7 @@ def test_search_specific_files(test_collection):
     """
     query = "SELECT * FROM metadata WHERE id = 554625 OR id = 222564"
 
-    run_wrapper(
+    wrapper(
         collection=test_collection,
         sql_query=query,
     )
@@ -39,7 +39,7 @@ def test_search_specific_files_return_only_first(test_collection):
     query = "SELECT * FROM metadata WHERE id = 554625 OR id = 222564"
     script = "def main(files_in):\n files_out=files_in.copy()\n return [files_out[0]]"
 
-    run_wrapper(
+    wrapper(
         collection=test_collection,
         sql_query=query,
         script=script,

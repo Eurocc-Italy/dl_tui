@@ -4,7 +4,7 @@ import pytest
 # Testing convert_SQL_to_mongo function in client.py library
 #
 
-from tuilib.client import convert_SQL_to_mongo
+from dtaas.lib.client import convert_SQL_to_mongo
 
 
 def test_get_everything():

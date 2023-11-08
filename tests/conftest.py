@@ -3,12 +3,19 @@ import pytest
 import os
 import json
 from pymongo import MongoClient
-from tuilib.common import Config
+from dtaas.lib.common import Config
 import shutil
 from glob import glob
 
 
 @pytest.fixture(scope="session", autouse=True)
+def cleanup():
+    yield
+    for match in glob("run_script_*"):
+        shutil.rmtree(match)
+
+
+@pytest.fixture(scope="module")
 def test_collection():
     """Setting up testing environment and yielding test MongoDB collection
 
@@ -19,7 +26,8 @@ def test_collection():
     """
     # loading config and setting up testing environment
     with open(
-        f"{os.path.dirname(os.path.abspath(__file__))}/../etc/config_client.json", "w"
+        f"{os.path.dirname(os.path.abspath(__file__))}/../dtaas/etc/config_client.json",
+        "w",
     ) as f:
         json.dump({"ip": "localhost"}, f)
 
@@ -37,10 +45,8 @@ def test_collection():
     # running tests
     yield collection
 
+    # removing custom configuration file
     os.remove(f"{os.path.dirname(os.path.abspath(__file__))}/../etc/config_client.json")
-
-    for match in glob("42_*"):
-        shutil.rmtree(match)
 
 
 @pytest.fixture(scope="function")

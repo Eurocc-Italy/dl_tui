@@ -6,7 +6,7 @@ import pytest
 
 import os
 import json
-from tuilib.common import Config
+from dtaas.lib.common import Config
 
 
 @pytest.fixture(scope="function")

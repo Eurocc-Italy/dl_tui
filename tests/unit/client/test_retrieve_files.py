@@ -5,7 +5,7 @@ import pytest
 #
 # TODO: make a mock test file and test database so the tests do not rely on any previously prepared database
 
-from tuilib.client import retrieve_files
+from dtaas.lib.client import retrieve_files
 
 
 def test_search_specific_files(test_collection):

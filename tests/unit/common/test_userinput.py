@@ -5,7 +5,7 @@ import pytest
 #
 
 
-from tuilib.common import UserInput
+from dtaas.lib.common import UserInput
 
 
 def test_sql_only():
