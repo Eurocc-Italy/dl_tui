@@ -6,13 +6,13 @@ send a HPC job on G100 which calls the wrapper.py on the compute nodes and runs 
 Author: @lbabetto
 """
 
-import subprocess
-from typing import Tuple
-from dtaas.tuilib.common import Config, UserInput, sanitize_string
-
 import logging
 
 logger = logging.getLogger(__name__)
+
+import subprocess
+from typing import Tuple
+from dtaas.tuilib.common import Config, UserInput, sanitize_string
 
 
 def launch_job(config: Config, user_input: UserInput) -> Tuple[str, str]:

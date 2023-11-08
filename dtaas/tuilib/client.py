@@ -4,6 +4,10 @@ Functions for client-side (HPC) operations
 Author: @lbabetto
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import os
 import sys
 import shutil
@@ -15,10 +19,6 @@ from pymongo.collection import Collection
 
 from importlib import import_module
 from sqlparse.builders.mongo_builder import MongoQueryBuilder
-
-import logging
-
-logger = logging.getLogger(__name__)
 
 
 def convert_SQL_to_mongo(sql_query: str) -> Tuple[Dict[str, str], Dict[str, str]]:

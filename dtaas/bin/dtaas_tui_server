@@ -6,18 +6,20 @@ send a HPC job on G100 which calls the wrapper.py on the compute nodes and runs 
 Author: @lbabetto
 """
 
+# setting up logging
+import logging
+
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+fh = logging.FileHandler("server.log")
+fh.setLevel(logging.DEBUG)
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+fh.setFormatter(formatter)
+logger.addHandler(fh)
+
 from dtaas.tuilib.common import Config, UserInput
 from dtaas.tuilib.server import launch_job
 
-import logging
-
-# setting up logger
-logger = logging.getLogger(__name__)
-handler = logging.StreamHandler()
-formatter = logging.Formatter("%(asctime)s %(name)-12s %(levelname)-8s %(message)s")
-handler.setFormatter(formatter)
-logger.addHandler(handler)
-logger.setLevel(logging.DEBUG)
 
 # loading config
 config = Config(version="server")

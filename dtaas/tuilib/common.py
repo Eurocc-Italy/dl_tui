@@ -4,15 +4,15 @@ Various functions and utilities used throughout the code
 Author: @lbabetto
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import os
 import sys
 import json
 import pickle
 from typing import Dict
-
-import logging
-
-logger = logging.getLogger(__name__)
 
 
 def sanitize_string(string: str):

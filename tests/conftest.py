@@ -13,6 +13,7 @@ def cleanup():
     yield
     for match in glob("run_script_*"):
         shutil.rmtree(match)
+    os.remove("client.log")
 
 
 @pytest.fixture(scope="module")
