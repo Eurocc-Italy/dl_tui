@@ -40,7 +40,7 @@ def test_search_only(test_collection):
 
     query = process_string("SELECT * FROM metadata WHERE id = 554625 OR id = 222564")
 
-    cmd = f"{os.path.dirname(os.path.abspath(__file__))}/../../../bin/dtaas_tui_client "
+    cmd = f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client "
     cmd += rf"{{\"ID\": 42, \"query\": \"{query}\"}}"
     os.system(cmd)
 
@@ -65,7 +65,7 @@ def test_return_reverse(test_collection):
         "def main(files_in):\n files_out=files_in.copy()\n return [files_out[0]]"
     )
 
-    cmd = f"{os.path.dirname(os.path.abspath(__file__))}/../../../bin/dtaas_tui_client "
+    cmd = f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client "
     cmd += rf"{{\"ID\": 42, \"query\": \"{query}\", \"script\": \"{script}\"}}"
     os.system(cmd)
 
@@ -87,7 +87,7 @@ def test_double_quotes_in_SQL(test_collection):
         'SELECT * FROM metadata WHERE captured = "2013-11-14 16:03:19"'
     )
 
-    cmd = f"{os.path.dirname(os.path.abspath(__file__))}/../../../bin/dtaas_tui_client "
+    cmd = f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client "
     cmd += rf"{{\"ID\": 42, \"query\": \"{query}\"}}"
     os.system(cmd)
 
@@ -108,7 +108,7 @@ def test_single_quotes_in_SQL(test_collection):
         "SELECT * FROM metadata WHERE captured = '2013-11-14 16:03:19'"
     )
 
-    cmd = f"{os.path.dirname(os.path.abspath(__file__))}/../../../bin/dtaas_tui_client "
+    cmd = f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client "
     cmd += rf"{{\"ID\": 42, \"query\": \"{query}\"}}"
     os.system(cmd)
 
@@ -131,7 +131,7 @@ def test_double_quotes_in_script(test_collection):
         'def main(files_in):\n files_out=files_in.copy()\n print("HELLO!")\n return [files_out[0]]'
     )
 
-    cmd = f"{os.path.dirname(os.path.abspath(__file__))}/../../../bin/dtaas_tui_client "
+    cmd = f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client "
     cmd += rf"{{\"ID\": 42, \"query\": \"{query}\", \"script\": \"{script}\"}}"
     os.system(cmd)
 
@@ -153,7 +153,7 @@ def test_single_quotes_in_script(test_collection):
         "def main(files_in):\n files_out=files_in.copy()\n print('HELLO!')\n return [files_out[0]]"
     )
 
-    cmd = f"{os.path.dirname(os.path.abspath(__file__))}/../../../bin/dtaas_tui_client "
+    cmd = f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client "
     cmd += rf"{{\"ID\": 42, \"query\": \"{query}\", \"script\": \"{script}\"}}"
     os.system(cmd)
 

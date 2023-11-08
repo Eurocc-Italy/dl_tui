@@ -6,8 +6,8 @@ send a HPC job on G100 which calls the wrapper.py on the compute nodes and runs 
 Author: @lbabetto
 """
 
-from tuilib.common import Config, UserInput
-from tuilib.server import launch_job
+from dtaas.tuilib.common import Config, UserInput
+from dtaas.tuilib.server import launch_job
 
 import logging
 

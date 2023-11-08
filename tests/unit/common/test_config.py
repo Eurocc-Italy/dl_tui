@@ -6,7 +6,7 @@ import pytest
 
 import os
 import json
-from tuilib.common import Config
+from dtaas.tuilib.common import Config
 
 
 @pytest.fixture(scope="function")
@@ -26,15 +26,15 @@ def default_client():
 def default_server():
     config = {
         "user": "lbabetto",
-        "host": "login.g100.cineca.it",
+        "host": "login02-ext.g100.cineca.it",
         "repo_dir": "~/REPOS/DTaaS_TUI/dtaas",
         "venv_path": "~/virtualenvs/dtaas/bin/activate",
-        "ssh_key": "~/.ssh/vm/my_private.pem",
+        "ssh_key": "~/.ssh/luca-g100",
         "partition": "g100_usr_prod",
         "account": "cin_staff",
+        "mail": "l.babetto@cineca.it",
         "walltime": "01:00:00",
         "nodes": 1,
-        "workdir": "~/PROJECTS/1-DTaas/1-query-tests",
     }
     return config
 
@@ -61,15 +61,15 @@ def custom_server():
         json.dump({"account": "EUCC_staff"}, f)
     config = {
         "user": "lbabetto",
-        "host": "login.g100.cineca.it",
+        "host": "login02-ext.g100.cineca.it",
         "repo_dir": "~/REPOS/DTaaS_TUI/dtaas",
         "venv_path": "~/virtualenvs/dtaas/bin/activate",
-        "ssh_key": "~/.ssh/vm/my_private.pem",
+        "ssh_key": "~/.ssh/luca-g100",
         "partition": "g100_usr_prod",
-        "account": "EUCC_staff",
+        "account": "cin_staff",
+        "mail": "l.babetto@cineca.it",
         "walltime": "01:00:00",
         "nodes": 1,
-        "workdir": "~/PROJECTS/1-DTaas/1-query-tests",
     }
     yield config
     os.remove(f"{os.path.dirname(__file__)}/../../../etc/config_server.json")

@@ -4,12 +4,10 @@ setup(
     name="DTaaS",
     version="0.0.1",
     description="Query/Process interface for DTaaS",
-    packages=["bin", "tuilib", "etc"],
+    packages=["dtaas"],
     package_data={
-        "bin": ["*"],
-        "etc": ["*"],
-        "tuilib": ["*"],
+        "dtaas": ["*", "bin", "tuilib", "etc"],
     },
-    scripts=["bin/dtaas_tui_client", "bin/dtaas_tui_server"],
+    scripts=["dtaas/bin/dtaas_tui_client", "dtaas/bin/dtaas_tui_server"],
     install_requires=[],
 )

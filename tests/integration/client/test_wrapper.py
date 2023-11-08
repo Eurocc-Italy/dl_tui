@@ -5,7 +5,7 @@ import pytest
 #
 # TODO: make a mock test file and test database so the tests do not rely on any previously prepared database
 
-from tuilib.client import wrapper
+from dtaas.tuilib.client import wrapper
 import os
 from zipfile import ZipFile
 

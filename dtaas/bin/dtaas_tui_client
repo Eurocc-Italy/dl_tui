@@ -20,8 +20,8 @@ Author: @lbabetto
 
 from pymongo import MongoClient
 
-from tuilib.common import Config, UserInput
-from tuilib.client import wrapper
+from dtaas.tuilib.common import Config, UserInput
+from dtaas.tuilib.client import wrapper
 
 import logging
 

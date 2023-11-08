@@ -4,7 +4,7 @@ import pytest
 # Testing convert_SQL_to_mongo function in client.py library
 #
 
-from tuilib.client import convert_SQL_to_mongo
+from dtaas.tuilib.client import convert_SQL_to_mongo
 
 
 def test_get_everything():
@@ -86,7 +86,9 @@ def test_multiword_argument():
     query = "SELECT * FROM datalake where caption = 'a boy wearing headphones using one computer in a long row of computers'"
 
     mongo_filter, mongo_fields = convert_SQL_to_mongo(query)
-    assert mongo_filter == {"caption": "a boy wearing headphones using one computer in a long row of computers"}
+    assert mongo_filter == {
+        "caption": "a boy wearing headphones using one computer in a long row of computers"
+    }
     assert mongo_fields == {}
 
 
@@ -116,7 +118,9 @@ def test_and():
     """
     query = "SELECT * FROM datalake WHERE category = motorcycle AND width > 600"
     mongo_filter, mongo_fields = convert_SQL_to_mongo(query)
-    assert mongo_filter == {"$and": [{"category": "motorcycle"}, {"width": {"$gt": 600}}]}
+    assert mongo_filter == {
+        "$and": [{"category": "motorcycle"}, {"width": {"$gt": 600}}]
+    }
     assert mongo_fields == {}
 
 
@@ -126,7 +130,9 @@ def test_or():
     """
     query = "SELECT * FROM datalake WHERE category = motorcycle OR category = bicycle"
     mongo_filter, mongo_fields = convert_SQL_to_mongo(query)
-    assert mongo_filter == {"$or": [{"category": "motorcycle"}, {"category": "bicycle"}]}
+    assert mongo_filter == {
+        "$or": [{"category": "motorcycle"}, {"category": "bicycle"}]
+    }
     assert mongo_fields == {}
 
 
@@ -174,7 +180,12 @@ def test_complex_SQL():
                     {
                         "$or": [
                             {"last_name": "Jacob"},
-                            {"$and": [{"first_name": {"$ne": "Chris"}}, {"last_name": {"$ne": "Lyon"}}]},
+                            {
+                                "$and": [
+                                    {"first_name": {"$ne": "Chris"}},
+                                    {"last_name": {"$ne": "Lyon"}},
+                                ]
+                            },
                         ]
                     }
                 ]
@@ -200,7 +211,12 @@ def test_complex_SQL_mangled():
                     {
                         "$or": [
                             {"last_name": "Jacob"},
-                            {"$and": [{"first_name": {"$ne": "Chris"}}, {"last_name": {"$ne": "Lyon"}}]},
+                            {
+                                "$and": [
+                                    {"first_name": {"$ne": "Chris"}},
+                                    {"last_name": {"$ne": "Lyon"}},
+                                ]
+                            },
                         ]
                     }
                 ]

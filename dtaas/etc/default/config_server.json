@@ -8,6 +8,5 @@
   "account": "cin_staff",
   "mail": "l.babetto@cineca.it",
   "walltime": "01:00:00",
-  "nodes": 1,
-  "workdir": "~/PROJECTS/1-DTaas/1-query-tests"
+  "nodes": 1
 }

@@ -3,7 +3,7 @@ import pytest
 import os
 import json
 from pymongo import MongoClient
-from tuilib.common import Config
+from dtaas.tuilib.common import Config
 import shutil
 from glob import glob
 
@@ -26,7 +26,7 @@ def test_collection():
     """
     # loading config and setting up testing environment
     with open(
-        f"{os.path.dirname(os.path.abspath(__file__))}/../etc/config_client.json",
+        f"{os.path.dirname(os.path.abspath(__file__))}/../dtaas/etc/config_client.json",
         "w",
     ) as f:
         json.dump({"ip": "localhost"}, f)
@@ -46,7 +46,9 @@ def test_collection():
     yield collection
 
     # removing custom configuration file
-    os.remove(f"{os.path.dirname(os.path.abspath(__file__))}/../etc/config_client.json")
+    os.remove(
+        f"{os.path.dirname(os.path.abspath(__file__))}/../dtaas/etc/config_client.json"
+    )
 
 
 @pytest.fixture(scope="function")
