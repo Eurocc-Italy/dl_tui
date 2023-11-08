@@ -26,7 +26,7 @@ def test_collection():
     """
     # loading config and setting up testing environment
     with open(
-        f"{os.path.dirname(os.path.abspath(__file__))}/../dtaas/etc/config_client.json",
+        f"{os.path.dirname(os.path.abspath(__file__))}/../etc/config_client.json",
         "w",
     ) as f:
         json.dump({"ip": "localhost"}, f)

@@ -8,7 +8,7 @@ Author: @lbabetto
 
 import subprocess
 from typing import Tuple
-from dtaas.tuilib.common import Config, UserInput
+from tuilib.common import Config, UserInput
 
 import logging
 

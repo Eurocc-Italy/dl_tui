@@ -4,7 +4,7 @@ import pytest
 # Testing save_output function in client.py library
 #
 
-from dtaas.tuilib.client import save_output
+from tuilib.client import save_output
 import os
 from zipfile import ZipFile
 

@@ -4,7 +4,7 @@ import pytest
 # Testing run_script function in client.py library
 #
 
-from dtaas.tuilib.client import run_script
+from tuilib.client import run_script
 
 
 def test_run_script(generate_test_files):
