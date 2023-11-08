@@ -5,8 +5,8 @@ import pytest
 #
 # TODO: make a mock test file and test database so the tests do not rely on any previously prepared database
 
-from dtaas.lib.common import Config
-from dtaas.lib.server import launch_job
+from dtaas.tuilib.common import Config
+from dtaas.tuilib.server import launch_job
 
 
 @pytest.mark.skip

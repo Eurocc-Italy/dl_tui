@@ -3,7 +3,7 @@ import pytest
 import os
 import json
 from pymongo import MongoClient
-from dtaas.lib.common import Config
+from dtaas.tuilib.common import Config
 import shutil
 from glob import glob
 
