@@ -11,8 +11,13 @@ from dtaas.tuilib.server import launch_job
 
 import logging
 
-logging.basicConfig(filename="server.log", level=logging.DEBUG)
-
+# setting up logger
+logger = logging.getLogger(__name__)
+handler = logging.StreamHandler()
+formatter = logging.Formatter("%(asctime)s %(name)-12s %(levelname)-8s %(message)s")
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+logger.setLevel(logging.DEBUG)
 
 # loading config
 config = Config(version="server")
