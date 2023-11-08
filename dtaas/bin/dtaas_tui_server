@@ -11,7 +11,7 @@ from dtaas.tuilib.server import launch_job
 
 import logging
 
-logging.basicConfig(filename="server.log", encoding="utf-8", level=logging.DEBUG)
+logging.basicConfig(filename="server.log", level=logging.DEBUG)
 
 
 # loading config

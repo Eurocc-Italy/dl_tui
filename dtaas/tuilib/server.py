@@ -77,7 +77,8 @@ def launch_job(config: Config, user_input: UserInput) -> Tuple[str, str]:
     ssh_cmd += f"cd {user_input.id}; "
     ssh_cmd += f"sbatch -p {partition} -A {account} "
     ssh_cmd += f"--mail-type ALL --mail-user {mail} "
-    ssh_cmd += f"-t {walltime} -N {nodes} --ntasks-per-node 48 "
+    # ssh_cmd += f"-t {walltime} -N {nodes} --ntasks-per-node 48 " TODO: change back when done!!! <<<<<<<<<<<<<<<<<<
+    ssh_cmd += f"-t 00:01:00 -N {nodes} --ntasks-per-node 1 "
     ssh_cmd += f"--wrap '{wrap_cmd}'"
 
     # TODO: implement ssh via chain user
