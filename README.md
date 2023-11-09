@@ -2,10 +2,10 @@
 
 Query/processing text user interface for the DTaaS project.
 
-Consists of two executables, `dtaas_tui_client` and `dtaas_tui_server`, which take as argument a JSON-formatted dictionary containing the following keys:
+Consists of two executables, `dtaas_tui_client` and `dtaas_tui_server`, which take as argument the content of a JSON-formatted document with the following keys:
 
- - a unique ID (we recommend using the [UUID](https://docs.python.org/3/library/uuid.html) module to generate it)
- - a SQL query to be run on the MongoDB database containing the metadata 
+ - a unique ID (we recommend using the [UUID](https://docs.python.org/3/library/uuid.html) module to generate it, producing a UUID.hex string)
+ - an SQL query to be run on the MongoDB database containing the metadata 
  - the content of a Python script to analyse the files matching the query
 
 The Python script should contain a `main` function, which takes a list of file paths as input, processes the data, and returns a list of file paths as output. The interface then runs the script and saves the resulting files in a compressed archive, which is ultimately accessible by the user.
