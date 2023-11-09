@@ -32,6 +32,14 @@ If the `dtaas_tui_server` version is called, the interface will launch a job on 
 
 If no script is provided, the results will simply be the files corresponding to the query.
 
+## Installing
+
+ 1. Activate your Python virtual environment
+ 2. Download the [DTaaS_TUI](https://gitlab.hpc.cineca.it/lbabetto/DTaaS_TUI`) repository via `git clone`
+ 3. `cd DTaaS_TUI` and install requirements via `pip install -r requirements.txt`
+ 4. install the library via `pip install .`
+ 5. repeat the clone/install process with the custom [sqlparse](https://github.com/lbabetto/sqlparse) library we are currently used for parsing queries (we are waiting for a pull request on the official repo)
+
 ## Passing JSON-formatted input
 
 To be correctly parsed by the interface, the input argument should be a properly-formatted JSON document, where all special characters have been correctly escaped. This is to ensure that, for example, the shell does not strip quotes or parse wildcards.
