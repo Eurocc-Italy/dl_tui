@@ -52,9 +52,7 @@ def launch_job(config: Config, user_input: UserInput) -> Tuple[str, str]:
     ### GENERATING CLIENT COMMAND ###
 
     # Calling client version of TUI with required arguments
-    client_cmd = (
-        f'dtaas_tui_client {{"ID": "{user_input.id}", "query": "{user_input.query}"'
-    )
+    client_cmd = f'dtaas_tui_client {{"ID": "{user_input.id}", "query": "{user_input.query}"'
 
     # adding script, if one was provided
     if user_input.script:
@@ -62,7 +60,7 @@ def launch_job(config: Config, user_input: UserInput) -> Tuple[str, str]:
 
     # closing JSON-formatted string and sanitizing command
     client_cmd += "}"
-    client_cmd = sanitize_string(client_cmd)
+    client_cmd = sanitize_string(version="server", string=client_cmd)
 
     ### GENERATING SLURM --wrap COMMAND ###
 
@@ -82,9 +80,9 @@ def launch_job(config: Config, user_input: UserInput) -> Tuple[str, str]:
     ssh_cmd = f"mkdir {user_input.id}; "
     ssh_cmd += f"cd {user_input.id}; "
     ssh_cmd += f"sbatch -p {partition} -A {account} "
-    # ssh_cmd += f"--mail-type ALL --mail-user {mail} "
+    ssh_cmd += f"--mail-type ALL --mail-user {mail} "
     ssh_cmd += f"-t {walltime} -N {nodes} "
-    ssh_cmd += "--ntasks-per-node 1 --qos g100_qos_dbg "  # CHANGE IT BACK!
+    ssh_cmd += "--ntasks-per-node 48 "
     ssh_cmd += f"--wrap '{wrap_cmd}'"
 
     # TODO: implement ssh via chain user

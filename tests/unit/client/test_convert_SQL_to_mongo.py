@@ -118,9 +118,7 @@ def test_and():
     """
     query = "SELECT * FROM datalake WHERE category = motorcycle AND width > 600"
     mongo_filter, mongo_fields = convert_SQL_to_mongo(query)
-    assert mongo_filter == {
-        "$and": [{"category": "motorcycle"}, {"width": {"$gt": 600}}]
-    }
+    assert mongo_filter == {"$and": [{"category": "motorcycle"}, {"width": {"$gt": 600}}]}
     assert mongo_fields == {}
 
 
@@ -130,9 +128,7 @@ def test_or():
     """
     query = "SELECT * FROM datalake WHERE category = motorcycle OR category = bicycle"
     mongo_filter, mongo_fields = convert_SQL_to_mongo(query)
-    assert mongo_filter == {
-        "$or": [{"category": "motorcycle"}, {"category": "bicycle"}]
-    }
+    assert mongo_filter == {"$or": [{"category": "motorcycle"}, {"category": "bicycle"}]}
     assert mongo_fields == {}
 
 

@@ -15,11 +15,13 @@ import pickle
 from typing import Dict
 
 
-def sanitize_string(string: str):
+def sanitize_string(version: str, string: str):
     """Sanitize string for use on shell, replacing special characters
 
     Parameters
     ----------
+    version : str
+        specifies whether the string must be "cleaned up" for client or server
     string : str
         "raw" string to be sanitized
 
@@ -28,9 +30,12 @@ def sanitize_string(string: str):
     str
         sanitized string
     """
-    sanitized_string = string.replace("'", r"\\\'")
-    sanitized_string = sanitized_string.replace('"', r"\\\"")
-    sanitized_string = sanitized_string.replace(r"\n", r"\n")
+    if version not in ["client", "server"]:
+        raise NameError("version must either be 'client' or 'server'")
+
+    sanitized_string = string.replace("'", r"\\\'" if version == "server" else r"\'")
+    sanitized_string = sanitized_string.replace('"', r"\\\"" if version == "server" else r"\"")
+    sanitized_string = sanitized_string.replace(r"\n", r"\\n")
     sanitized_string = sanitized_string.replace("*", r"\*")
     sanitized_string = sanitized_string.replace("(", r"\(")
     sanitized_string = sanitized_string.replace(")", r"\)")
@@ -79,26 +84,6 @@ class UserInput:
         data = json.loads(user_input)
         return cls(data)
 
-    # TODO: this is not done yet
-    @classmethod
-    def from_bytes(cls, data_bytes: bytes):
-        """Class constructor from serialized pickle object.
-
-        Parameters
-        ----------
-        data_bytes : bytes
-            _description_
-
-        Returns
-        -------
-        UserInput
-            UserInput instance initialized providing a pickle object
-        """
-        data_dict = pickle.loads(data_bytes)
-        logger.info(f"Raw input: {data_bytes}")
-        logger.info(f"Processed input: {data_dict}")
-        return cls(data_dict)
-
 
 class Config:
     """Class containing configuration info for client/server.
@@ -126,16 +111,12 @@ class Config:
 
     def load_config(self, version):
         # read default configuration file
-        with open(
-            f"{os.path.dirname(__file__)}/../etc/default/config_{version}.json", "r"
-        ) as f:
+        with open(f"{os.path.dirname(__file__)}/../etc/default/config_{version}.json", "r") as f:
             config = json.load(f)
 
         # read custom configuration file, if present
         if os.path.exists(f"{os.path.dirname(__file__)}/../etc/config_{version}.json"):
-            with open(
-                f"{os.path.dirname(__file__)}/../etc/config_{version}.json", "r"
-            ) as f:
+            with open(f"{os.path.dirname(__file__)}/../etc/config_{version}.json", "r") as f:
                 new_config = json.load(f)
                 config.update(new_config)
 

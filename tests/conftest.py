@@ -13,8 +13,10 @@ def cleanup():
     yield
     for match in glob("run_script_*"):
         shutil.rmtree(match)
-    os.remove("client.log")
-    os.remove("server.log")
+    if os.path.exists("client.log"):
+        os.remove("client.log")
+    if os.path.exists("server.log"):
+        os.remove("server.log")
 
 
 @pytest.fixture(scope="module")
@@ -34,9 +36,7 @@ def test_collection():
         json.dump({"ip": "localhost"}, f)
 
     config = Config(version="client")
-    mongodb_uri = (
-        f"mongodb://{config.user}:{config.password}@{config.ip}:{config.port}/"
-    )
+    mongodb_uri = f"mongodb://{config.user}:{config.password}@{config.ip}:{config.port}/"
 
     # connecting to client
     client = MongoClient(mongodb_uri)
@@ -48,9 +48,7 @@ def test_collection():
     yield collection
 
     # removing custom configuration file
-    os.remove(
-        f"{os.path.dirname(os.path.abspath(__file__))}/../dtaas/etc/config_client.json"
-    )
+    os.remove(f"{os.path.dirname(os.path.abspath(__file__))}/../dtaas/etc/config_client.json")
 
 
 @pytest.fixture(scope="function")

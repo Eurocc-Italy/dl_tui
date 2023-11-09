@@ -7,6 +7,6 @@
   "partition": "g100_usr_prod",
   "account": "cin_staff",
   "mail": "l.babetto@cineca.it",
-  "walltime": "00:01:00",
+  "walltime": "01:00:00",
   "nodes": 1
 }

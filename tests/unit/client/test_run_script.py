@@ -12,7 +12,9 @@ def test_run_script(generate_test_files):
     Search for two specific files and return them in reverse order
     """
 
-    script = "def main(files_in):\n files_out=files_in.copy()\n files_out.reverse()\n return files_out"
+    script = (
+        "def main(files_in):\n files_out=files_in.copy()\n files_out.reverse()\n return files_out"
+    )
 
     files_in = generate_test_files
 

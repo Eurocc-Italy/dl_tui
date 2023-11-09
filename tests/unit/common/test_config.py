@@ -41,9 +41,7 @@ def default_server():
 
 @pytest.fixture(scope="function")
 def custom_client():
-    with open(
-        f"{os.path.dirname(__file__)}/../../../dtaas/etc/config_client.json", "w"
-    ) as f:
+    with open(f"{os.path.dirname(__file__)}/../../../dtaas/etc/config_client.json", "w") as f:
         json.dump({"ip": "localhost"}, f)
     config = {
         "user": "user",
@@ -59,9 +57,7 @@ def custom_client():
 
 @pytest.fixture(scope="function")
 def custom_server():
-    with open(
-        f"{os.path.dirname(__file__)}/../../../dtaas/etc/config_server.json", "w"
-    ) as f:
+    with open(f"{os.path.dirname(__file__)}/../../../dtaas/etc/config_server.json", "w") as f:
         json.dump({"account": "EUCC_staff"}, f)
     config = {
         "user": "lbabetto",
