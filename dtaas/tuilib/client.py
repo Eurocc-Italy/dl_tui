@@ -110,12 +110,14 @@ def run_script(script: str, files_in: List[str]) -> List[str]:
 
     logger.info(f"User script:\n{script}")
 
+    # creating unique temporary directory
     tdir = mkdtemp(
         prefix="run_script_",
         suffix=None,
         dir=os.getcwd(),
     )
 
+    # moving to temporary directory and working within the context manager
     with pushd(tdir):
         with open("user_script.py", "w") as f:
             f.write(script)
