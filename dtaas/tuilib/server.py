@@ -69,7 +69,7 @@ def launch_job(config: Config, user_input: UserInput) -> Tuple[str, str]:
     wrap_cmd = "module load python; "
 
     # sourcing virtual environment
-    wrap_cmd += f"source {config.venv_path}; "
+    wrap_cmd += f"source {config.venv_path}/bin/activate; "
 
     # adding client command
     wrap_cmd += client_cmd

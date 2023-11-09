@@ -40,6 +40,33 @@ If no script is provided, the results will simply be the files corresponding to 
  4. install the library via `pip install .`
  5. repeat the clone/install process with the custom [sqlparse](https://github.com/lbabetto/sqlparse) library we are currently used for parsing queries (we are waiting for a pull request on the official repo)
 
+## Configuration
+
+Configuration options can be saved in the /etc folder as JSON files. For client/server versions, these should be named "config_client.json" and "config_server.json", respectively. The library first loads the default options written the JSON files located in /etc/default (which can be taken as a template to understand the kind of options which can be configured) and overwrite with the content of the JSON files in /etc.
+
+For the client version, the configurable options are:
+
+ * `user`: the user name in the MongoDB server
+ * `password`: the password of the MongoDB server
+ * `ip`: network address of the machine running the MongoDB server
+ * `port`: the port to access the MongoDB server
+ * `database`: the name of the MongoDB database
+ * `collection`: the name of the MongoDB collection within the database
+
+For the server version, the configurable options are:
+
+  `user`: username of the HPC account
+  `host`: address of the HPC login node
+  `venv_path`: path of the virtual environment in which the library is installed
+  `ssh_key`: path to the SSH key used for authentication on the HPC login node
+  `partition`: SLURM partition for the HPC job
+  `account`: SLURM account for the HPC job
+  `mail`: email address to which the notifications for job start/end are sent
+  `walltime`: maximum walltime for HPC job
+  `nodes`: number of nodes requested for HPC job
+  `ntasks_per_node`: number of CPU cores per node requested for the HPC job
+
+
 ## Passing JSON-formatted input
 
 To be correctly parsed by the interface, the input argument should be a properly-formatted JSON document, where all special characters have been correctly escaped. This is to ensure that, for example, the shell does not strip quotes or parse wildcards.
