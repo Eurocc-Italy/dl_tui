@@ -71,5 +71,13 @@ def test_newline():
     )
     assert (
         sanitize_string(version="server", string=string)
-        == r"def main\(files_in\):\\n return files_in"
+        == r"def main\(files_in\):\\\\n return files_in"
     )
+
+
+def test_wrong_version():
+    """
+    Test that entering a wrong name version raises an exception.
+    """
+    with pytest.raises(NameError):
+        sanitize_string(version="test", string="")

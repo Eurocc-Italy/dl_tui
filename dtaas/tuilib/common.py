@@ -33,9 +33,9 @@ def sanitize_string(version: str, string: str):
     if version not in ["client", "server"]:
         raise NameError("version must either be 'client' or 'server'")
 
-    sanitized_string = string.replace("'", r"\\\'" if version == "server" else r"\'")
-    sanitized_string = sanitized_string.replace('"', r"\\\"" if version == "server" else r"\"")
-    sanitized_string = sanitized_string.replace(r"\n", r"\\n")
+    sanitized_string = string.replace("'", r"\'" if version == "client" else r"\\\'")
+    sanitized_string = sanitized_string.replace('"', r"\"" if version == "client" else r"\\\"")
+    sanitized_string = sanitized_string.replace(r"\n", r"\\n" if version == "client" else r"\\\\n")
     sanitized_string = sanitized_string.replace("*", r"\*")
     sanitized_string = sanitized_string.replace("(", r"\(")
     sanitized_string = sanitized_string.replace(")", r"\)")

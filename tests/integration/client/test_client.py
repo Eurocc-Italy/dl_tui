@@ -33,7 +33,7 @@ def test_search_only(test_collection: Collection):
     os.remove("results.zip")
 
 
-def test_return_reverse(test_collection: Collection):
+def test_return_first(test_collection: Collection):
     """
     Search for two specific files and only return the first item
     """
