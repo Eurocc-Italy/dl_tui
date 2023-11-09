@@ -11,7 +11,6 @@ logger = logging.getLogger(__name__)
 import os
 import sys
 import json
-import pickle
 from typing import Dict
 
 
