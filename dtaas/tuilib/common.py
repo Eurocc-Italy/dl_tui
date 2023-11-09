@@ -15,7 +15,10 @@ from typing import Dict
 
 
 def sanitize_string(version: str, string: str):
-    """Sanitize string for use on shell, replacing special characters
+    """Sanitize string for use on shell, replacing special characters.
+    For server, escape character \ must itself be escaped, as the string
+    passes via two shells, one in the ssh command call and one within the
+    slurm script.
 
     Parameters
     ----------
