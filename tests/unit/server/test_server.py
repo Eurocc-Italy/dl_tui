@@ -1,4 +1,3 @@
-from pymongo.collection import Collection
 import pytest
 
 #
@@ -11,7 +10,7 @@ from dtaas.tuilib.common import Config, UserInput
 from dtaas.tuilib.server import launch_job
 
 
-def test_just_search(test_collection: Collection):
+def test_just_search():
     """
     Search for two specific files
     """
@@ -42,7 +41,7 @@ def test_just_search(test_collection: Collection):
     ), "Slurm output file is not empty"
 
 
-def test_return_first(test_collection: Collection):
+def test_return_first():
     """
     Search for two specific files and only return the first item
     """
@@ -50,7 +49,7 @@ def test_return_first(test_collection: Collection):
     config = Config("server")
     user_input = UserInput(
         {
-            "ID": "DTAAS-TUI-TEST-return_file",
+            "ID": "DTAAS-TUI-TEST-return_first",
             "query": "SELECT * FROM metadata WHERE id = 554625 OR id = 222564",
             "script": r"def main(files_in):\n files_out=files_in.copy()\n return [files_out[0]]",
         }
@@ -84,7 +83,7 @@ def test_return_first(test_collection: Collection):
             break
 
 
-def test_invalid_script(test_collection: Collection):
+def test_invalid_script():
     """
     Try breaking the job
     """

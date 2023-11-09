@@ -1,4 +1,3 @@
-from pymongo.collection import Collection
 import pytest
 
 #
@@ -8,7 +7,6 @@ import pytest
 
 import os
 from dtaas.tuilib.common import Config, UserInput, sanitize_string
-from dtaas.tuilib.server import launch_job
 
 
 def test_just_search():
@@ -19,7 +17,7 @@ def test_just_search():
     config = Config("server")
     user_input = UserInput(
         {
-            "ID": "DTAAS-TUI-TEST-return_file",
+            "ID": "DTAAS-TUI-TEST-just_search",
             "query": "SELECT * FROM metadata WHERE id = 554625 OR id = 222564",
             "script": r"def main(files_in):\n files_out=files_in.copy()\n return [files_out[0]]",
         }
@@ -52,7 +50,7 @@ def test_return_first():
     config = Config("server")
     user_input = UserInput(
         {
-            "ID": "DTAAS-TUI-TEST-return_file",
+            "ID": "DTAAS-TUI-TEST-return_first",
             "query": "SELECT * FROM metadata WHERE id = 554625 OR id = 222564",
             "script": r"def main(files_in):\n files_out=files_in.copy()\n return [files_out[0]]",
         }

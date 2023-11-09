@@ -1,4 +1,3 @@
-from pymongo.collection import Collection
 import pytest
 
 #
@@ -11,7 +10,7 @@ from zipfile import ZipFile
 from dtaas.tuilib.common import sanitize_string
 
 
-def test_search_only(test_collection: Collection):
+def test_search_only():
     """
     Search for two specific files
     """
@@ -33,7 +32,7 @@ def test_search_only(test_collection: Collection):
     os.remove("results.zip")
 
 
-def test_return_first(test_collection: Collection):
+def test_return_first():
     """
     Search for two specific files and only return the first item
     """
@@ -54,7 +53,7 @@ def test_return_first(test_collection: Collection):
 
 
 @pytest.mark.xfail  # TODO: consider converting all double quotes to single quotes
-def test_double_quotes_in_SQL(test_collection: Collection):
+def test_double_quotes_in_SQL():
     """
     Search for a specific file using double quotes in SQL query
     """
@@ -73,7 +72,7 @@ def test_double_quotes_in_SQL(test_collection: Collection):
     os.remove("results.zip")
 
 
-def test_single_quotes_in_SQL(test_collection: Collection):
+def test_single_quotes_in_SQL():
     """
     Search for a specific file using single quotes in SQL query and replacing them with double quotes.
     """
@@ -93,7 +92,7 @@ def test_single_quotes_in_SQL(test_collection: Collection):
 
 
 @pytest.mark.xfail  # TODO: consider converting all double quotes to single quotes
-def test_double_quotes_in_script(test_collection: Collection):
+def test_double_quotes_in_script():
     """
     Search for a specific file using double quotes in user script
     """
@@ -113,7 +112,7 @@ def test_double_quotes_in_script(test_collection: Collection):
     os.remove("results.zip")
 
 
-def test_single_quotes_in_script(test_collection: Collection):
+def test_single_quotes_in_script():
     """
     Search for a specific file using single quotes in user script
     """
