@@ -8,7 +8,7 @@ import shutil
 from glob import glob
 
 
-@pytest.fixture(scope="module", autouse=True)
+@pytest.fixture(scope="module")
 def setup_test():
     # creating custom configuration files
     with open(f"{os.path.dirname(os.path.abspath(__file__))}/../dtaas/etc/config_client.json", "w") as f:
@@ -37,7 +37,7 @@ def setup_test():
 
 
 @pytest.fixture(scope="module")
-def test_collection():
+def test_collection(setup_test):
     """Setting up testing environment and yielding test MongoDB collection
 
     Yields

@@ -10,7 +10,7 @@ from zipfile import ZipFile
 from dtaas.tuilib.common import sanitize_string
 
 
-def test_search_only():
+def test_search_only(setup_test):
     """
     Search for two specific files
     """
@@ -32,7 +32,7 @@ def test_search_only():
     os.remove("results.zip")
 
 
-def test_return_first():
+def test_return_first(setup_test):
     """
     Search for two specific files and only return the first item
     """
@@ -53,7 +53,7 @@ def test_return_first():
 
 
 @pytest.mark.xfail  # TODO: consider converting all double quotes to single quotes
-def test_double_quotes_in_SQL():
+def test_double_quotes_in_SQL(setup_test):
     """
     Search for a specific file using double quotes in SQL query
     """
@@ -72,7 +72,7 @@ def test_double_quotes_in_SQL():
     os.remove("results.zip")
 
 
-def test_single_quotes_in_SQL():
+def test_single_quotes_in_SQL(setup_test):
     """
     Search for a specific file using single quotes in SQL query and replacing them with double quotes.
     """
@@ -92,7 +92,7 @@ def test_single_quotes_in_SQL():
 
 
 @pytest.mark.xfail  # TODO: consider converting all double quotes to single quotes
-def test_double_quotes_in_script():
+def test_double_quotes_in_script(setup_test):
     """
     Search for a specific file using double quotes in user script
     """
@@ -112,7 +112,7 @@ def test_double_quotes_in_script():
     os.remove("results.zip")
 
 
-def test_single_quotes_in_script():
+def test_single_quotes_in_script(setup_test):
     """
     Search for a specific file using single quotes in user script
     """

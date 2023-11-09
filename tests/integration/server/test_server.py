@@ -10,7 +10,7 @@ import subprocess
 from dtaas.tuilib.common import Config, UserInput, sanitize_string
 
 
-def test_just_search():
+def test_just_search(setup_test):
     """
     Search for two specific files
     """
@@ -43,7 +43,7 @@ def test_just_search():
     ), "Slurm output file is not empty"
 
 
-def test_return_first():
+def test_return_first(setup_test):
     """
     Search for two specific files and only return the first item
     """
@@ -86,7 +86,7 @@ def test_return_first():
             break
 
 
-def test_invalid_script():
+def test_invalid_script(setup_test):
     """
     Try breaking the job
     """
