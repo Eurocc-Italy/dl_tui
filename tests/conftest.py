@@ -36,6 +36,29 @@ def setup_test():
     os.system(f"ssh -i {server.ssh_key} {server.user}@{server.host} 'rm -rf ~/DTAAS-TUI-TEST-*'")
 
 
+@pytest.fixture(scope="module")
+def test_collection():
+    """Setting up testing environment and yielding test MongoDB collection
+
+    Yields
+    ------
+    Collection
+        MongoDB Collection on which to run the tests
+    """
+    # loading config and setting up testing environment
+    config = Config(version="client")
+    mongodb_uri = f"mongodb://{config.user}:{config.password}@{config.ip}:{config.port}/"
+
+    # connecting to client
+    client = MongoClient(mongodb_uri)
+
+    # accessing collection
+    collection = client[config.database][config.collection]
+
+    # running tests
+    yield collection
+
+
 @pytest.fixture(scope="function")
 def generate_test_files():
     """generate a text file to test the library

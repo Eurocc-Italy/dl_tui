@@ -6,6 +6,7 @@ import pytest
 # TODO: make a mock test file and test database so the tests do not rely on any previously prepared database
 
 import os
+import subprocess
 from dtaas.tuilib.common import Config, UserInput, sanitize_string
 
 
@@ -100,22 +101,15 @@ def test_invalid_script():
 
     cmd = f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_server "
     cmd += f'{{"ID": "{user_input.id}", "query": "{user_input.query}"}}'
-    os.system(sanitize_string(version="client", string=cmd))
 
-    while True:
-        # checking that JOB_DONE file has been made
-        if os.system(f"ssh -i {config.ssh_key} {config.user}@{config.host} 'ls ~/{user_input.id}/JOB_DONE'") == 0:
-            # checking that results file is present
-            assert (
-                os.system(f"ssh -i {config.ssh_key} {config.user}@{config.host} 'ls ~/{user_input.id}/results.zip'")
-                == 512
-            ), "Results file found, should not have worked"
+    stdout, stderr = subprocess.Popen(
+        sanitize_string(version="client", string=cmd),
+        shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    ).communicate()
 
-            # checking that slurm output contains an error
-            assert (
-                os.popen(f"ssh -i {config.ssh_key} {config.user}@{config.host} 'cat ~/{user_input.id}/slurm*'").read()[
-                    -82:
-                ]
-                == "json.decoder.JSONDecodeError: Expecting ',' delimiter: line 1 column 83 (char 82)\n"
-            ), "Slurm output file is not empty"
-            break
+    assert stdout == b""
+    assert (
+        stderr[-82:] == b"json.decoder.JSONDecodeError: Expecting ',' delimiter: line 1 column 83 (char 82)\n"
+    ), "job was launched, should not have worked"

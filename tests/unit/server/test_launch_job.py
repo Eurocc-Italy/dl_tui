@@ -1,7 +1,7 @@
 import pytest
 
 #
-# Testing the launcher module
+# Testing the launch_job function in module server.py
 #
 # TODO: make a mock test file and test database so the tests do not rely on any previously prepared database
 
@@ -61,26 +61,23 @@ def test_return_first():
     while True:
         # checking that JOB_DONE file has been made
         if os.system(f"ssh -i {config.ssh_key} {config.user}@{config.host} 'ls ~/{user_input.id}/JOB_DONE'") == 0:
-            # checking that results file is present
-            assert (
-                os.system(f"ssh -i {config.ssh_key} {config.user}@{config.host} 'ls ~/{user_input.id}/results.zip'")
-                == 0
-            ), "Results file not found"
-            # checking zip content
-            assert (
-                "COCO_val2014_000000554625.jpg"
-                in os.popen(
-                    f"ssh -i {config.ssh_key} {config.user}@{config.host} 'unzip -l ~/{user_input.id}/results.zip'"
-                )
-                .read()
-                .split()
-            ), "Missing output file"
-            # checking that slurm output is empty
-            assert (
-                os.popen(f"ssh -i {config.ssh_key} {config.user}@{config.host} 'cat ~/{user_input.id}/slurm*'").read()
-                == " \n"
-            ), "Slurm output file is not empty"
             break
+
+    # checking that results file is present
+    assert (
+        os.system(f"ssh -i {config.ssh_key} {config.user}@{config.host} 'ls ~/{user_input.id}/results.zip'") == 0
+    ), "Results file not found"
+    # checking zip content
+    assert (
+        "COCO_val2014_000000554625.jpg"
+        in os.popen(f"ssh -i {config.ssh_key} {config.user}@{config.host} 'unzip -l ~/{user_input.id}/results.zip'")
+        .read()
+        .split()
+    ), "Missing output file"
+    # checking that slurm output is empty
+    assert (
+        os.popen(f"ssh -i {config.ssh_key} {config.user}@{config.host} 'cat ~/{user_input.id}/slurm*'").read() == " \n"
+    ), "Slurm output file is not empty"
 
 
 def test_invalid_script():
@@ -102,17 +99,15 @@ def test_invalid_script():
     while True:
         # checking that JOB_DONE file has been made
         if os.system(f"ssh -i {config.ssh_key} {config.user}@{config.host} 'ls ~/{user_input.id}/JOB_DONE'") == 0:
-            # checking that results file is present
-            assert (
-                os.system(f"ssh -i {config.ssh_key} {config.user}@{config.host} 'ls ~/{user_input.id}/results.zip'")
-                == 512
-            ), "Results file found, should not have worked"
-
-            # checking that slurm output contains an error
-            assert (
-                os.popen(f"ssh -i {config.ssh_key} {config.user}@{config.host} 'cat ~/{user_input.id}/slurm*'").read()[
-                    -82:
-                ]
-                == "json.decoder.JSONDecodeError: Expecting ',' delimiter: line 1 column 83 (char 82)\n"
-            ), "Slurm output file is not empty"
             break
+
+    # checking that results file is present
+    assert (
+        os.system(f"ssh -i {config.ssh_key} {config.user}@{config.host} 'ls ~/{user_input.id}/results.zip'") == 512
+    ), "Results file found, should not have worked"
+
+    # checking that slurm output contains an error
+    assert (
+        os.popen(f"ssh -i {config.ssh_key} {config.user}@{config.host} 'cat ~/{user_input.id}/slurm*'").read()[-82:]
+        == "json.decoder.JSONDecodeError: Expecting ',' delimiter: line 1 column 83 (char 82)\n"
+    ), "Slurm output file is not empty"
