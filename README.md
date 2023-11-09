@@ -42,7 +42,7 @@ If no script is provided, the results will simply be the files corresponding to 
 
 ## Configuration
 
-Configuration options can be saved in the /etc folder as JSON files. For client/server versions, these should be named "config_client.json" and "config_server.json", respectively. The library first loads the default options written the JSON files located in /etc/default (which can be taken as a template to understand the kind of options which can be configured) and overwrite with the content of the JSON files in /etc.
+Configuration options can be saved in the library `/etc` folder as JSON files. For client/server versions, these should be named `config_client.json` and `config_server.json`, respectively. The library first loads the default options written the JSON files located in `/etc/default` (which can be taken as a template to understand the kind of options which can be configured) and overwrite with the content of the JSON files in `/etc`.
 
 For the client version, the configurable options are:
 
