@@ -14,6 +14,7 @@ def cleanup():
     for match in glob("run_script_*"):
         shutil.rmtree(match)
     os.remove("client.log")
+    os.remove("server.log")
 
 
 @pytest.fixture(scope="module")

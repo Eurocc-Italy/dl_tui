@@ -49,43 +49,49 @@ def launch_job(config: Config, user_input: UserInput) -> Tuple[str, str]:
     nodes = config.nodes
     ssh_key = config.ssh_key
 
-    ### GENERATING SLURM JOB COMMAND ###
+    ### GENERATING CLIENT COMMAND ###
 
-    # loading modules
-    wrap_cmd = "module load python; "
-
-    # sourcing virtual environment
-    wrap_cmd += f"source {config.venv_path}; "
-
-    # calling client version of TUI with common arguments
-    wrap_cmd += (
+    # Calling client version of TUI with required arguments
+    client_cmd = (
         f'dtaas_tui_client {{"ID": "{user_input.id}", "query": "{user_input.query}"'
     )
 
     # adding script, if one was provided
     if user_input.script:
-        wrap_cmd += f', "script": "{user_input.script}"'
+        client_cmd += f', "script": "{user_input.script}"'
 
-    # closing JSON-formatted string and adding a finalizer file once the job is done
-    wrap_cmd += "}; touch JOB_DONE"
+    # closing JSON-formatted string and sanitizing command
+    client_cmd += "}"
+    client_cmd = sanitize_string(client_cmd)
 
-    # sanitizing string, escaping special characters
-    wrap_cmd = sanitize_string(wrap_cmd)
+    ### GENERATING SLURM --wrap COMMAND ###
+
+    # creating wrap command to be passed to sbatchloading modules
+    wrap_cmd = "module load python; "
+
+    # sourcing virtual environment
+    wrap_cmd += f"source {config.venv_path}; "
+
+    # adding client command
+    wrap_cmd += client_cmd
+
+    # adding a finalizer file once the job is done
+    wrap_cmd += "; touch JOB_DONE"
 
     ### GENERATING BASH COMMAND TO BE RUN VIA SSH ###
     ssh_cmd = f"mkdir {user_input.id}; "
     ssh_cmd += f"cd {user_input.id}; "
     ssh_cmd += f"sbatch -p {partition} -A {account} "
-    ssh_cmd += f"--mail-type ALL --mail-user {mail} "
-    # ssh_cmd += f"-t {walltime} -N {nodes} --ntasks-per-node 48 " TODO: change back when done!!! <<<<<<<<<<<<<<<<<<
-    ssh_cmd += f"-t {walltime} -N {nodes} --ntasks-per-node 48 "
+    # ssh_cmd += f"--mail-type ALL --mail-user {mail} "
+    ssh_cmd += f"-t {walltime} -N {nodes} "
+    ssh_cmd += "--ntasks-per-node 1 --qos g100_qos_dbg "  # CHANGE IT BACK!
     ssh_cmd += f"--wrap '{wrap_cmd}'"
 
     # TODO: implement ssh via chain user
     full_ssh_cmd = rf'ssh -i {ssh_key} {config.user}@{config.host} "{ssh_cmd}"'
 
-    logger.debug(f"Launching command via ssh: {ssh_cmd}")
-    logger.debug(f"Full ssh command: {full_ssh_cmd}")
+    logger.debug(f"Launching command via ssh:\n{ssh_cmd}")
+    logger.debug(f"Full ssh command:\n{full_ssh_cmd}")
 
     stdout, stderr = subprocess.Popen(
         full_ssh_cmd,

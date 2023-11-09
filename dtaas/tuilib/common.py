@@ -28,14 +28,13 @@ def sanitize_string(string: str):
     str
         sanitized string
     """
-    sanitized_string = (
-        string.replace("'", r"\'")
-        .replace('"', r"\"")
-        .replace(r"\n", r"\\n")
-        .replace("*", r"\*")
-        .replace("(", r"\(")
-        .replace(")", r"\)")
-    )
+    sanitized_string = string.replace("'", r"\\\'")
+    sanitized_string = sanitized_string.replace('"', r"\\\"")
+    sanitized_string = sanitized_string.replace(r"\n", r"\n")
+    sanitized_string = sanitized_string.replace("*", r"\*")
+    sanitized_string = sanitized_string.replace("(", r"\(")
+    sanitized_string = sanitized_string.replace(")", r"\)")
+
     return sanitized_string
 
 
