@@ -34,11 +34,11 @@ If no script is provided, the results will simply be the files corresponding to 
 
 ## Installing
 
- 1. Activate your Python virtual environment
- 2. Download the [DTaaS_TUI](https://gitlab.hpc.cineca.it/lbabetto/DTaaS_TUI`) repository via `git clone`
- 3. `cd DTaaS_TUI` and install requirements via `pip install -r requirements.txt`
- 4. install the library via `pip install .`
- 5. repeat the clone/install process with the custom [sqlparse](https://github.com/lbabetto/sqlparse) library we are currently used for parsing queries (we are waiting for a pull request on the official repo)
+  1. Activate your Python virtual environment
+  2. Download the [DTaaS_TUI](https://gitlab.hpc.cineca.it/lbabetto/DTaaS_TUI`)  repository via `git clone`
+  3. `cd DTaaS_TUI` and install requirements via `pip install -r requirements.txt`
+  4. install the library via `pip install .`
+  5. repeat the clone/install process with the custom [sqlparse](https://github.com/lbabetto/sqlparse) library we are currently used for parsing queries (we are waiting for a pull request on the official repo)
 
 ## Configuration
 
@@ -46,25 +46,25 @@ Configuration options can be saved in the /etc folder as JSON files. For client/
 
 For the client version, the configurable options are:
 
- * `user`: the user name in the MongoDB server
- * `password`: the password of the MongoDB server
- * `ip`: network address of the machine running the MongoDB server
- * `port`: the port to access the MongoDB server
- * `database`: the name of the MongoDB database
- * `collection`: the name of the MongoDB collection within the database
+  * `user`: the user name in the MongoDB server
+  * `password`: the password of the MongoDB server
+  * `ip`: network address of the machine running the MongoDB server
+  * `port`: the port to access the MongoDB server
+  * `database`: the name of the MongoDB database
+  * `collection`: the name of the MongoDB collection within the database
 
 For the server version, the configurable options are:
 
-  `user`: username of the HPC account
-  `host`: address of the HPC login node
-  `venv_path`: path of the virtual environment in which the library is installed
-  `ssh_key`: path to the SSH key used for authentication on the HPC login node
-  `partition`: SLURM partition for the HPC job
-  `account`: SLURM account for the HPC job
-  `mail`: email address to which the notifications for job start/end are sent
-  `walltime`: maximum walltime for HPC job
-  `nodes`: number of nodes requested for HPC job
-  `ntasks_per_node`: number of CPU cores per node requested for the HPC job
+  * `user`: username of the HPC account
+  * `host`: address of the HPC login node
+  * `venv_path`: path of the virtual environment in which the library is installed
+  * `ssh_key`: path to the SSH key used for authentication on the HPC login node
+  * `partition`: SLURM partition for the HPC job
+  * `account`: SLURM account for the HPC job
+  * `mail`: email address to which the notifications for job start/end are sent
+  * `walltime`: maximum walltime for HPC job
+  * `nodes`: number of nodes requested for HPC job
+  * `ntasks_per_node`: number of CPU cores per node requested for the HPC job
 
 
 ## Passing JSON-formatted input
