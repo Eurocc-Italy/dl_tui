@@ -71,6 +71,8 @@ For the server version, the configurable options are:
 
 To be correctly parsed by the interface, the input argument should be a properly-formatted JSON document, where all special characters have been correctly escaped. This is to ensure that, for example, the shell does not strip quotes or parse wildcards.
 
+**NOTE**: unfortunately, double quotes are currently forbidden both in the SQL query and the user script. If you must use quotes, please use single quotes or the program will not work!
+
 Since the client version runs locally, special characters only need to be escaped once. In the client version, because of the way it works (two shell "passages" are involved), escape characters need to be escaped themselves, otherwise they get "lost in translation".
 
 The library provides a `sanitize_string("client/server", string)`, which needs the user to specify whether they want a string intended for the client/server version, and the string to "sanitize", returning the appropriately-formatted version.
