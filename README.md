@@ -26,7 +26,7 @@ def main(input_files):
     return output_files
 ```
 
-If the `dtaas_tui_client` version is called, the interface will run locally (still accessing the remote MongoDB server), therefore files should be available on the local machine.
+If the `dtaas_tui_client` version is called, the interface will run locally (still accessing a remote MongoDB server if configured as such), therefore files should be available on the local machine.
 
 If the `dtaas_tui_server` version is called, the interface will launch a job on HPC, where the processing will run on the compute nodes, accessing the files on the parallel filesystem.
 
