@@ -55,6 +55,8 @@ class UserInput:
 
     Attributes
     ----------
+    ID : str
+        Unique ID of the run (preferably of the UUID.hex type)
     query : str
         SQL query
     script : str
@@ -63,7 +65,7 @@ class UserInput:
 
     def __init__(self, data: Dict[str, str]) -> None:
         logger.debug(f"Received input dict: {data}")
-        
+
         self.id = data["ID"]
         self.query = data["query"]
 
