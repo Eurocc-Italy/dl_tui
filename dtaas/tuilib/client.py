@@ -102,8 +102,6 @@ def run_script(script: str, files_in: List[str]) -> List[str]:
 
     Raises
     ------
-    NameError
-        if the user provides a script whose name conflicts with another loaded library
     AttributeError
         if the user provides a script without a `main` function
     TypeError
