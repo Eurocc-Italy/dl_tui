@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 Module to interface with HPC (G100) from the VM. The purpose of this module is to take the user query and script,
-send a HPC job on G100 which calls the wrapper.py on the compute nodes and runs the script on the query results.
+send a HPC job on G100 which calls the client program on the compute nodes and runs the script on the query results.
 
 Author: @lbabetto
 """

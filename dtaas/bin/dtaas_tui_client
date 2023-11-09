@@ -2,10 +2,11 @@
 """
 Wrapper which needs to be run from command line providing the following information in JSON format:
 
+  - ID: a unique ID for the job run (preferably of the UUID.hex form)
   - query: path to a file containing an SQL query
-  - script (optional): path to a Python script. This Python script must contain a `main` function which takes as input 
-    a list (of file paths), does some user-defined analysis, and returns a list (of file paths) which the wrapper then 
-    takes and stores in a compressed archive. TODO: S3 implementation and POST to datalake.
+  - script (optional): the content of a Python script. This Python script must contain a `main` function which takes 
+    as input a list (of file paths), does some user-defined analysis, and returns a list (of file paths) which the 
+    wrapper then takes and stores in a compressed archive. TODO: S3 implementation and POST to datalake.
 
 The wrapper then does the following:
 
