@@ -120,9 +120,7 @@ def test_single_quotes_in_script(test_collection: Collection):
 
     query = "SELECT * FROM metadata WHERE id = 554625"
 
-    script = (
-        r"def main(files_in):\n files_out=files_in.copy()\n print('HELLO!')\n return [files_out[0]]"
-    )
+    script = r"def main(files_in):\n files_out=files_in.copy()\n print('HELLO!')\n return [files_out[0]]"
 
     cmd = f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client "
     cmd += rf'{{"ID": 42, "query": "{query}", "script": "{script}"}}'

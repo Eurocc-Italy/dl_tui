@@ -10,6 +10,8 @@ from glob import glob
 
 @pytest.fixture(scope="session", autouse=True)
 def cleanup():
+    client = Config(version="client")
+    server = Config(version="server")
     yield
     for match in glob("run_script_*"):
         shutil.rmtree(match)
@@ -17,6 +19,8 @@ def cleanup():
         os.remove("client.log")
     if os.path.exists("server.log"):
         os.remove("server.log")
+
+    os.system(f"ssh -i {server.ssh_key} {server.user}@{server.host} 'rm -rf ~/DTAAS-TUI-TEST-*'")
 
 
 @pytest.fixture(scope="module")
@@ -28,13 +32,14 @@ def test_collection():
     Collection
         MongoDB Collection on which to run the tests
     """
-    # loading config and setting up testing environment
-    with open(
-        f"{os.path.dirname(os.path.abspath(__file__))}/../dtaas/etc/config_client.json",
-        "w",
-    ) as f:
+    # creating custom configuration files
+    with open(f"{os.path.dirname(os.path.abspath(__file__))}/../dtaas/etc/config_client.json", "w") as f:
         json.dump({"ip": "localhost"}, f)
 
+    with open(f"{os.path.dirname(os.path.abspath(__file__))}/../dtaas/etc/config_server.json", "w") as f:
+        json.dump({"walltime": "00:10:00", "nodes": 1, "ntasks_per_node": 1}, f)
+
+    # loading config and setting up testing environment
     config = Config(version="client")
     mongodb_uri = f"mongodb://{config.user}:{config.password}@{config.ip}:{config.port}/"
 
@@ -47,8 +52,9 @@ def test_collection():
     # running tests
     yield collection
 
-    # removing custom configuration file
+    # removing custom configuration files
     os.remove(f"{os.path.dirname(os.path.abspath(__file__))}/../dtaas/etc/config_client.json")
+    os.remove(f"{os.path.dirname(os.path.abspath(__file__))}/../dtaas/etc/config_server.json")
 
 
 @pytest.fixture(scope="function")

@@ -47,6 +47,7 @@ def launch_job(config: Config, user_input: UserInput) -> Tuple[str, str]:
     walltime = config.walltime
     mail = config.mail
     nodes = config.nodes
+    ntasks_per_node = config.ntasks_per_node
     ssh_key = config.ssh_key
 
     ### GENERATING CLIENT COMMAND ###
@@ -82,7 +83,7 @@ def launch_job(config: Config, user_input: UserInput) -> Tuple[str, str]:
     ssh_cmd += f"sbatch -p {partition} -A {account} "
     ssh_cmd += f"--mail-type ALL --mail-user {mail} "
     ssh_cmd += f"-t {walltime} -N {nodes} "
-    ssh_cmd += "--ntasks-per-node 48 "
+    ssh_cmd += f"--ntasks-per-node {ntasks_per_node} "
     ssh_cmd += f"--wrap '{wrap_cmd}'"
 
     # TODO: implement ssh via chain user
@@ -104,8 +105,6 @@ def launch_job(config: Config, user_input: UserInput) -> Tuple[str, str]:
     logger.debug(f"stderr: {stderr}")
 
     if "Submitted batch job" not in stdout:
-        raise RuntimeError(
-            f"Something gone wrong, job was not launched.\nstdout: {stdout}\nstderr: {stderr}"
-        )
+        raise RuntimeError(f"Something gone wrong, job was not launched.\nstdout: {stdout}\nstderr: {stderr}")
 
     return stdout, stderr

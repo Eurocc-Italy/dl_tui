@@ -32,7 +32,7 @@ def default_server():
         "ssh_key": "~/.ssh/luca-g100",
         "partition": "g100_usr_prod",
         "account": "cin_staff",
-        "mail": "l.babetto@cineca.it",
+        "mail": "NO",
         "walltime": "01:00:00",
         "nodes": 1,
     }
@@ -67,7 +67,7 @@ def custom_server():
         "ssh_key": "~/.ssh/luca-g100",
         "partition": "g100_usr_prod",
         "account": "EUCC_staff",
-        "mail": "l.babetto@cineca.it",
+        "mail": "NO",
         "walltime": "01:00:00",
         "nodes": 1,
     }
