@@ -17,13 +17,13 @@ jupyter-build:
     - jupyter-book build docs
   artifacts:
     paths:
-      - _build/
+      - docs/_build/
 
 pages:
   stage: deploy
   image: busybox:latest
   script:
-    - mv _build/html public
+    - mv docs&/_build/html docs/public
   artifacts:
     paths:
       - public
