@@ -26,6 +26,6 @@ pages:
     - mv docs/_build/html docs/public
   artifacts:
     paths:
-      - public
+      - docs/public
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
