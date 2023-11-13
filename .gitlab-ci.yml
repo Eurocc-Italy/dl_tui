@@ -6,7 +6,7 @@ jupyter-build:
   stage: build
   tags:
     - cpu
-  image: python:slim
+  # image: python:slim
   before_script:
     # - python -m pip install --upgrade pip
     # - pip install -r requirements.txt
@@ -25,7 +25,7 @@ pages:
   stage: deploy
   tags:
     - cpu
-  image: busybox:latest
+  # image: busybox:latest
   script:
     - mv docs/_build/html public
   artifacts:
