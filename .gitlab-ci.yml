@@ -27,9 +27,9 @@ pages:
     - cpu
   image: busybox:latest
   script:
-    - mv docs/_build/html docs/public
+    - mv docs/_build/html public
   artifacts:
     paths:
-      - docs/public
+      - public
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
