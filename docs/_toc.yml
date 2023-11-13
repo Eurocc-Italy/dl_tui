@@ -5,10 +5,10 @@ root: intro
 chapters:
 - file: getting-started
 - file: user-guide
-  sections:
-    - file: Guide/test
 - file: api
   sections:
-    - file: API/test
+    - file: API/tuilib/common
+    - file: API/tuilib/client
+    - file: API/tuilib/server
 - file: contributor-guide
 - file: release-notes
