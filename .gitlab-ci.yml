@@ -1,0 +1,31 @@
+stages:
+  - build
+  - deploy
+
+jupyter-build:
+  stage: build
+  image: python:slim
+  # before_script:
+  #   - python -m pip install --upgrade pip
+  #   - pip install -r requirements.txt
+  #   - pip install .
+  #   - pip install -r docs/requirements-docs.txt
+  #   - pip install myst-parser
+  script:
+    - pip install -U jupyter-book
+    - jupyter-book clean docs
+    - jupyter-book build docs
+  artifacts:
+    paths:
+      - _build/
+
+pages:
+  stage: deploy
+  image: busybox:latest
+  script:
+    - mv _build/html public
+  artifacts:
+    paths:
+      - public
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH

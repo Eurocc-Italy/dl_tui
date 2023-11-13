@@ -1,0 +1,14 @@
+# Table of contents
+
+format: jb-book
+root: intro
+chapters:
+- file: getting-started
+- file: user-guide
+  sections:
+    - file: Guide/test
+- file: api
+  sections:
+    - file: API/test
+- file: contributor-guide
+- file: release-notes
