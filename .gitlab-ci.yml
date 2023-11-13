@@ -4,6 +4,8 @@ stages:
 
 jupyter-build:
   stage: build
+  tags:
+    - cpu
   image: python:slim
   before_script:
     # - python -m pip install --upgrade pip
@@ -21,6 +23,8 @@ jupyter-build:
 
 pages:
   stage: deploy
+  tags:
+    - cpu
   image: busybox:latest
   script:
     - mv docs/_build/html docs/public
