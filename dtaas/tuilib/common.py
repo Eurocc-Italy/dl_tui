@@ -109,10 +109,18 @@ class Config:
         if version not in ["client", "server"]:
             raise NameError("config file only available for 'client' or 'server'")
 
+        self.version = version
+
         data = self.load_config(version)
 
         for key, value in data.items():
             setattr(self, key, value)
+
+    def __str__(self):
+        info = " --- DTaaS TUI configuration ---\n"
+        for key, val in self.__dict__.items():
+            info += f"{key:16}: {val}\n"
+        return info
 
     def load_config(self, version):
         # read default configuration file
