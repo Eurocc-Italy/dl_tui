@@ -22,17 +22,18 @@ from dtaas.tuilib.server import launch_job
 
 
 def main():
-    # loading config
+    # reading user input
+    user_input = UserInput.from_cli()
+
+    # loading server config
     config_server = Config(version="server")
     config_server.load_custom_config(user_input.config_server)
     logger.debug(f"config_server: {config_server}")
 
+    # loading client config
     config_client = Config(version="client")
     config_client.load_custom_config(user_input.config_client)
     logger.debug(f"config_client: {config_client}")
-
-    # running query and script
-    user_input = UserInput.from_cli()
 
     # Launching job
     launch_job(
