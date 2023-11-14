@@ -44,6 +44,7 @@ After having set up and activated your virtual environment, follow these steps t
   git clone https://github.com/lbabetto/sqlparse
   pip install -r sqlparse/requirements.txt
   pip install sqlparse/
+  ```
 
   2. Download and install the [DTaaS_TUI](https://gitlab.hpc.cineca.it/lbabetto/DTaaS_TUI) repository and its requirements:
   
