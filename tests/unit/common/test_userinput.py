@@ -38,8 +38,7 @@ def test_sql_and_script():
 
     assert user_input.query == "SELECT * FROM metadata WHERE category = 'motorcycle'"
     assert (
-        user_input.script
-        == "def main(files_in):\n files_out=files_in.copy()\n files_out.reverse()\n return files_out"
+        user_input.script == "def main(files_in):\n files_out=files_in.copy()\n files_out.reverse()\n return files_out"
     )
     assert user_input.id == 42
 
@@ -140,8 +139,7 @@ def test_cli_input_script(monkeypatch):
 
     assert user_input.query == "SELECT * FROM metadata WHERE ID = 123456"
     assert (
-        user_input.script
-        == "def main(files_in):\n files_out=files_in.copy()\n files_out.reverse()\n return files_out"
+        user_input.script == "def main(files_in):\n files_out=files_in.copy()\n files_out.reverse()\n return files_out"
     )
     assert user_input.id == 42
 
@@ -168,3 +166,20 @@ def test_cli_input_script_double_quotes(monkeypatch):
         == 'def main(files_in):\n files_out=files_in.copy()\n files_out.reverse()\n print("DONE!")\n return files_out'
     )
     assert user_input.id == 42
+
+
+def test_config():
+    """
+    Test initialization of UserInput class with only SQL query and custom config
+    """
+
+    data = {
+        "ID": 42,
+        "query": "SELECT * FROM metadata WHERE category = 'motorcycle'",
+        "config_client": {"ip": "localhost"},
+    }
+    user_input = UserInput(data)
+
+    assert user_input.id == 42
+    assert user_input.query == "SELECT * FROM metadata WHERE category = 'motorcycle'"
+    assert user_input.config_client == {"ip": "localhost"}

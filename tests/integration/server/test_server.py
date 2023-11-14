@@ -7,24 +7,25 @@ import pytest
 
 import os
 import subprocess
-from dtaas.tuilib.common import Config, UserInput, sanitize_string
+from dtaas.tuilib.common import UserInput, sanitize_string
 
 
-def test_just_search(setup_test):
+def test_just_search(config_server):
     """
     Search for two specific files
     """
 
-    config = Config("server")
+    config = config_server
     user_input = UserInput(
         {
             "ID": "DTAAS-TUI-TEST-just_search",
             "query": "SELECT * FROM metadata WHERE id = 554625 OR id = 222564",
             "script": r"def main(files_in):\n files_out=files_in.copy()\n return [files_out[0]]",
+            "config_server": config,
         }
     )
 
-    cmd = f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_server "
+    cmd = f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_server.py "
     cmd += f'{{"ID": "{user_input.id}", "query": "{user_input.query}"}}'
     os.system(sanitize_string(version="client", string=cmd))
 
@@ -43,21 +44,22 @@ def test_just_search(setup_test):
     ), "Slurm output file is not empty"
 
 
-def test_return_first(setup_test):
+def test_return_first(config_server):
     """
     Search for two specific files and only return the first item
     """
 
-    config = Config("server")
+    config = config_server
     user_input = UserInput(
         {
             "ID": "DTAAS-TUI-TEST-return_first",
             "query": "SELECT * FROM metadata WHERE id = 554625 OR id = 222564",
             "script": r"def main(files_in):\n files_out=files_in.copy()\n return [files_out[0]]",
+            "config_server": config,
         }
     )
 
-    cmd = f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_server "
+    cmd = f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_server.py "
     cmd += f'{{"ID": "{user_input.id}", "query": "{user_input.query}"}}'
     os.system(sanitize_string(version="client", string=cmd))
 
@@ -86,20 +88,21 @@ def test_return_first(setup_test):
             break
 
 
-def test_invalid_script(setup_test):
+def test_invalid_script(config_server):
     """
     Try breaking the job
     """
 
-    config = Config("server")
+    config = config_server
     user_input = UserInput(
         {
             "ID": "DTAAS-TUI-TEST-invalid_job",
             "query": 'SELECT * FROM metadata WHERE id = "554625" OR id = 222564',
+            "config_server": config,
         }
     )
 
-    cmd = f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_server "
+    cmd = f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_server.py "
     cmd += f'{{"ID": "{user_input.id}", "query": "{user_input.query}"}}'
 
     stdout, stderr = subprocess.Popen(

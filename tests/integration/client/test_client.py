@@ -10,15 +10,16 @@ from zipfile import ZipFile
 from dtaas.tuilib.common import sanitize_string
 
 
-def test_search_only(setup_test):
+def test_search_only(config_client):
     """
     Search for two specific files
     """
 
     query = "SELECT * FROM metadata WHERE id = 554625 OR id = 222564"
 
-    cmd = f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client "
-    cmd += f'{{"ID": "42", "query": "{query}"}}'
+    cmd = f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client.py "
+    cmd += f'{{"ID": "42", "query": "{query}", "config_client": "{config_client.__dict__}"}}'
+
     os.system(sanitize_string(version="client", string=cmd))
 
     assert os.path.exists("results.zip"), "Zipped archive was not created."
@@ -32,7 +33,7 @@ def test_search_only(setup_test):
     os.remove("results.zip")
 
 
-def test_return_first(setup_test):
+def test_return_first(config_client):
     """
     Search for two specific files and only return the first item
     """
@@ -40,8 +41,9 @@ def test_return_first(setup_test):
     query = "SELECT * FROM metadata WHERE id = 554625 OR id = 222564"
     script = r"def main(files_in):\n files_out=files_in.copy()\n return [files_out[0]]"
 
-    cmd = f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client "
-    cmd += f'{{"ID": 42, "query": "{query}", "script": "{script}"}}'
+    cmd = f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client.py "
+    cmd += f'{{"ID": 42, "query": "{query}", "script": "{script}", "config_client": "{config_client.__dict__}"}}'
+
     os.system(sanitize_string(version="client", string=cmd))
 
     assert os.path.exists("results.zip"), "Zipped archive was not created."
@@ -53,15 +55,16 @@ def test_return_first(setup_test):
 
 
 @pytest.mark.xfail  # TODO: consider converting all double quotes to single quotes
-def test_double_quotes_in_SQL(setup_test):
+def test_double_quotes_in_SQL(config_client):
     """
     Search for a specific file using double quotes in SQL query
     """
 
     query = 'SELECT * FROM metadata WHERE captured = "2013-11-14 16:03:19"'
 
-    cmd = f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client "
-    cmd += f'{{"ID": 42, "query": "{query}"}}'
+    cmd = f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client.py "
+    cmd += f'{{"ID": 42, "query": "{query}", "config_client": "{config_client.__dict__}"}}'
+
     os.system(sanitize_string(version="client", string=cmd))
 
     assert os.path.exists("results.zip"), "Zipped archive was not created."
@@ -72,15 +75,16 @@ def test_double_quotes_in_SQL(setup_test):
     os.remove("results.zip")
 
 
-def test_single_quotes_in_SQL(setup_test):
+def test_single_quotes_in_SQL(config_client):
     """
     Search for a specific file using single quotes in SQL query and replacing them with double quotes.
     """
 
     query = "SELECT * FROM metadata WHERE captured = '2013-11-14 16:03:19'"
 
-    cmd = f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client "
-    cmd += f'{{"ID": 42, "query": "{query}"}}'
+    cmd = f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client.py "
+    cmd += f'{{"ID": 42, "query": "{query}", "config_client": "{config_client.__dict__}"}}'
+
     os.system(sanitize_string(version="client", string=cmd))
 
     assert os.path.exists("results.zip"), "Zipped archive was not created."
@@ -92,7 +96,7 @@ def test_single_quotes_in_SQL(setup_test):
 
 
 @pytest.mark.xfail  # TODO: consider converting all double quotes to single quotes
-def test_double_quotes_in_script(setup_test):
+def test_double_quotes_in_script(config_client):
     """
     Search for a specific file using double quotes in user script
     """
@@ -100,8 +104,9 @@ def test_double_quotes_in_script(setup_test):
     query = "SELECT * FROM metadata WHERE id = 554625"
     script = r"def main\(files_in\):\n files_out=files_in.copy\(\)\n print\(\"HELLO!\"\)\n return \[files_out\[0\]\]"
 
-    cmd = f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client "
-    cmd += f'{{"ID": 42, "query": "{query}", "script": "{script}"}}'
+    cmd = f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client.py "
+    cmd += f'{{"ID": 42, "query": "{query}", "script": "{script}", "config_client": "{config_client.__dict__}"}}'
+
     os.system(sanitize_string(version="client", string=cmd))
 
     assert os.path.exists("results.zip"), "Zipped archive was not created."
@@ -112,7 +117,7 @@ def test_double_quotes_in_script(setup_test):
     os.remove("results.zip")
 
 
-def test_single_quotes_in_script(setup_test):
+def test_single_quotes_in_script(config_client):
     """
     Search for a specific file using single quotes in user script
     """
@@ -121,8 +126,8 @@ def test_single_quotes_in_script(setup_test):
 
     script = r"def main(files_in):\n files_out=files_in.copy()\n print('HELLO!')\n return [files_out[0]]"
 
-    cmd = f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client "
-    cmd += rf'{{"ID": 42, "query": "{query}", "script": "{script}"}}'
+    cmd = f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client.py "
+    cmd += rf'{{"ID": 42, "query": "{query}", "script": "{script}", "config_client": "{config_client.__dict__}"}}'
 
     os.system(sanitize_string(version="client", string=cmd))
 

@@ -7,7 +7,7 @@ import pytest
 from dtaas.tuilib.client import run_script
 
 
-def test_run_script(setup_test, generate_test_files):
+def test_run_script(generate_test_files):
     """
     Search for two specific files and return them in reverse order
     """
@@ -24,7 +24,7 @@ def test_run_script(setup_test, generate_test_files):
     ], "Output file list not matching"
 
 
-def test_missing_main(setup_test):
+def test_missing_main():
     """
     Test that if no `main` function is present, the program crashes
     """
@@ -34,7 +34,7 @@ def test_missing_main(setup_test):
         run_script(script=script, files_in=files_in)
 
 
-def test_main_wrong_return(setup_test):
+def test_main_wrong_return():
     """
     Test that if `main` function does not return a list, the program crashes
     """

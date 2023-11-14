@@ -1,7 +1,6 @@
 import pytest
 
 import os
-import json
 from pymongo import MongoClient
 from dtaas.tuilib.common import Config
 import shutil
@@ -9,13 +8,21 @@ from glob import glob
 
 
 @pytest.fixture(scope="module")
-def setup_test():
-    # creating custom configuration files
-    with open(f"{os.path.dirname(os.path.abspath(__file__))}/../dtaas/etc/config_client.json", "w") as f:
-        json.dump({"ip": "localhost"}, f)
-    with open(f"{os.path.dirname(os.path.abspath(__file__))}/../dtaas/etc/config_server.json", "w") as f:
-        json.dump({"walltime": "00:10:00", "nodes": 1, "ntasks_per_node": 1}, f)
+def config_client():
+    config_client = Config("client")
+    config_client.load_custom_config({"ip": "localhost"})
+    return config_client
 
+
+@pytest.fixture(scope="module")
+def config_server():
+    config_server = Config("server")
+    config_server.load_custom_config({"walltime": "00:10:00", "nodes": 1, "ntasks_per_node": 1})
+    return config_server
+
+
+@pytest.fixture(scope="module", autouse=True)
+def cleanup(config_server):
     # run test
     yield
 
@@ -27,17 +34,13 @@ def setup_test():
     if os.path.exists("server.log"):
         os.remove("server.log")
 
-    # removing custom configuration files
-    os.remove(f"{os.path.dirname(os.path.abspath(__file__))}/../dtaas/etc/config_client.json")
-    os.remove(f"{os.path.dirname(os.path.abspath(__file__))}/../dtaas/etc/config_server.json")
-
     # removing temporary folders on HPC
-    server = Config(version="server")
+    server = config_server
     os.system(f"ssh -i {server.ssh_key} {server.user}@{server.host} 'rm -rf ~/DTAAS-TUI-TEST-*'")
 
 
 @pytest.fixture(scope="module")
-def test_collection(setup_test):
+def test_collection(config_client):
     """Setting up testing environment and yielding test MongoDB collection
 
     Yields
@@ -45,17 +48,17 @@ def test_collection(setup_test):
     Collection
         MongoDB Collection on which to run the tests
     """
-    # loading config and setting up testing environment
-    config = Config(version="client")
+    # load config and set up testing environment
+    config = config_client
     mongodb_uri = f"mongodb://{config.user}:{config.password}@{config.ip}:{config.port}/"
 
-    # connecting to client
+    # connect to client
     client = MongoClient(mongodb_uri)
 
-    # accessing collection
+    # access collection
     collection = client[config.database][config.collection]
 
-    # running tests
+    # run tests
     yield collection
 
 

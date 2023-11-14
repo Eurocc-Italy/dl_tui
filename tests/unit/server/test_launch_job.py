@@ -6,16 +6,16 @@ import pytest
 # TODO: make a mock test file and test database so the tests do not rely on any previously prepared database
 
 import os
-from dtaas.tuilib.common import Config, UserInput
+from dtaas.tuilib.common import UserInput
 from dtaas.tuilib.server import launch_job
 
 
-def test_just_search():
+def test_just_search(config_server):
     """
     Search for two specific files
     """
 
-    config = Config("server")
+    config = config_server
     user_input = UserInput(
         {
             "ID": "DTAAS-TUI-TEST-just_search",
@@ -35,18 +35,29 @@ def test_just_search():
     assert (
         os.system(f"ssh -i {config.ssh_key} {config.user}@{config.host} 'ls ~/{user_input.id}/results.zip'") == 0
     ), "Results file not found"
+    # checking zip content
+    assert (
+        "COCO_val2014_000000554625.jpg"
+        in os.popen(f"ssh -i {config.ssh_key} {config.user}@{config.host} 'unzip -l ~/{user_input.id}/results.zip'")
+        .read()
+        .split()
+        and "COCO_val2014_000000222564.jpg"
+        in os.popen(f"ssh -i {config.ssh_key} {config.user}@{config.host} 'unzip -l ~/{user_input.id}/results.zip'")
+        .read()
+        .split()
+    ), "Missing output file"
     # checking that slurm output is empty
     assert (
         os.popen(f"ssh -i {config.ssh_key} {config.user}@{config.host} 'cat ~/{user_input.id}/slurm*'").read() == " \n"
     ), "Slurm output file is not empty"
 
 
-def test_return_first():
+def test_return_first(config_server):
     """
     Search for two specific files and only return the first item
     """
 
-    config = Config("server")
+    config = config_server
     user_input = UserInput(
         {
             "ID": "DTAAS-TUI-TEST-return_first",
@@ -80,12 +91,12 @@ def test_return_first():
     ), "Slurm output file is not empty"
 
 
-def test_invalid_script():
+def test_invalid_script(config_server):
     """
     Try breaking the job
     """
 
-    config = Config("server")
+    config = config_server
     user_input = UserInput(
         {
             "ID": "DTAAS-TUI-TEST-invalid_job",

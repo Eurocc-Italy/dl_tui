@@ -37,8 +37,12 @@ from dtaas.tuilib.client import wrapper
 
 
 def main():
-    # loading config
+    # reading user input
+    user_input = UserInput.from_cli()
+
+    # loading config and overwriting custom options
     config = Config(version="client")
+    config.load_custom_config(user_input.config_client)
     logger.debug(config)
 
     # setting up MongoDB URI
@@ -52,11 +56,12 @@ def main():
     logger.info(f"Loading database {config.database}, collection {config.collection}")
     collection = client[config.database][config.collection]
 
-    # running query and script
-    user_input = UserInput.from_cli()
-
     wrapper(
         collection=collection,
         sql_query=user_input.query,
         script=user_input.script,
     )
+
+
+if __name__ == "__main__":
+    main()
