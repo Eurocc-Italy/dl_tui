@@ -35,23 +35,25 @@ from pymongo import MongoClient
 from dtaas.tuilib.common import Config, UserInput
 from dtaas.tuilib.client import wrapper
 
-# loading config and setting up MongoDB URI
-config = Config(version="client")
-mongodb_uri = f"mongodb://{config.user}:{config.password}@{config.ip}:{config.port}/"
 
-# connecting to client
-logger.info(f"Connecting to client: {mongodb_uri}")
-client = MongoClient(mongodb_uri)
+def main():
+    # loading config and setting up MongoDB URI
+    config = Config(version="client")
+    mongodb_uri = f"mongodb://{config.user}:{config.password}@{config.ip}:{config.port}/"
 
-# accessing collection
-logger.info(f"Loading database {config.database}, collection {config.collection}")
-collection = client[config.database][config.collection]
+    # connecting to client
+    logger.info(f"Connecting to client: {mongodb_uri}")
+    client = MongoClient(mongodb_uri)
 
-# running query and script
-user_input = UserInput.from_cli()
+    # accessing collection
+    logger.info(f"Loading database {config.database}, collection {config.collection}")
+    collection = client[config.database][config.collection]
 
-wrapper(
-    collection=collection,
-    sql_query=user_input.query,
-    script=user_input.script,
-)
+    # running query and script
+    user_input = UserInput.from_cli()
+
+    wrapper(
+        collection=collection,
+        sql_query=user_input.query,
+        script=user_input.script,
+    )

@@ -21,14 +21,15 @@ from dtaas.tuilib.common import Config, UserInput
 from dtaas.tuilib.server import launch_job
 
 
-# loading config
-config = Config(version="server")
+def main():
+    # loading config
+    config = Config(version="server")
 
-# running query and script
-user_input = UserInput.from_cli()
+    # running query and script
+    user_input = UserInput.from_cli()
 
-# Launching job
-launch_job(
-    config=config,
-    user_input=user_input,
-)
+    # Launching job
+    launch_job(
+        config=config,
+        user_input=user_input,
+    )
