@@ -42,7 +42,8 @@ def main():
 
     # loading config and overwriting custom options
     config = Config(version="client")
-    config.load_custom_config(user_input.config_client)
+    if user_input.config_client:
+        config.load_custom_config(user_input.config_client)
     logger.debug(config)
 
     # setting up MongoDB URI
