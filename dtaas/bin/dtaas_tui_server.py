@@ -24,6 +24,7 @@ from dtaas.tuilib.server import launch_job
 def main():
     # loading config
     config = Config(version="server")
+    logger.debug(config)
 
     # running query and script
     user_input = UserInput.from_cli()

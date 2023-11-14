@@ -37,8 +37,11 @@ from dtaas.tuilib.client import wrapper
 
 
 def main():
-    # loading config and setting up MongoDB URI
+    # loading config
     config = Config(version="client")
+    logger.debug(config)
+
+    # setting up MongoDB URI
     mongodb_uri = f"mongodb://{config.user}:{config.password}@{config.ip}:{config.port}/"
 
     # connecting to client
