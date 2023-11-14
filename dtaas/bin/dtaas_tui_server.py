@@ -31,19 +31,13 @@ def main():
         config_server.load_custom_config(user_input.config_server)
     logger.debug(f"config_server: {config_server}")
 
-    # loading client config
-    config_client = Config(version="client")
-    if user_input.config_client:
-        config_client.load_custom_config(user_input.config_client)
-    logger.debug(f"config_client: {config_client}")
-
     # Launching job
     launch_job(
         config_server=config_server,
         job_id=user_input.id,
         query=user_input.query,
         script=user_input.script,
-        config_client=config_client,
+        config_client=user_input.config_client,
     )
 
 
