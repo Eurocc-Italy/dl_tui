@@ -16,25 +16,25 @@ from dtaas.tuilib.common import Config, sanitize_string
 
 
 def launch_job(
-    config_server: Config,
     job_id: str,
     query: str,
     script: str = None,
+    config_server: Config = None,
     config_client: Config = None,
 ) -> Tuple[str, str]:
     """Launch Slurm job on G100 with the user script on the files returned by the TUI filter
 
     Parameters
     ----------
-    config_server : Config
-        configuration instance with all the relevant data for the job (server-side)
     job_id : str,
         unique identifier for the job,
     query : str
         SQL query to run on the MongoDB database
-    script : str
+    script : str, optional
         Content of the Python script to be run on HPC
-    config_client : Config
+    config_server : Config, optional
+        configuration instance with all the relevant data for the job (server-side)
+    config_client : Config, optional
         configuration instance with all the relevant data for the job (client-side)
 
     Returns
@@ -53,14 +53,19 @@ def launch_job(
     if script:
         logger.debug(f"Received script: \n{script}")
 
+    # loading server config
+    config = Config("server")
+    if config_server:
+        config.load_custom_config(config_server)
+
     # SLURM parameters
-    partition = config_server.partition
-    account = config_server.account
-    walltime = config_server.walltime
-    mail = config_server.mail
-    nodes = config_server.nodes
-    ntasks_per_node = config_server.ntasks_per_node
-    ssh_key = config_server.ssh_key
+    partition = config.partition
+    account = config.account
+    walltime = config.walltime
+    mail = config.mail
+    nodes = config.nodes
+    ntasks_per_node = config.ntasks_per_node
+    ssh_key = config.ssh_key
 
     ### GENERATING CLIENT COMMAND ###
 
@@ -85,7 +90,7 @@ def launch_job(
     wrap_cmd = "module load python; "
 
     # sourcing virtual environment
-    wrap_cmd += f"source {config_server.venv_path}/bin/activate; "
+    wrap_cmd += f"source {config.venv_path}/bin/activate; "
 
     # adding client command
     wrap_cmd += client_cmd
@@ -103,7 +108,7 @@ def launch_job(
     ssh_cmd += f"--wrap '{wrap_cmd}'"
 
     # TODO: implement ssh via chain user
-    full_ssh_cmd = rf'ssh -i {ssh_key} {config_server.user}@{config_server.host} "{ssh_cmd}"'
+    full_ssh_cmd = rf'ssh -i {ssh_key} {config.user}@{config.host} "{ssh_cmd}"'
 
     logger.debug(f"Launching command via ssh:\n{ssh_cmd}")
     logger.debug(f"Full ssh command:\n{full_ssh_cmd}")

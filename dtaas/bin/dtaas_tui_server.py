@@ -17,7 +17,7 @@ formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(messag
 fh.setFormatter(formatter)
 logger.addHandler(fh)
 
-from dtaas.tuilib.common import Config, UserInput
+from dtaas.tuilib.common import UserInput
 from dtaas.tuilib.server import launch_job
 
 
@@ -25,15 +25,9 @@ def main():
     # reading user input
     user_input = UserInput.from_cli()
 
-    # loading server config
-    config_server = Config(version="server")
-    if user_input.config_server:
-        config_server.load_custom_config(user_input.config_server)
-    logger.debug(f"config_server: {config_server}")
-
     # Launching job
     launch_job(
-        config_server=config_server,
+        config_server=user_input.config_server,
         job_id=user_input.id,
         query=user_input.query,
         script=user_input.script,
