@@ -12,18 +12,30 @@ logger = logging.getLogger(__name__)
 
 import subprocess
 from typing import Tuple
-from dtaas.tuilib.common import Config, UserInput, sanitize_string
+from dtaas.tuilib.common import Config, sanitize_string
 
 
-def launch_job(config: Config, user_input: UserInput) -> Tuple[str, str]:
+def launch_job(
+    config_server: Config,
+    job_id: str,
+    query: str,
+    script: str = None,
+    config_client: Config = None,
+) -> Tuple[str, str]:
     """Launch Slurm job on G100 with the user script on the files returned by the TUI filter
 
     Parameters
     ----------
-    config : Config
-        configuration instance with all the relevant data for the job (server)
-    user_input : UserInput
-        class instance containing the relevant user input (query, script)
+    config_server : Config
+        configuration instance with all the relevant data for the job (server-side)
+    job_id : str,
+        unique identifier for the job,
+    query : str
+        SQL query to run on the MongoDB database
+    script : str
+        Content of the Python script to be run on HPC
+    config_client : Config
+        configuration instance with all the relevant data for the job (client-side)
 
     Returns
     -------
@@ -36,28 +48,32 @@ def launch_job(config: Config, user_input: UserInput) -> Tuple[str, str]:
         if "Submitted batch job" is not found in stdout, meaning the job was not launched
     """
 
-    logger.debug(f"Received query: {user_input.query}")
+    logger.debug(f"Received query: {query}")
 
-    if user_input.script:
-        logger.debug(f"Received script: \n{user_input.script}")
+    if script:
+        logger.debug(f"Received script: \n{script}")
 
     # SLURM parameters
-    partition = config.partition
-    account = config.account
-    walltime = config.walltime
-    mail = config.mail
-    nodes = config.nodes
-    ntasks_per_node = config.ntasks_per_node
-    ssh_key = config.ssh_key
+    partition = config_server.partition
+    account = config_server.account
+    walltime = config_server.walltime
+    mail = config_server.mail
+    nodes = config_server.nodes
+    ntasks_per_node = config_server.ntasks_per_node
+    ssh_key = config_server.ssh_key
 
     ### GENERATING CLIENT COMMAND ###
 
     # Calling client version of TUI with required arguments
-    client_cmd = f'dtaas_tui_client {{"ID": "{user_input.id}", "query": "{user_input.query}"'
+    client_cmd = f'dtaas_tui_client {{"ID": "{job_id}", "query": "{query}"'
 
     # adding script, if one was provided
-    if user_input.script:
-        client_cmd += f', "script": "{user_input.script}"'
+    if script:
+        client_cmd += f', "script": "{script}"'
+
+    # adding client config, if one was provided
+    if config_client:
+        client_cmd += f', "config_client": "{config_client.__dict__}"'
 
     # closing JSON-formatted string and sanitizing command
     client_cmd += "}"
@@ -69,7 +85,7 @@ def launch_job(config: Config, user_input: UserInput) -> Tuple[str, str]:
     wrap_cmd = "module load python; "
 
     # sourcing virtual environment
-    wrap_cmd += f"source {config.venv_path}/bin/activate; "
+    wrap_cmd += f"source {config_server.venv_path}/bin/activate; "
 
     # adding client command
     wrap_cmd += client_cmd
@@ -78,8 +94,8 @@ def launch_job(config: Config, user_input: UserInput) -> Tuple[str, str]:
     wrap_cmd += "; touch JOB_DONE"
 
     ### GENERATING BASH COMMAND TO BE RUN VIA SSH ###
-    ssh_cmd = f"mkdir {user_input.id}; "
-    ssh_cmd += f"cd {user_input.id}; "
+    ssh_cmd = f"mkdir {job_id}; "
+    ssh_cmd += f"cd {job_id}; "
     ssh_cmd += f"sbatch -p {partition} -A {account} "
     ssh_cmd += f"--mail-type ALL --mail-user {mail} "
     ssh_cmd += f"-t {walltime} -N {nodes} "
@@ -87,7 +103,7 @@ def launch_job(config: Config, user_input: UserInput) -> Tuple[str, str]:
     ssh_cmd += f"--wrap '{wrap_cmd}'"
 
     # TODO: implement ssh via chain user
-    full_ssh_cmd = rf'ssh -i {ssh_key} {config.user}@{config.host} "{ssh_cmd}"'
+    full_ssh_cmd = rf'ssh -i {ssh_key} {config_server.user}@{config_server.host} "{ssh_cmd}"'
 
     logger.debug(f"Launching command via ssh:\n{ssh_cmd}")
     logger.debug(f"Full ssh command:\n{full_ssh_cmd}")
