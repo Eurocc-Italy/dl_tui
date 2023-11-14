@@ -1,4 +1,5 @@
 sh
+wheel
 pymongo
 pyparsing
-sqlparse
+# sqlparse
