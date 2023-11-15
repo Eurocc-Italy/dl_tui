@@ -19,6 +19,17 @@ The wrapper then does the following:
 Author: @lbabetto
 """
 
+# setting up logging
+import logging
+
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+fh = logging.FileHandler("client.log", mode="w")
+fh.setLevel(logging.DEBUG)
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+fh.setFormatter(formatter)
+logger.addHandler(fh)
+
 from pymongo import MongoClient
 
 import sys
@@ -64,16 +75,4 @@ def main():
 
 
 if __name__ == "__main__":
-    # setting up logging
-    import logging
-
-    logger = logging.getLogger()
-    logger.setLevel(logging.DEBUG)
-    fh = logging.FileHandler("client.log", mode="w")
-    fh.setLevel(logging.DEBUG)
-    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-    fh.setFormatter(formatter)
-    logger.addHandler(fh)
-
-    # running script
     main()

@@ -6,6 +6,17 @@ send a HPC job on G100 which calls the client program on the compute nodes and r
 Author: @lbabetto
 """
 
+# setting up logging
+import logging
+
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+fh = logging.FileHandler("server.log", mode="w")
+fh.setLevel(logging.DEBUG)
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+fh.setFormatter(formatter)
+logger.addHandler(fh)
+
 import sys
 from dtaas.tuilib.server import create_remote_directory, copy_json_input, copy_user_script, launch_job
 
@@ -21,16 +32,4 @@ def main():
 
 
 if __name__ == "__main__":
-    # setting up logging
-    import logging
-
-    logger = logging.getLogger()
-    logger.setLevel(logging.DEBUG)
-    fh = logging.FileHandler("server.log", mode="w")
-    fh.setLevel(logging.DEBUG)
-    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-    fh.setFormatter(formatter)
-    logger.addHandler(fh)
-
-    # running main function
     main()
