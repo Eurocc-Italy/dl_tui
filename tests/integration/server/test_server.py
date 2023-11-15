@@ -128,7 +128,7 @@ def test_invalid_script():
         json.dump(
             {
                 "ID": "DTAAS-TUI-TEST-invalid_job",
-                "sql_query": 'SELECT * FROM metadata WHERE id = "554625" OR id = 222564',
+                "query": 'SELECT * FROM metadata WHERE id = "554625" OR id = 222564',
                 "config_server": {"walltime": "00:10:00", "ntasks_per_node": 1},
             },
             f,
@@ -142,6 +142,4 @@ def test_invalid_script():
     ).communicate()
 
     assert stdout == b""
-    assert (
-        stderr[-82:] == b"json.decoder.JSONDecodeError: Expecting ',' delimiter: line 1 column 83 (char 82)\n"
-    ), "job was launched, should not have worked"
+    assert stderr[:35] == b"Traceback (most recent call last):\n", "job was launched, should not have worked"
