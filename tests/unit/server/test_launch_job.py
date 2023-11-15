@@ -143,7 +143,7 @@ def test_invalid_script(config_server):
         json.dump(
             {
                 "ID": "DTAAS-TUI-TEST-invalid_job",
-                "sql_query": 'SELECT * FROM metadata WHERE id = "554625" OR id = 222564',
+                "sql_query": "blablabla",
                 "config_server": {"walltime": "00:10:00", "ntasks_per_node": 1},
             },
             f,
@@ -175,6 +175,6 @@ def test_invalid_script(config_server):
     assert (
         os.popen(
             f"ssh -i {config.ssh_key} {config.user}@{config.host} 'cat ~/DTAAS-TUI-TEST-invalid_job/slurm*'"
-        ).read()[-82:]
-        == "json.decoder.JSONDecodeError: Expecting ',' delimiter: line 1 column 83 (char 82)\n"
-    ), "Slurm output file is not empty"
+        ).read()[:35]
+        == " \nTraceback (most recent call last)"
+    ), "Unexpected output in Slurm file."
