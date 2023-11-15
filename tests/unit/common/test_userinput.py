@@ -4,7 +4,7 @@ import pytest
 # Testing UserInput class in common.py library
 #
 
-
+import os, json
 from dtaas.tuilib.common import UserInput
 
 
@@ -14,14 +14,14 @@ def test_sql_only():
     """
 
     data = {
+        "ID": "42",
         "query": "SELECT * FROM metadata WHERE category = 'motorcycle'",
-        "ID": 42,
     }
     user_input = UserInput(data)
 
+    assert user_input.id == "42"
     assert user_input.query == "SELECT * FROM metadata WHERE category = 'motorcycle'"
-    assert user_input.script == None
-    assert user_input.id == 42
+    assert user_input.script_path == None
 
 
 def test_sql_and_script():
@@ -29,18 +29,21 @@ def test_sql_and_script():
     Test initialization of UserInput class with only SQL query
     """
 
+    with open("user_script.py", "w") as f:
+        f.write("def main(files_in):\n files_out=files_in.copy()\n files_out.reverse()\n return files_out")
+
     data = {
+        "ID": "42",
         "query": "SELECT * FROM metadata WHERE category = 'motorcycle'",
-        "script": "def main(files_in):\n files_out=files_in.copy()\n files_out.reverse()\n return files_out",
-        "ID": 42,
+        "script_path": "user_script.py",
     }
     user_input = UserInput(data)
 
+    assert user_input.id == "42"
     assert user_input.query == "SELECT * FROM metadata WHERE category = 'motorcycle'"
-    assert (
-        user_input.script == "def main(files_in):\n files_out=files_in.copy()\n files_out.reverse()\n return files_out"
-    )
-    assert user_input.id == 42
+    assert user_input.script_path == "user_script.py"
+    with open(user_input.script_path, "r") as f:
+        assert f.read() == "def main(files_in):\n files_out=files_in.copy()\n files_out.reverse()\n return files_out"
 
 
 def test_missing_query():
@@ -48,7 +51,7 @@ def test_missing_query():
     Test that the initialization fails if query is not provided
     """
     with pytest.raises(KeyError):
-        data = {"ID": 42}
+        data = {"ID": "42"}
         UserInput(data)
 
 
@@ -69,16 +72,16 @@ def test_cli_input_sql(monkeypatch):
     monkeypatch.setattr(
         "sys.argv",
         [
-            "dtaas_tui_client",
-            '{"query": "SELECT * FROM metadata WHERE ID = 123456", "ID": 42}',
+            f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client.py",
+            '{"ID": "42", "query": "SELECT * FROM metadata WHERE ID = 123456"}',
         ],
     )
 
     user_input = UserInput.from_cli()
 
+    assert user_input.id == "42"
     assert user_input.query == "SELECT * FROM metadata WHERE ID = 123456"
-    assert user_input.script == None
-    assert user_input.id == 42
+    assert user_input.script_path == None
 
 
 @pytest.mark.xfail  # TODO: evaluate converting all double quotes to single quotes
@@ -90,16 +93,16 @@ def test_cli_input_sql_double_quotes(monkeypatch):
     monkeypatch.setattr(
         "sys.argv",
         [
-            "dtaas_tui_client",
-            '{"query": "SELECT * FROM metadata WHERE category = "motorcycle"", "ID": 42}',
+            f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client.py",
+            '{"ID": "42", "query": "SELECT * FROM metadata WHERE category = "motorcycle""}',
         ],
     )
 
     user_input = UserInput.from_cli()
 
+    assert user_input.id == "42"
     assert user_input.query == 'SELECT * FROM metadata WHERE category = "motorcycle"'
-    assert user_input.script == None
-    assert user_input.id == 42
+    assert user_input.script_path == None
 
 
 def test_cli_input_sql_single_quotes(monkeypatch):
@@ -110,16 +113,16 @@ def test_cli_input_sql_single_quotes(monkeypatch):
     monkeypatch.setattr(
         "sys.argv",
         [
-            "dtaas_tui_client",
-            """{"query": "SELECT * FROM metadata WHERE category = 'motorcycle'", "ID": 42}""",
+            f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client.py",
+            """{"ID": "42", "query": "SELECT * FROM metadata WHERE category = 'motorcycle'"}""",
         ],
     )
 
     user_input = UserInput.from_cli()
 
+    assert user_input.id == "42"
     assert user_input.query == "SELECT * FROM metadata WHERE category = 'motorcycle'"
-    assert user_input.script == None
-    assert user_input.id == 42
+    assert user_input.script_path == None
 
 
 def test_cli_input_script(monkeypatch):
@@ -127,21 +130,24 @@ def test_cli_input_script(monkeypatch):
     Test initialization of UserInput class from command-line input (with script)
     """
 
+    with open("user_script.py", "w") as f:
+        f.write("def main(files_in):\n files_out=files_in.copy()\n files_out.reverse()\n return files_out")
+
     monkeypatch.setattr(
         "sys.argv",
         [
-            "dtaas_tui_client",
-            r"""{"ID": 42, "query": "SELECT * FROM metadata WHERE ID = 123456", "script": "def main(files_in):\n files_out=files_in.copy()\n files_out.reverse()\n return files_out"}""",
+            f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client.py",
+            '{"ID": "42", "query": "SELECT * FROM metadata WHERE ID = 123456", "script_path": "user_script.py"}',
         ],
     )
 
     user_input = UserInput.from_cli()
 
+    assert user_input.id == "42"
     assert user_input.query == "SELECT * FROM metadata WHERE ID = 123456"
-    assert (
-        user_input.script == "def main(files_in):\n files_out=files_in.copy()\n files_out.reverse()\n return files_out"
-    )
-    assert user_input.id == 42
+    assert user_input.script_path == "user_script.py"
+    with open(user_input.script_path, "r") as f:
+        assert f.read() == "def main(files_in):\n files_out=files_in.copy()\n files_out.reverse()\n return files_out"
 
 
 @pytest.mark.xfail  # TODO: evaluate converting all double quotes to single quotes
@@ -150,22 +156,29 @@ def test_cli_input_script_double_quotes(monkeypatch):
     Test initialization of UserInput class from command-line input (with double quotes in script)
     """
 
+    with open("user_script.py", "r") as f:
+        f.write(
+            'def main(files_in):\n files_out=files_in.copy()\n files_out.reverse()\n print("DONE!")\n return files_out'
+        )
+
     monkeypatch.setattr(
         "sys.argv",
         [
-            "dtaas_tui_client",
-            r"""{"ID": 42, "query": "SELECT * FROM metadata WHERE ID = 123456", "script": "def main(files_in):\n files_out=files_in.copy()\n files_out.reverse()\n print("DONE!")\n return files_out"}""",
+            f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client.py",
+            '{"ID": 42, "query": "SELECT * FROM metadata WHERE ID = 123456", "script_path": "user_script.py"}',
         ],
     )
 
     user_input = UserInput.from_cli()
 
     assert user_input.query == "SELECT * FROM metadata WHERE ID = 123456"
-    assert (
-        user_input.script
-        == 'def main(files_in):\n files_out=files_in.copy()\n files_out.reverse()\n print("DONE!")\n return files_out'
-    )
+    assert user_input.script == "user_script.py"
     assert user_input.id == 42
+    with open(user_input.script_path, "r") as f:
+        assert (
+            f.read()
+            == 'def main(files_in):\n files_out=files_in.copy()\n files_out.reverse()\n print("DONE!")\n return files_out'
+        )
 
 
 def test_config():
@@ -182,4 +195,40 @@ def test_config():
 
     assert user_input.id == 42
     assert user_input.query == "SELECT * FROM metadata WHERE category = 'motorcycle'"
+    assert user_input.script_path == None
     assert user_input.config_client == {"ip": "localhost"}
+
+
+def test_json_input_sql(monkeypatch):
+    """
+    Test initialization of UserInput class from JSON file input
+    """
+
+    with open("user_script.py", "w") as f:
+        f.write("def main(files_in):\n files_out=files_in.copy()\n files_out.reverse()\n return files_out")
+
+    with open("input.json", "w") as f:
+        json.dump(
+            {
+                "ID": "42",
+                "query": "SELECT * FROM metadata WHERE ID = 123456",
+                "script_path": "user_script.py",
+            },
+            f,
+        )
+
+    monkeypatch.setattr(
+        "sys.argv",
+        [
+            f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client.py",
+            "input.json",
+        ],
+    )
+
+    user_input = UserInput.from_json()
+
+    assert user_input.id == "42"
+    assert user_input.query == "SELECT * FROM metadata WHERE ID = 123456"
+    assert user_input.script_path == "user_script.py"
+    with open(user_input.script_path, "r") as f:
+        assert f.read() == "def main(files_in):\n files_out=files_in.copy()\n files_out.reverse()\n return files_out"

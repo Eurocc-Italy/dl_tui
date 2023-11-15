@@ -21,17 +21,21 @@ def config_server():
     return config_server
 
 
-@pytest.fixture(scope="module", autouse=True)
+@pytest.fixture(scope="function", autouse=True)
 def cleanup(config_server):
     # run test
     yield
 
-    # cleanup temporary files
-    for match in glob("run_script_*"):
+    # cleanup temporary files and folders
+    for match in glob("run_script*"):
         shutil.rmtree(match)
-    if os.path.exists("client.log"):
+    for match in glob("user_script*.py"):
+        os.remove(match)
+    for match in glob("input*.json"):
+        os.remove(match)
+    if os.path.exists("client*.log"):
         os.remove("client.log")
-    if os.path.exists("server.log"):
+    if os.path.exists("server*.log"):
         os.remove("server.log")
 
     # removing temporary folders on HPC

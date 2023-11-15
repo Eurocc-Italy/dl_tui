@@ -54,8 +54,8 @@ class UserInput:
         Unique ID of the run (preferably of the UUID.hex type)
     query : str
         SQL query
-    script : str
-        Python script with the analysis on the files returned by the SQL query
+    script_path : str
+        Path to the Python script with the analysis on the files returned by the SQL query
     config_client : dict
         dictionary with custom configuration options for client version
     config_server : dict
@@ -74,9 +74,9 @@ class UserInput:
         self.query = data["query"]
 
         try:
-            self.script = data["script"]
+            self.script_path = data["script_path"]
         except KeyError:  # no script provided
-            self.script = None
+            self.script_path = None
 
         try:
             self.config_client = json.loads(data["config_client"].replace("'", '"'))
@@ -94,14 +94,14 @@ class UserInput:
 
         logger.debug(f"UserInput.id: {self.id}")
         logger.debug(f"UserInput.query: {self.query}")
-        logger.debug(f"UserInput.script: {self.script}")
+        logger.debug(f"UserInput.script_path: {self.script_path}")
         logger.debug(f"UserInput.config_client: {self.config_client}")
         logger.debug(f"UserInput.config_server: {self.config_server}")
 
     @classmethod
     def from_cli(cls):
         """Class constructor from command-line argument.
-        Expects a properly JSON-formatted dictionary as input.
+        Expects a properly JSON-formatted dictionary as command line argument.
 
         Returns
         -------
@@ -111,6 +111,33 @@ class UserInput:
         user_input = " ".join(sys.argv[1:])
         logger.info(f"Received input from CLI: {user_input}")
         data = json.loads(user_input)
+        return cls(data)
+
+    @classmethod
+    def from_json(cls):
+        """Class constructor from JSON file.
+        Expects the path to a JSON file as command line argument
+
+        Returns
+        -------
+        UserInput
+            UserInput instance initialized directly from command-line
+
+        Raises
+        ------
+        TypeError
+            if the user does not provide a .json file
+        """
+
+        json_path = sys.argv[1]
+
+        if not json_path.endswith(".json"):
+            raise TypeError("Provided input is not a .json file")
+
+        with open(json_path, "r") as f:
+            data = json.load(f)
+        logger.info(f"Received input from JSON file: {data}")
+
         return cls(data)
 
 
