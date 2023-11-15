@@ -26,14 +26,9 @@ from dtaas.tuilib.common import Config, UserInput
 from dtaas.tuilib.client import wrapper
 
 
-def main(json_path: str):
-    """Client-side (HPC) version of the DTaaS TUI
-
-    Parameters
-    ----------
-    json_path : str
-        path to the JSON file with the input info
-    """
+def main():
+    """Client-side (HPC) version of the DTaaS TUI"""
+    json_path = sys.argv[1]
 
     # reading user input
     user_input = UserInput.from_json(json_path=json_path)
@@ -81,4 +76,4 @@ if __name__ == "__main__":
     logger.addHandler(fh)
 
     # running script
-    main(json_path=sys.argv[1])
+    main()

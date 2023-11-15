@@ -10,14 +10,9 @@ import sys
 from dtaas.tuilib.server import create_remote_directory, copy_json_input, copy_user_script, launch_job
 
 
-def main(json_path: str):
-    """Server-side (VM) version of the DTaaS TUI
-
-    Parameters
-    ----------
-    json_path : str
-        path to the JSON file with the input info
-    """
+def main():
+    """Server-side (VM) version of the DTaaS TUI"""
+    json_path = sys.argv[1]
 
     create_remote_directory(json_path=json_path)
     copy_json_input(json_path=json_path)
@@ -38,4 +33,4 @@ if __name__ == "__main__":
     logger.addHandler(fh)
 
     # running main function
-    main(json_path=sys.argv[1])
+    main()
