@@ -29,13 +29,13 @@ def cleanup(config_server):
     # cleanup temporary files and folders
     for match in glob("run_script*"):
         shutil.rmtree(match)
-    for match in glob("user_script*.py"):
-        os.remove(match)
-    for match in glob("input*.json"):
-        os.remove(match)
-    if os.path.exists("client*.log"):
+    if os.path.exists("user_script.py"):
+        os.remove("user_script.py")
+    if os.path.exists("input.json"):
+        os.remove("input.json")
+    if os.path.exists("client.log"):
         os.remove("client.log")
-    if os.path.exists("server*.log"):
+    if os.path.exists("server.log"):
         os.remove("server.log")
 
     # removing temporary folders on HPC

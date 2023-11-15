@@ -19,26 +19,24 @@ The wrapper then does the following:
 Author: @lbabetto
 """
 
-# setting up logging
-import logging
-
-logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
-fh = logging.FileHandler("client.log", mode="w")
-fh.setLevel(logging.DEBUG)
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-fh.setFormatter(formatter)
-logger.addHandler(fh)
-
 from pymongo import MongoClient
 
+import sys
 from dtaas.tuilib.common import Config, UserInput
 from dtaas.tuilib.client import wrapper
 
 
-def main():
+def main(json_path: str):
+    """Client-side (HPC) version of the DTaaS TUI
+
+    Parameters
+    ----------
+    json_path : str
+        path to the JSON file with the input info
+    """
+
     # reading user input
-    user_input = UserInput.from_cli()
+    user_input = UserInput.from_json(json_path=json_path)
 
     # loading config and overwriting custom options
     config = Config(version="client")
@@ -57,12 +55,27 @@ def main():
     logger.info(f"Loading database {config.database}, collection {config.collection}")
     collection = client[config.database][config.collection]
 
+    with open(user_input.script_path, "r") as f:
+        script = f.read()
+
     wrapper(
         collection=collection,
         sql_query=user_input.query,
-        script=user_input.script,
+        script=script,
     )
 
 
 if __name__ == "__main__":
-    main()
+    # setting up logging
+    import logging
+
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+    fh = logging.FileHandler("client.log", mode="w")
+    fh.setLevel(logging.DEBUG)
+    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    fh.setFormatter(formatter)
+    logger.addHandler(fh)
+
+    # running script
+    main(json_path=sys.argv[1])

@@ -52,7 +52,7 @@ class UserInput:
     ----------
     ID : str
         Unique ID of the run (preferably of the UUID.hex type)
-    query : str
+    sql_query : str
         SQL query
     script_path : str
         Path to the Python script with the analysis on the files returned by the SQL query
@@ -66,12 +66,12 @@ class UserInput:
         """_summary_
 
         Args:
-            data (Dict[str, str]): dictionary with the user input (ID, query, script, config)
+            data (Dict[str, str]): dictionary with the user input (ID, sql_query, script, config)
         """
         logger.debug(f"Received input dict: {data}")
 
         self.id = data["ID"]
-        self.query = data["query"]
+        self.sql_query = data["sql_query"]
 
         try:
             self.script_path = data["script_path"]
@@ -93,7 +93,7 @@ class UserInput:
             self.config_server = data["config_server"]
 
         logger.debug(f"UserInput.id: {self.id}")
-        logger.debug(f"UserInput.query: {self.query}")
+        logger.debug(f"UserInput.sql_query: {self.sql_query}")
         logger.debug(f"UserInput.script_path: {self.script_path}")
         logger.debug(f"UserInput.config_client: {self.config_client}")
         logger.debug(f"UserInput.config_server: {self.config_server}")
@@ -114,9 +114,14 @@ class UserInput:
         return cls(data)
 
     @classmethod
-    def from_json(cls):
+    def from_json(cls, json_path: str):
         """Class constructor from JSON file.
         Expects the path to a JSON file as command line argument
+
+        Parameters
+        ----------
+        json_path : str
+            Path to the JSON file with the input info
 
         Returns
         -------
@@ -128,8 +133,6 @@ class UserInput:
         TypeError
             if the user does not provide a .json file
         """
-
-        json_path = sys.argv[1]
 
         if not json_path.endswith(".json"):
             raise TypeError("Provided input is not a .json file")

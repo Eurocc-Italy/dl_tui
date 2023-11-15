@@ -12,30 +12,143 @@ logger = logging.getLogger(__name__)
 
 import subprocess
 from typing import Tuple
-from dtaas.tuilib.common import Config, sanitize_string
+from dtaas.tuilib.common import Config, UserInput
 
 
-def launch_job(
-    job_id: str,
-    query: str,
-    script: str = None,
-    config_server: Config = None,
-    config_client: Config = None,
-) -> Tuple[str, str]:
-    """Launch Slurm job on G100 with the user script on the files returned by the TUI filter
+def create_remote_directory(json_path: str) -> Tuple[str, str]:
+    """Create remote temporary directory on HPC
 
     Parameters
     ----------
-    job_id : str,
-        unique identifier for the job,
-    query : str
-        SQL query to run on the MongoDB database
-    script : str, optional
-        Content of the Python script to be run on HPC
-    config_server : Config, optional
-        configuration instance with all the relevant data for the job (server-side)
-    config_client : Config, optional
-        configuration instance with all the relevant data for the job (client-side)
+    json_path : str
+        Path to the JSON file with the user input
+
+    Returns
+    -------
+    Tuple[str, str]
+        stdout and stderr of the ssh command
+    """
+
+    user_input = UserInput.from_json(json_path=json_path)
+
+    if user_input.script_path:
+        logger.debug(f"Script name: \n{user_input.script_path}")
+
+    # loading server config
+    config = Config("server")
+    if user_input.config_server:
+        config.load_custom_config(user_input.config_server)
+
+    ssh_cmd = f"ssh -i {config.ssh_key} {config.user}@{config.host} 'mkdir {user_input.id}'"
+    logger.debug(f"launching command: {ssh_cmd}")
+    stdout, stderr = subprocess.Popen(
+        ssh_cmd,
+        shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    ).communicate()
+    stdout = str(stdout, encoding="utf-8")
+    stderr = str(stderr, encoding="utf-8")
+    logger.debug(f"mkdir stdout: {stdout}")
+    logger.debug(f"mkdir stderr: {stderr}")
+
+    if "mkdir: cannot create directory" in stderr:
+        raise RuntimeError("Directory already present, cannot continue.")
+
+    return stdout, stderr
+
+
+def copy_json_input(json_path: str):
+    """Copy .json file with the user input to remote machine
+
+    Parameters
+    ----------
+    json_path : str
+        Path to the JSON file with the user input
+
+    Returns
+    -------
+    Tuple[str, str]
+        stdout and stderr of the ssh command
+    """
+
+    user_input = UserInput.from_json(json_path=json_path)
+
+    if user_input.script_path:
+        logger.debug(f"Script name: \n{user_input.script_path}")
+
+    # loading server config
+    config = Config("server")
+    if user_input.config_server:
+        config.load_custom_config(user_input.config_server)
+
+    # copying input JSON
+    ssh_cmd = f"scp -i {config.ssh_key} {json_path} {config.user}@{config.host}:~/{user_input.id}/{json_path}"
+    logger.debug(f"launching command: {ssh_cmd}")
+    stdout, stderr = subprocess.Popen(
+        ssh_cmd,
+        shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    ).communicate()
+    stdout = str(stdout, encoding="utf-8")
+    stderr = str(stderr, encoding="utf-8")
+    logger.debug(f"scp json input stdout: {stdout}")
+    logger.debug(f"scp json input stderr: {stderr}")
+
+    return stdout, stderr
+
+
+def copy_user_script(json_path: str):
+    """Copy user script file to remote machine (if present in json file)
+
+    Parameters
+    ----------
+    json_path : str
+        Path to the JSON file with the user input
+
+    Returns
+    -------
+    Tuple[str, str]
+        stdout and stderr of the ssh command
+    """
+
+    user_input = UserInput.from_json(json_path=json_path)
+
+    if user_input.script_path:
+        logger.debug(f"Script name: \n{user_input.script_path}")
+
+        # loading server config
+        config = Config("server")
+        if user_input.config_server:
+            config.load_custom_config(user_input.config_server)
+
+        ssh_cmd = f"scp -i {config.ssh_key} {user_input.script_path} {config.user}@{config.host}:~/{user_input.id}/{user_input.script_path}"
+        logger.debug(f"launching command: {ssh_cmd}")
+        stdout, stderr = subprocess.Popen(
+            ssh_cmd,
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        ).communicate()
+        stdout = str(stdout, encoding="utf-8")
+        stderr = str(stderr, encoding="utf-8")
+        logger.debug(f"scp user script stdout: {stdout}")
+        logger.debug(f"scp user script stderr: {stderr}")
+
+        return stdout, stderr
+
+    else:
+        return "", ""
+
+
+def launch_job(json_path: str):
+    """Setting up job environment (folders and files)
+
+    Parameters
+    ----------
+    json_path : str
+        Path to the JSON file with the user input
 
     Returns
     -------
@@ -48,15 +161,14 @@ def launch_job(
         if "Submitted batch job" is not found in stdout, meaning the job was not launched
     """
 
-    logger.debug(f"Received query: {query}")
+    user_input = UserInput.from_json(json_path=json_path)
 
-    if script:
-        logger.debug(f"Received script: \n{script}")
+    logger.debug(f"Received SQL query: {user_input.sql_query}")
 
     # loading server config
     config = Config("server")
-    if config_server:
-        config.load_custom_config(config_server)
+    if user_input.config_server:
+        config.load_custom_config(user_input.config_server)
 
     # SLURM parameters
     partition = config.partition
@@ -67,40 +179,14 @@ def launch_job(
     ntasks_per_node = config.ntasks_per_node
     ssh_key = config.ssh_key
 
-    ### GENERATING CLIENT COMMAND ###
-
-    # Calling client version of TUI with required arguments
-    client_cmd = f'dtaas_tui_client {{"ID": "{job_id}", "query": "{query}"'
-
-    # adding script, if one was provided
-    if script:
-        client_cmd += f', "script": "{script}"'
-
-    # adding client config, if one was provided
-    if config_client:
-        client_cmd += f', "config_client": "{config_client.__dict__}"'
-
-    # closing JSON-formatted string and sanitizing command
-    client_cmd += "}"
-    client_cmd = sanitize_string(version="server", string=client_cmd)
-
-    ### GENERATING SLURM --wrap COMMAND ###
-
-    # creating wrap command to be passed to sbatchloading modules
+    # Creating wrap command to be passed to sbatch
     wrap_cmd = "module load python; "
-
-    # sourcing virtual environment
     wrap_cmd += f"source {config.venv_path}/bin/activate; "
+    wrap_cmd += f"dtaas_tui_client {json_path}; "
+    wrap_cmd += "touch JOB_DONE"
 
-    # adding client command
-    wrap_cmd += client_cmd
-
-    # adding a finalizer file once the job is done
-    wrap_cmd += "; touch JOB_DONE"
-
-    ### GENERATING BASH COMMAND TO BE RUN VIA SSH ###
-    ssh_cmd = f"mkdir {job_id}; "
-    ssh_cmd += f"cd {job_id}; "
+    # Generating SSH command
+    ssh_cmd = f"cd {user_input.id}; "
     ssh_cmd += f"sbatch -p {partition} -A {account} "
     ssh_cmd += f"--mail-type ALL --mail-user {mail} "
     ssh_cmd += f"-t {walltime} -N {nodes} "

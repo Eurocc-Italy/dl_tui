@@ -6,34 +6,36 @@ send a HPC job on G100 which calls the client program on the compute nodes and r
 Author: @lbabetto
 """
 
-# setting up logging
-import logging
-
-logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
-fh = logging.FileHandler("server.log", mode="w")
-fh.setLevel(logging.DEBUG)
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-fh.setFormatter(formatter)
-logger.addHandler(fh)
-
-from dtaas.tuilib.common import UserInput
-from dtaas.tuilib.server import launch_job
+import sys
+from dtaas.tuilib.server import create_remote_directory, copy_json_input, copy_user_script, launch_job
 
 
-def main():
-    # reading user input
-    user_input = UserInput.from_cli()
+def main(json_path: str):
+    """Server-side (VM) version of the DTaaS TUI
 
-    # Launching job
-    launch_job(
-        config_server=user_input.config_server,
-        job_id=user_input.id,
-        query=user_input.query,
-        script=user_input.script,
-        config_client=user_input.config_client,
-    )
+    Parameters
+    ----------
+    json_path : str
+        path to the JSON file with the input info
+    """
+
+    create_remote_directory(json_path=json_path)
+    copy_json_input(json_path=json_path)
+    copy_user_script(json_path=json_path)
+    launch_job(json_path=json_path)
 
 
 if __name__ == "__main__":
-    main()
+    # setting up logging
+    import logging
+
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+    fh = logging.FileHandler("server.log", mode="w")
+    fh.setLevel(logging.DEBUG)
+    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    fh.setFormatter(formatter)
+    logger.addHandler(fh)
+
+    # running main function
+    main(json_path=sys.argv[1])

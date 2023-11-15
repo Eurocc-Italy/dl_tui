@@ -86,9 +86,7 @@ def test_multiword_argument():
     query = "SELECT * FROM datalake where caption = 'a boy wearing headphones using one computer in a long row of computers'"
 
     mongo_filter, mongo_fields = convert_SQL_to_mongo(query)
-    assert mongo_filter == {
-        "caption": "a boy wearing headphones using one computer in a long row of computers"
-    }
+    assert mongo_filter == {"caption": "a boy wearing headphones using one computer in a long row of computers"}
     assert mongo_fields == {}
 
 
@@ -160,6 +158,16 @@ def test_select_where():
     mongo_filter, mongo_fields = convert_SQL_to_mongo(query)
     assert mongo_filter == {"category": "motorcycle"}
     assert mongo_fields == {"width": 1, "height": 1}
+
+
+def test_newlines():
+    """
+    Testing SQL statement with newlines
+    """
+    query = "SELECT *\nFROM datalake\nWHERE category = motorcycle"
+    mongo_filter, mongo_fields = convert_SQL_to_mongo(query)
+    assert mongo_filter == {"category": "motorcycle"}
+    assert mongo_fields == {}
 
 
 def test_complex_SQL():
