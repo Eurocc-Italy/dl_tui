@@ -1,0 +1,1 @@
+{"ID": "DTAAS-TUI-TEST-invalid_job", "sql_query": "SELECT * FROM metadata WHERE id = \"554625\" OR id = 222564", "config_server": {"walltime": "00:10:00", "ntasks_per_node": 1}}

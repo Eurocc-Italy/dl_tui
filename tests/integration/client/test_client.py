@@ -6,21 +6,26 @@ import pytest
 # TODO: make a mock test file and test database so the tests do not rely on any previously prepared database
 
 import os
+import json
 from zipfile import ZipFile
-from dtaas.tuilib.common import sanitize_string
 
 
-def test_search_only(config_client):
+def test_search_only():
     """
     Search for two specific files
     """
 
-    query = "SELECT * FROM metadata WHERE id = 554625 OR id = 222564"
+    with open("input.json", "w") as f:
+        json.dump(
+            {
+                "ID": "42",
+                "sql_query": "SELECT * FROM metadata WHERE id = 554625 OR id = 222564",
+                "config_client": {"ip": "localhost"},
+            },
+            f,
+        )
 
-    cmd = f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client.py "
-    cmd += f'{{"ID": "42", "query": "{query}", "config_client": "{config_client.__dict__}"}}'
-
-    os.system(sanitize_string(version="client", string=cmd))
+    os.system(f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client.py input.json")
 
     assert os.path.exists("results.zip"), "Zipped archive was not created."
 
@@ -33,18 +38,25 @@ def test_search_only(config_client):
     os.remove("results.zip")
 
 
-def test_return_first(config_client):
+def test_return_first():
     """
     Search for two specific files and only return the first item
     """
 
-    query = "SELECT * FROM metadata WHERE id = 554625 OR id = 222564"
-    script = r"def main(files_in):\n files_out=files_in.copy()\n return [files_out[0]]"
+    with open("input.json", "w") as f:
+        json.dump(
+            {
+                "ID": "42",
+                "sql_query": "SELECT * FROM metadata WHERE id = 554625 OR id = 222564",
+                "script_path": "user_script.py",
+                "config_client": {"ip": "localhost"},
+            },
+            f,
+        )
+    with open("user_script.py", "w") as f:
+        f.write("def main(files_in):\n files_out=files_in.copy()\n return [files_out[0]]")
 
-    cmd = f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client.py "
-    cmd += f'{{"ID": 42, "query": "{query}", "script": "{script}", "config_client": "{config_client.__dict__}"}}'
-
-    os.system(sanitize_string(version="client", string=cmd))
+    os.system(f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client.py input.json")
 
     assert os.path.exists("results.zip"), "Zipped archive was not created."
 
@@ -54,38 +66,22 @@ def test_return_first(config_client):
     os.remove("results.zip")
 
 
-@pytest.mark.xfail  # TODO: consider converting all double quotes to single quotes
 def test_double_quotes_in_SQL(config_client):
     """
     Search for a specific file using double quotes in SQL query
     """
 
-    query = 'SELECT * FROM metadata WHERE captured = "2013-11-14 16:03:19"'
+    with open("input.json", "w") as f:
+        json.dump(
+            {
+                "ID": "42",
+                "sql_query": 'SELECT * FROM metadata WHERE captured = "2013-11-14 16:03:19"',
+                "config_client": {"ip": "localhost"},
+            },
+            f,
+        )
 
-    cmd = f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client.py "
-    cmd += f'{{"ID": 42, "query": "{query}", "config_client": "{config_client.__dict__}"}}'
-
-    os.system(sanitize_string(version="client", string=cmd))
-
-    assert os.path.exists("results.zip"), "Zipped archive was not created."
-
-    with ZipFile("results.zip", "r") as archive:
-        assert archive.namelist() == ["COCO_val2014_000000554625.jpg"]
-
-    os.remove("results.zip")
-
-
-def test_single_quotes_in_SQL(config_client):
-    """
-    Search for a specific file using single quotes in SQL query and replacing them with double quotes.
-    """
-
-    query = "SELECT * FROM metadata WHERE captured = '2013-11-14 16:03:19'"
-
-    cmd = f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client.py "
-    cmd += f'{{"ID": 42, "query": "{query}", "config_client": "{config_client.__dict__}"}}'
-
-    os.system(sanitize_string(version="client", string=cmd))
+    os.system(f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client.py input.json")
 
     assert os.path.exists("results.zip"), "Zipped archive was not created."
 
@@ -95,19 +91,50 @@ def test_single_quotes_in_SQL(config_client):
     os.remove("results.zip")
 
 
-@pytest.mark.xfail  # TODO: consider converting all double quotes to single quotes
-def test_double_quotes_in_script(config_client):
+def test_single_quotes_in_SQL():
+    """
+    Search for a specific file using single quotes in SQL query.
+    """
+
+    with open("input.json", "w") as f:
+        json.dump(
+            {
+                "ID": "42",
+                "sql_query": "SELECT * FROM metadata WHERE captured = '2013-11-14 16:03:19'",
+                "config_client": {"ip": "localhost"},
+            },
+            f,
+        )
+
+    os.system(f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client.py input.json")
+
+    assert os.path.exists("results.zip"), "Zipped archive was not created."
+
+    with ZipFile("results.zip", "r") as archive:
+        assert archive.namelist() == ["COCO_val2014_000000554625.jpg"]
+
+    os.remove("results.zip")
+
+
+def test_double_quotes_in_script():
     """
     Search for a specific file using double quotes in user script
     """
 
-    query = "SELECT * FROM metadata WHERE id = 554625"
-    script = r"def main\(files_in\):\n files_out=files_in.copy\(\)\n print\(\"HELLO!\"\)\n return \[files_out\[0\]\]"
+    with open("input.json", "w") as f:
+        json.dump(
+            {
+                "ID": "42",
+                "sql_query": "SELECT * FROM metadata WHERE id = 554625",
+                "script_path": "user_script.py",
+                "config_client": {"ip": "localhost"},
+            },
+            f,
+        )
+    with open("user_script.py", "w") as f:
+        f.write('def main(files_in):\n files_out=files_in.copy()\n print("HELLO!")\n return [files_out[0]]')
 
-    cmd = f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client.py "
-    cmd += f'{{"ID": 42, "query": "{query}", "script": "{script}", "config_client": "{config_client.__dict__}"}}'
-
-    os.system(sanitize_string(version="client", string=cmd))
+    os.system(f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client.py input.json")
 
     assert os.path.exists("results.zip"), "Zipped archive was not created."
 
@@ -117,19 +144,25 @@ def test_double_quotes_in_script(config_client):
     os.remove("results.zip")
 
 
-def test_single_quotes_in_script(config_client):
+def test_single_quotes_in_script():
     """
     Search for a specific file using single quotes in user script
     """
 
-    query = "SELECT * FROM metadata WHERE id = 554625"
+    with open("input.json", "w") as f:
+        json.dump(
+            {
+                "ID": "42",
+                "sql_query": "SELECT * FROM metadata WHERE id = 554625",
+                "script_path": "user_script.py",
+                "config_client": {"ip": "localhost"},
+            },
+            f,
+        )
+    with open("user_script.py", "w") as f:
+        f.write("def main(files_in):\n files_out=files_in.copy()\n print('HELLO!')\n return [files_out[0]]")
 
-    script = r"def main(files_in):\n files_out=files_in.copy()\n print('HELLO!')\n return [files_out[0]]"
-
-    cmd = f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client.py "
-    cmd += rf'{{"ID": 42, "query": "{query}", "script": "{script}", "config_client": "{config_client.__dict__}"}}'
-
-    os.system(sanitize_string(version="client", string=cmd))
+    os.system(f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client.py input.json")
 
     assert os.path.exists("results.zip"), "Zipped archive was not created."
 

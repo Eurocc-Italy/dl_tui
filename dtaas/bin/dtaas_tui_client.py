@@ -55,12 +55,15 @@ def main(json_path: str):
     logger.info(f"Loading database {config.database}, collection {config.collection}")
     collection = client[config.database][config.collection]
 
-    with open(user_input.script_path, "r") as f:
-        script = f.read()
+    if user_input.script_path:
+        with open(user_input.script_path, "r") as f:
+            script = f.read()
+    else:
+        script = None
 
     wrapper(
         collection=collection,
-        sql_query=user_input.query,
+        sql_query=user_input.sql_query,
         script=script,
     )
 
