@@ -50,8 +50,8 @@ class UserInput:
 
     Attributes
     ----------
-    id : str
-        Unique id of the run (preferably of the UUID.hex type)
+    ID : str
+        Unique ID of the run (preferably of the UUID.hex type)
     sql_query : str
         SQL query
     script_path : str
@@ -66,11 +66,11 @@ class UserInput:
         """_summary_
 
         Args:
-            data (Dict[str, str]): dictionary with the user input (id, sql_query, script, config)
+            data (Dict[str, str]): dictionary with the user input (ID, sql_query, script, config)
         """
         logger.debug(f"Received input dict: {data}")
 
-        self.id = data["id"]
+        self.id = data["ID"]
         self.sql_query = data["sql_query"]
 
         try:

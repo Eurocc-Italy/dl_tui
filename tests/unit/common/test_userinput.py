@@ -14,7 +14,7 @@ def test_sql_only():
     """
 
     data = {
-        "id": "42",
+        "ID": "42",
         "sql_query": "SELECT * FROM metadata WHERE category = 'motorcycle'",
     }
     user_input = UserInput(data)
@@ -33,7 +33,7 @@ def test_sql_and_script():
         f.write("def main(files_in):\n files_out=files_in.copy()\n files_out.reverse()\n return files_out")
 
     data = {
-        "id": "42",
+        "ID": "42",
         "sql_query": "SELECT * FROM metadata WHERE category = 'motorcycle'",
         "script_path": "user_script.py",
     }
@@ -51,13 +51,13 @@ def test_missing_query():
     Test that the initialization fails if query is not provided
     """
     with pytest.raises(KeyError):
-        data = {"id": "42"}
+        data = {"ID": "42"}
         UserInput(data)
 
 
 def test_missing_query():
     """
-    Test that the initialization fails if id is not provided
+    Test that the initialization fails if ID is not provided
     """
     with pytest.raises(KeyError):
         data = {"sql_query": "SELECT * FROM metadata WHERE category = 'motorcycle'"}
@@ -73,7 +73,7 @@ def test_cli_input_sql(monkeypatch):
         "sys.argv",
         [
             f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client.py",
-            '{"id": "42", "sql_query": "SELECT * FROM metadata WHERE ID = 123456"}',
+            '{"ID": "42", "sql_query": "SELECT * FROM metadata WHERE ID = 123456"}',
         ],
     )
 
@@ -94,7 +94,7 @@ def test_cli_input_sql_double_quotes(monkeypatch):
         "sys.argv",
         [
             f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client.py",
-            '{"id": "42", "sql_query": "SELECT * FROM metadata WHERE category = "motorcycle""}',
+            '{"ID": "42", "sql_query": "SELECT * FROM metadata WHERE category = "motorcycle""}',
         ],
     )
 
@@ -114,7 +114,7 @@ def test_cli_input_sql_single_quotes(monkeypatch):
         "sys.argv",
         [
             f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client.py",
-            """{"id": "42", "sql_query": "SELECT * FROM metadata WHERE category = 'motorcycle'"}""",
+            """{"ID": "42", "sql_query": "SELECT * FROM metadata WHERE category = 'motorcycle'"}""",
         ],
     )
 
@@ -137,7 +137,7 @@ def test_cli_input_script(monkeypatch):
         "sys.argv",
         [
             f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client.py",
-            '{"id": "42", "sql_query": "SELECT * FROM metadata WHERE ID = 123456", "script_path": "user_script.py"}',
+            '{"ID": "42", "sql_query": "SELECT * FROM metadata WHERE ID = 123456", "script_path": "user_script.py"}',
         ],
     )
 
@@ -165,7 +165,7 @@ def test_cli_input_script_double_quotes(monkeypatch):
         "sys.argv",
         [
             f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client.py",
-            '{"id": 42, "sql_query": "SELECT * FROM metadata WHERE ID = 123456", "script_path": "user_script.py"}',
+            '{"ID": 42, "sql_query": "SELECT * FROM metadata WHERE ID = 123456", "script_path": "user_script.py"}',
         ],
     )
 
@@ -187,13 +187,13 @@ def test_config():
     """
 
     data = {
-        "id": "42",
+        "ID": 42,
         "sql_query": "SELECT * FROM metadata WHERE category = 'motorcycle'",
         "config_client": {"ip": "localhost"},
     }
     user_input = UserInput(data)
 
-    assert user_input.id == "42"
+    assert user_input.id == 42
     assert user_input.sql_query == "SELECT * FROM metadata WHERE category = 'motorcycle'"
     assert user_input.script_path == None
     assert user_input.config_client == {"ip": "localhost"}
@@ -207,7 +207,7 @@ def test_json_input_sql(monkeypatch):
     with open("input.json", "w") as f:
         json.dump(
             {
-                "id": "42",
+                "ID": "42",
                 "sql_query": "SELECT * FROM metadata WHERE ID = 123456",
             },
             f,
@@ -239,7 +239,7 @@ def test_json_input_sql_and_script(monkeypatch):
     with open("input.json", "w") as f:
         json.dump(
             {
-                "id": "42",
+                "ID": "42",
                 "sql_query": "SELECT * FROM metadata WHERE ID = 123456",
                 "script_path": "user_script.py",
             },
@@ -276,7 +276,7 @@ def test_json_input_with_single_quotes(monkeypatch):
     with open("input.json", "w") as f:
         json.dump(
             {
-                "id": "42",
+                "ID": "42",
                 "sql_query": "SELECT * FROM metadata WHERE category = 'motorcycle'",
                 "script_path": "user_script.py",
             },
@@ -316,7 +316,7 @@ def test_json_input_with_double_quotes(monkeypatch):
     with open("input.json", "w") as f:
         json.dump(
             {
-                "id": "42",
+                "ID": "42",
                 "sql_query": 'SELECT * FROM metadata WHERE category = "motorcycle"',
                 "script_path": "user_script.py",
             },
@@ -356,7 +356,7 @@ def test_json_input_with_multiple_quotes(monkeypatch):
     with open("input.json", "w") as f:
         json.dump(
             {
-                "id": "42",
+                "ID": "42",
                 "sql_query": """SELECT * FROM metadata WHERE category = "motorcycle" OR category = 'hotdog'""",
                 "script_path": "user_script.py",
             },
@@ -391,7 +391,7 @@ def test_json_input_config(monkeypatch):
     with open("input.json", "w") as f:
         json.dump(
             {
-                "id": "42",
+                "ID": "42",
                 "sql_query": """SELECT * FROM metadata WHERE category = "motorcycle" OR category = 'hotdog'""",
                 "config_server": {"walltime": "01:00:00", "ntasks_per_node": 48},
             },
