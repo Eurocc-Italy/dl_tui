@@ -19,7 +19,7 @@ def test_copy_user_script(config_server):
     with open("input.json", "w") as f:
         json.dump(
             {
-                "ID": "DTAAS-TUI-TEST-copy_user_script",
+                "id": "DTAAS-TUI-TEST-copy_user_script",
                 "sql_query": "SELECT * FROM metadata",
                 "script_path": "user_script.py",
             },
@@ -58,7 +58,7 @@ def test_no_script(config_server):
     with open("input.json", "w") as f:
         json.dump(
             {
-                "ID": "DTAAS-TUI-TEST-copy_user_script",
+                "id": "DTAAS-TUI-TEST-copy_user_script",
                 "sql_query": "SELECT * FROM metadata",
             },
             f,

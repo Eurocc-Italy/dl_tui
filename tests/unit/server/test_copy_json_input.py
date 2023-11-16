@@ -19,7 +19,7 @@ def test_copy_json_input(config_server):
     with open("input.json", "w") as f:
         json.dump(
             {
-                "ID": "DTAAS-TUI-TEST-copy_json",
+                "id": "DTAAS-TUI-TEST-copy_json",
                 "sql_query": "SELECT * FROM metadata",
             },
             f,
@@ -40,6 +40,6 @@ def test_copy_json_input(config_server):
             f"ssh -i {config.ssh_key} {config.user}@{config.host} 'cat ~/DTAAS-TUI-TEST-copy_json/input.json'"
         ).read()
     ) == {
-        "ID": "DTAAS-TUI-TEST-copy_json",
+        "id": "DTAAS-TUI-TEST-copy_json",
         "sql_query": "SELECT * FROM metadata",
     }

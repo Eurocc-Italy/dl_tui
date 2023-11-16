@@ -18,7 +18,7 @@ def test_search_only():
     with open("input.json", "w") as f:
         json.dump(
             {
-                "ID": "42",
+                "id": "42",
                 "sql_query": "SELECT * FROM metadata WHERE id = 554625 OR id = 222564",
                 "config_client": {"ip": "localhost"},
             },
@@ -46,7 +46,7 @@ def test_return_first():
     with open("input.json", "w") as f:
         json.dump(
             {
-                "ID": "42",
+                "id": "42",
                 "sql_query": "SELECT * FROM metadata WHERE id = 554625 OR id = 222564",
                 "script_path": "user_script.py",
                 "config_client": {"ip": "localhost"},
@@ -74,7 +74,7 @@ def test_double_quotes_in_SQL(config_client):
     with open("input.json", "w") as f:
         json.dump(
             {
-                "ID": "42",
+                "id": "42",
                 "sql_query": 'SELECT * FROM metadata WHERE captured = "2013-11-14 16:03:19"',
                 "config_client": {"ip": "localhost"},
             },
@@ -99,7 +99,7 @@ def test_single_quotes_in_SQL():
     with open("input.json", "w") as f:
         json.dump(
             {
-                "ID": "42",
+                "id": "42",
                 "sql_query": "SELECT * FROM metadata WHERE captured = '2013-11-14 16:03:19'",
                 "config_client": {"ip": "localhost"},
             },
@@ -124,7 +124,7 @@ def test_double_quotes_in_script():
     with open("input.json", "w") as f:
         json.dump(
             {
-                "ID": "42",
+                "id": "42",
                 "sql_query": "SELECT * FROM metadata WHERE id = 554625",
                 "script_path": "user_script.py",
                 "config_client": {"ip": "localhost"},
@@ -152,7 +152,7 @@ def test_single_quotes_in_script():
     with open("input.json", "w") as f:
         json.dump(
             {
-                "ID": "42",
+                "id": "42",
                 "sql_query": "SELECT * FROM metadata WHERE id = 554625",
                 "script_path": "user_script.py",
                 "config_client": {"ip": "localhost"},

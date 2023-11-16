@@ -19,7 +19,7 @@ def test_create_remote_directory(config_server):
     with open("input.json", "w") as f:
         json.dump(
             {
-                "ID": "DTAAS-TUI-TEST-create_remote_dir",
+                "id": "DTAAS-TUI-TEST-create_remote_dir",
                 "sql_query": "SELECT * FROM metadata",
             },
             f,
@@ -42,7 +42,7 @@ def test_create_existing_directory():
     with open("input.json", "w") as f:
         json.dump(
             {
-                "ID": "DTAAS-TUI-TEST-create_remote_dir",
+                "id": "DTAAS-TUI-TEST-create_remote_dir",
                 "sql_query": "SELECT * FROM metadata",
             },
             f,
