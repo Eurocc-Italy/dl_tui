@@ -1,6 +1,6 @@
 # DTaaS_TUI User Guide
 
-Version: [`0.1`](changelog)
+Version: [`0.2`](changelog)
 
 This is the user guide for the Digital Twin as a Service Text User Interface (`DTaaS_TUI`) Python library. The TUI is used to query the data lake and run processing scripts on the files matching the query.
 
