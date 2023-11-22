@@ -24,7 +24,9 @@ Let's say you want to fetch a certain set of files from the database and run a P
 
 The Python script must have a `main` function, which will be what is actually run by the executable. This function should take a list as input, which will be populated by the interface with the paths of the files matching the SQL query. The function should also return a list as output, which contains the paths of the files which the user wants to save from the analysis. The interface will then take this list of paths, save the corresponding files (generated _in situ_ on HPC) in an archive and make them available to the user for download via the API/GUI.
 
-This is an example of a valid Python script to be passed to the interface, with a `main` function taking a list of paths as input and returning a list of paths as output:
+This is an example of a valid Python script to be passed to the interface, with a `main` function taking a list of paths as input and returning a list of paths as output. 
+
+The script uses the [scikit-image](https://scikit-image.org/) library to rotate the images given in input and save them alongside the original, using [matplotlib](https://matplotlib.org/) to generate the comparison "graphs" and [imageio](https://imageio.readthedocs.io/en/stable/) to open the actual image files. The comparison images are saved in a temporary folder (`rotated`) whose contents are returned by the main function in form of file paths. The script also uses the Python multiprocessing libary to run the job in parallel, exploiting the HPC performance for the analysis.
 
 ```python
 import imageio as iio
@@ -33,26 +35,26 @@ import matplotlib.pyplot as plt
 import os, sys
 from multiprocessing import Pool
 
-def rotate_image(img_path):
-    os.makedirs('rotated', exist_ok=True)
+def rotate_image(img_path):  # "worker" function, expecting a file path as input
+    os.makedirs('rotated', exist_ok=True)  # Create temporary folder if doesn't exist
 
-    image = iio.imread(uri=img_path)
-    rotated = ski.transform.rotate(image=image, angle=45)
+    image = iio.imread(uri=img_path)  # Open file with image
+    rotated = ski.transform.rotate(image=image, angle=45)  # Rotate image
 
-    fig, ax = plt.subplots(1,2)
-    ax[0].imshow(image)
-    ax[1].imshow(rotated)
+    fig, ax = plt.subplots(1,2)  # Initialize comparison plot
+    ax[0].imshow(image)  # Print original image to the left
+    ax[1].imshow(rotated)   # Print rotated image to the right
 
-    path = f'rotated/{os.path.basename(img_path)}'
-    fig.savefig(path)
+    path = f'rotated/{os.path.basename(img_path)}'  # Generate path name using original image name
+    fig.savefig(path)  # Save image
 
-    return path
+    return path  # Return the path of the newly saved image
 
-def main(files_in):
-    with Pool() as p:
-        files_out = p.map(rotate_image, files_in)
+def main(files_in):  # main function, expecting a list of file paths as input
+    with Pool() as p:  # Use all available cores
+        files_out = p.map(rotate_image, files_in)  # run the rotate_image function on all files in parallel
 
-    return files_out
+    return files_out  # Return list of file paths
 ```
 
 ## Configuration
