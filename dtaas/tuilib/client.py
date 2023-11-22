@@ -126,12 +126,12 @@ def run_script(script: str, files_in: List[str]) -> List[str]:
         sys.path.insert(0, os.getcwd())
         user_module = import_module("user_script")
 
-        # running the main function, retrieving output files and cleaning up
         try:
             user_main = getattr(user_module, "main")
-            files_out = user_main(files_in)
         except AttributeError:
             raise AttributeError(f"User-provided script has no `main` function")
+        else:
+            files_out = user_main(files_in)
         finally:
             del sys.modules["user_script"]
 
