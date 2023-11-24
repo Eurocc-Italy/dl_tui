@@ -94,7 +94,7 @@ def main(files_in):  # main function, expecting a list of file paths as input
 
 ## Configuration
 
-Configuration options can be given via the `config_client` and `config_server` keys in the input JSON file. The library first loads the default options written the JSON files located in `/etc/default` (which can be taken as a template to understand the kind of options which can be configured) and overwrites them with the content provided in the input JSON file.
+Configuration options can be given via the `config_client` and `config_server` keys in the input JSON file. The library first loads the default options written the JSON files located in the library's `dtaas/etc/default` folder (which can be taken as a template to understand the kind of options which can be configured) and overwrites them with the content provided in the input JSON file.
 
 For the client version, the configurable options are:
 
