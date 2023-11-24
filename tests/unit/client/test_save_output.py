@@ -32,3 +32,4 @@ def test_nonexistent_files():
     """
     with pytest.raises(FileNotFoundError):
         save_output(["test1", "test2"])
+    os.removedirs("RESULTS")
