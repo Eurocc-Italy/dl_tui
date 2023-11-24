@@ -152,13 +152,17 @@ def save_output(files_out: List[str]):
         list containing the paths to the files to be saved
     """
     # TODO: make this consistent with S3 bucket implementation, right now only zips the files.
-    # TODO: add try/except to make sure user returned the correct list of paths.
 
     logger.debug(f"Processed results: {files_out}")
 
     os.makedirs(f"RESULTS", exist_ok=True)
+
     for file in files_out:
-        shutil.copy(file, f"RESULTS/{os.path.basename(file)}")
+        try:
+            shutil.copy(file, f"RESULTS/{os.path.basename(file)}")
+        except FileNotFoundError:
+            logger.error(f"No such file or directory: '{file}'")
+
     shutil.make_archive("results", "zip", "RESULTS")
     shutil.rmtree("RESULTS")
 

@@ -24,3 +24,11 @@ def test_save_output(generate_test_files):
         assert filelist == ["TESTFILE_1.txt", "TESTFILE_2.txt"]
 
     os.remove("results.zip")
+
+
+def test_nonexistent_files():
+    """
+    Test the function with nonexistent files (e.g., from incorrect return in user_script `main`).
+    """
+    with pytest.raises(FileNotFoundError):
+        save_output(["test1", "test2"])
