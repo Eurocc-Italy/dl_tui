@@ -88,6 +88,9 @@ def run_script(script: str, files_in: List[str]) -> List[str]:
     """Runs the `main` function in the user-provided Python script, feeding the paths containted in files_in.
     This function must take a list (of file paths) as input and return a list (of file paths) as output.
 
+    TODO: parallelize execution of main function, splitting the file list across queries?
+    Is it a good idea? Maybe the user script assumes data integrity...
+
     Parameters
     ----------
     script : str

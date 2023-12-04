@@ -29,7 +29,15 @@ def test_save_output(generate_test_files):
 def test_nonexistent_files():
     """
     Test the function with nonexistent files (e.g., from incorrect return in user_script `main`).
+    UPDATED: code no longer raises the exception, 
     """
-    with pytest.raises(FileNotFoundError):
-        save_output(["test1", "test2"])
-    os.removedirs("RESULTS")
+
+    save_output(["test1", "test2"])
+
+    assert os.path.exists("results.zip"), "Zipped archive was not created."
+
+    with ZipFile("results.zip", "r") as archive:
+        filelist = archive.namelist()
+        assert filelist == []
+
+    os.remove("results.zip")
