@@ -10,6 +10,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+from os.path import basename
 import subprocess
 from typing import Tuple
 from dtaas.tuilib.common import Config, UserInput
@@ -83,7 +84,7 @@ def copy_json_input(json_path: str):
         config.load_custom_config(user_input.config_server)
 
     # copying input JSON
-    ssh_cmd = f"scp -i {config.ssh_key} {json_path} {config.user}@{config.host}:~/{user_input.id}/{json_path}"
+    ssh_cmd = f"scp -i {config.ssh_key} {json_path} {config.user}@{config.host}:~/{user_input.id}/{basename(json_path)}"
     logger.debug(f"launching command: {ssh_cmd}")
     stdout, stderr = subprocess.Popen(
         ssh_cmd,
@@ -123,7 +124,7 @@ def copy_user_script(json_path: str):
         if user_input.config_server:
             config.load_custom_config(user_input.config_server)
 
-        ssh_cmd = f"scp -i {config.ssh_key} {user_input.script_path} {config.user}@{config.host}:~/{user_input.id}/{user_input.script_path}"
+        ssh_cmd = f"scp -i {config.ssh_key} {user_input.script_path} {config.user}@{config.host}:~/{user_input.id}/{basename(user_input.script_path)}"
         logger.debug(f"launching command: {ssh_cmd}")
         stdout, stderr = subprocess.Popen(
             ssh_cmd,
