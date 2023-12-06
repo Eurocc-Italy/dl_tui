@@ -134,10 +134,10 @@ def run_script(script: str, files_in: List[str]) -> List[str]:
     if type(files_out) != list:
         raise TypeError("`main` function does not return a list of paths. ABORTING")
 
-    try:  # TODO: make this better...
-        return [os.path.abspath(file) for file in files_out]
-    except:
-        raise FileNotFoundError(f"Some files were not found.")
+    # converting to absolute paths (useful for save_output func)
+    files_out = [os.path.abspath(file) for file in files_out]
+
+    return files_out
 
 
 def save_output(files_out: List[str]):
