@@ -88,6 +88,8 @@ def run_script(script: str, files_in: List[str]) -> List[str]:
     """Runs the `main` function in the user-provided Python script, feeding the paths containted in files_in.
     This function must take a list (of file paths) as input and return a list (of file paths) as output.
 
+    NOTE: The function is intended to be run in a temporary directory, no cleanup is built-in!
+
     TODO: parallelize execution of main function, splitting the file list across queries?
     Is it a good idea? Maybe the user script assumes data integrity...
 
@@ -113,35 +115,24 @@ def run_script(script: str, files_in: List[str]) -> List[str]:
 
     logger.info(f"User script:\n{script}")
 
-    # creating unique temporary directory
-    tdir = mkdtemp(
-        prefix="run_script_",
-        suffix=None,
-        dir=os.getcwd(),
-    )
+    with open("user_script.py", "w") as f:
+        f.write(script)
 
-    # moving to temporary directory and working within the context manager
-    with pushd(tdir):
-        with open("user_script.py", "w") as f:
-            f.write(script)
+    # loading user script dynamically
+    sys.path.insert(0, os.getcwd())
+    user_module = import_module("user_script")
 
-        # loading user script dynamically
-        sys.path.insert(0, os.getcwd())
-        user_module = import_module("user_script")
+    try:
+        user_main = getattr(user_module, "main")
+    except AttributeError:
+        raise AttributeError(f"User-provided script has no `main` function")
+    else:
+        files_out = user_main(files_in)
+    finally:
+        del sys.modules["user_script"]
 
-        try:
-            user_main = getattr(user_module, "main")
-        except AttributeError:
-            raise AttributeError(f"User-provided script has no `main` function")
-        else:
-            files_out = user_main(files_in)
-        finally:
-            del sys.modules["user_script"]
-
-        if type(files_out) != list:
-            raise TypeError("`main` function does not return a list of paths. ABORTING")
-
-        shutil.rmtree(tdir)
+    if type(files_out) != list:
+        raise TypeError("`main` function does not return a list of paths. ABORTING")
 
     return files_out
 
@@ -178,8 +169,8 @@ def wrapper(
     script: str = None,
 ):
     """Get the SQL query and script, convert them to MongoDB spec, run the process query on the DB retrieving
-    matching files, run the user-provided script (if present), retrieve the output file list from the main function,
-    save the files and zip them in an archive
+    matching files, run the user-provided script (if present) in a temporary directory, retrieve the output
+    file list from the main function, save the files and zip them in an archive
 
     Parameters
     ----------
@@ -200,7 +191,17 @@ def wrapper(
     )
 
     if script:
-        files_out = run_script(script=script, files_in=files_in)
-        save_output(files_out)
+        # creating unique temporary directory
+        tdir = mkdtemp(
+            prefix="run_script_",
+            suffix=None,
+            dir=os.getcwd(),
+        )
+        # moving to temporary directory and working within the context manager
+        with pushd(tdir):
+            files_out = run_script(script=script, files_in=files_in)
+            save_output(files_out)
+        shutil.rmtree(tdir)
+
     else:
         save_output(files_in)
