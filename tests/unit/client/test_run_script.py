@@ -6,6 +6,8 @@ import pytest
 
 from dtaas.tuilib.client import run_script
 
+# TODO: run_script no longer works in a temporary directory, implement this explicitly!
+
 
 def test_run_script(generate_test_files):
     """

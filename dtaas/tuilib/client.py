@@ -134,7 +134,10 @@ def run_script(script: str, files_in: List[str]) -> List[str]:
     if type(files_out) != list:
         raise TypeError("`main` function does not return a list of paths. ABORTING")
 
-    return files_out
+    try:  # TODO: make this better...
+        return [os.path.abspath(file) for file in files_out]
+    except:
+        raise FileNotFoundError(f"Some files were not found.")
 
 
 def save_output(files_out: List[str]):
@@ -200,7 +203,7 @@ def wrapper(
         # moving to temporary directory and working within the context manager
         with pushd(tdir):
             files_out = run_script(script=script, files_in=files_in)
-            save_output(files_out)
+        save_output(files_out)
         shutil.rmtree(tdir)
 
     else:
