@@ -17,7 +17,13 @@ setup(
             "dtaas_tui_server=dtaas.bin.dtaas_tui_server:main",
         ],
     },
-    install_requires=[],
+    install_requires=[
+        "sh",
+        "wheel",
+        "pymongo",
+        "pyparsing",
+        "sqlparse @ git+https://github.com/lbabetto/sqlparse",
+    ],
     author="Luca Babetto",
     author_email="l.babetto@cineca.it",
 )
