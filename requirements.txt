@@ -2,4 +2,4 @@ sh
 wheel
 pymongo
 pyparsing
-# sqlparse
+sqlparse @ git+https://github.com/lbabetto/sqlparse
