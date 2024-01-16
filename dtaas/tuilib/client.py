@@ -58,6 +58,7 @@ def retrieve_files(
     query_fields: Dict[str, str],
 ) -> List[str]:
     """Generate a file path list according to user query
+    TODO: switch from file path to S3 URL
 
     Parameters
     ----------
@@ -76,6 +77,7 @@ def retrieve_files(
 
     query_matches = []
 
+    # TODO: convert to S3 URL
     for entry in collection.find(filter=query_filters, projection=query_fields):
         query_matches.append(entry["path"])
 
@@ -99,11 +101,13 @@ def run_script(script: str, files_in: List[str]) -> List[str]:
         content of the Python script provided by the user, to be run on the query results
     files_in : List[str]
         list of path with the files on which to run the script
+        TODO: convert paths to S3 URL
 
     Returns
     -------
     List[str]
         list of paths with the output/processed files the user wants to save
+        TODO: convert paths to S3 URL
 
     Raises
     ------
@@ -135,6 +139,7 @@ def run_script(script: str, files_in: List[str]) -> List[str]:
         raise TypeError("`main` function does not return a list of paths. ABORTING")
 
     # converting to absolute paths (useful for save_output func)
+    # TODO: convert to S3 URL
     files_out = [os.path.abspath(file) for file in files_out]
 
     return files_out
@@ -142,11 +147,13 @@ def run_script(script: str, files_in: List[str]) -> List[str]:
 
 def save_output(files_out: List[str]):
     """Take a list of paths and save the corresponding files in a zipped archive.
+    TODO: convert to S3 URL
 
     Parameters
     ----------
     files_out : List[str]
         list containing the paths to the files to be saved
+        TODO: convert to S3 URL
     """
     # TODO: make this consistent with S3 bucket implementation, right now only zips the files.
 
@@ -154,6 +161,7 @@ def save_output(files_out: List[str]):
 
     os.makedirs(f"RESULTS", exist_ok=True)
 
+    # TODO: convert to S3 URL and upload via curl
     for file in files_out:
         try:
             shutil.copy(file, f"RESULTS/{os.path.basename(file)}")
