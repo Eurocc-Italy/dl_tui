@@ -20,6 +20,8 @@ from pymongo.collection import Collection
 from importlib import import_module
 from sqlparse.builders.mongo_builder import MongoQueryBuilder
 
+import boto3
+
 
 def convert_SQL_to_mongo(sql_query: str) -> Tuple[Dict[str, str], Dict[str, str]]:
     """Converts SQL query to MongoDB spec
@@ -57,8 +59,7 @@ def retrieve_files(
     query_filters: Dict[str, str],
     query_fields: Dict[str, str],
 ) -> List[str]:
-    """Generate a file path list according to user query
-    TODO: switch from file path to S3 URL
+    """Generate a list of S3 object keys according to user query
 
     Parameters
     ----------
@@ -72,14 +73,13 @@ def retrieve_files(
     Returns
     -------
     List[str]
-        list containing the paths of the files matching the query
+        list containing the S3 object keys of the files matching the query
     """
 
     query_matches = []
 
-    # TODO: convert to S3 URL
     for entry in collection.find(filter=query_filters, projection=query_fields):
-        query_matches.append(entry["path"])
+        query_matches.append(entry["s3_key"])
 
     logger.debug(f"Query results: {query_matches}")
 
@@ -101,13 +101,11 @@ def run_script(script: str, files_in: List[str]) -> List[str]:
         content of the Python script provided by the user, to be run on the query results
     files_in : List[str]
         list of path with the files on which to run the script
-        TODO: convert paths to S3 URL
 
     Returns
     -------
     List[str]
         list of paths with the output/processed files the user wants to save
-        TODO: convert paths to S3 URL
 
     Raises
     ------
@@ -139,29 +137,38 @@ def run_script(script: str, files_in: List[str]) -> List[str]:
         raise TypeError("`main` function does not return a list of paths. ABORTING")
 
     # converting to absolute paths (useful for save_output func)
-    # TODO: convert to S3 URL
     files_out = [os.path.abspath(file) for file in files_out]
 
     return files_out
 
 
-def save_output(files_out: List[str]):
-    """Take a list of paths and save the corresponding files in a zipped archive.
-    TODO: convert to S3 URL
+def save_output(files_out: List[str], endpoint_url: str, s3_bucket: str, key: str):
+    """Take a list of paths and save the corresponding files in a zipped archive,
+    which is then uploaded to the S3 bucket.
 
     Parameters
     ----------
     files_out : List[str]
         list containing the paths to the files to be saved
-        TODO: convert to S3 URL
+    endpoint_url: str
+        URL where the S3 bucket is located
+    s3_bucket : str
+        name of the S3 bucket in which the results need to be saved
+    key : str
+        S3 Object Key identifying the results for the specific job
     """
-    # TODO: make this consistent with S3 bucket implementation, right now only zips the files.
+
+    # NOTE: S3 credentials must be saved in ~/.aws/config file
+    s3 = boto3.client(
+        service_name="s3",
+        endpoint_url=endpoint_url,
+    )
 
     logger.debug(f"Processed results: {files_out}")
 
     os.makedirs(f"RESULTS", exist_ok=True)
 
-    # TODO: convert to S3 URL and upload via curl
+    # TODO: create temporary public URL for download?
     for file in files_out:
         try:
             shutil.copy(file, f"RESULTS/{os.path.basename(file)}")
@@ -169,14 +176,26 @@ def save_output(files_out: List[str]):
             logger.error(f"No such file or directory: '{file}'")
 
     shutil.make_archive("results", "zip", "RESULTS")
+    response = s3.upload_file(
+        Filename="results.zip",
+        Bucket=s3_bucket,
+        Key=f"results_{key}.zip",
+    )
     shutil.rmtree("RESULTS")
 
-    logger.info("Processed files available in the results.zip archive")
+    logger.debug(f"S3 upload response: {response}")
+    # TODO: check if this is true
+    logger.info(f"Processed files available at the following URL: {endpoint_url}/{s3_bucket}/results_{key}.zip")
+
+    return response
 
 
 def wrapper(
     collection: Collection,
     sql_query: str,
+    endpoint_url: str,
+    s3_bucket: str,
+    id: str,
     script: str = None,
 ):
     """Get the SQL query and script, convert them to MongoDB spec, run the process query on the DB retrieving
@@ -189,6 +208,12 @@ def wrapper(
         MongoDB collection on which to run the query
     sql_query : str
         SQL query
+    endpoint_url: str
+        URL where the S3 bucket is located
+    s3_bucket : str
+        name of the S3 bucket in which the results need to be saved
+    id : str
+        unique identifier for the job, will be used to upload results to S3 bucket with unique key
     script : str, optional
         content of the Python script provided by the user, to be run on the query results
     """
@@ -211,7 +236,12 @@ def wrapper(
         # moving to temporary directory and working within the context manager
         with pushd(tdir):
             files_out = run_script(script=script, files_in=files_in)
-        save_output(files_out)
+        save_output(
+            files_out=files_out,
+            endpoint_url=endpoint_url,
+            s3_bucket=s3_bucket,
+            key=id,
+        )
         shutil.rmtree(tdir)
 
     else:
