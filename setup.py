@@ -23,6 +23,7 @@ setup(
         "pymongo",
         "pyparsing",
         "sqlparse @ git+https://github.com/lbabetto/sqlparse",
+        "boto3",
     ],
     author="Luca Babetto",
     author_email="l.babetto@cineca.it",
