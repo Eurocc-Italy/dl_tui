@@ -70,7 +70,7 @@ def main():
     wrapper(
         collection=collection,
         sql_query=user_input.sql_query,
-        endpoint_url=config.endpoint_url,
+        endpoint_url=config.s3_endpoint_url,
         s3_bucket=config.s3_bucket,
         id=user_input.id,
         script=script,
