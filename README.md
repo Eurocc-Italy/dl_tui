@@ -1,6 +1,6 @@
-# DTaaS-TUI
+# dtaas-tui
 
-This is the user guide for the Digital Twin as a Service Text User Interface (`DTaaS_TUI`) Python library. The TUI is used to query the data lake and run processing scripts on the files matching the query.
+This is the user guide for the Digital Twin as a Service Text User Interface (`dtaas-tui`) Python library. The TUI is used to query the data lake and run processing scripts on the files matching the query.
 
 The service is composed of: 
 
@@ -20,8 +20,8 @@ We highly recommend installing the software in a custom Python virtual environme
 After having set up and activated your virtual environment, follow these steps to install the DTaaS TUI:
   
   ```bash
-  git clone https://gitlab.hpc.cineca.it/lbabetto/DTaaS_TUI  
-  pip install DTaaS_TUI/
+  git clone https://gitlab.hpc.cineca.it/lbabetto/dtaas-tui  
+  pip install dtaas-tui/
   ```
 
 ## Preparing the input
