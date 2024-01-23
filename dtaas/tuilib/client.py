@@ -92,7 +92,7 @@ def run_script(script: str, files_in: List[str]) -> List[str]:
 
     NOTE: The function is intended to be run in a temporary directory, no cleanup is built-in!
 
-    TODO: parallelize execution of main function, splitting the file list across queries?
+    TODO?: parallelize execution of main function, splitting the file list across queries?
     Is it a good idea? Maybe the user script assumes data integrity...
 
     Parameters
@@ -100,12 +100,12 @@ def run_script(script: str, files_in: List[str]) -> List[str]:
     script : str
         content of the Python script provided by the user, to be run on the query results
     files_in : List[str]
-        list of path with the files on which to run the script
+        list of paths with the files on which to run the script  # TODO: paths? S3 keys?
 
     Returns
     -------
     List[str]
-        list of paths with the output/processed files the user wants to save
+        list of paths with the output/processed files the user wants to save  # TODO: paths? S3 keys?
 
     Raises
     ------
@@ -123,6 +123,16 @@ def run_script(script: str, files_in: List[str]) -> List[str]:
     # loading user script dynamically
     sys.path.insert(0, os.getcwd())
     user_module = import_module("user_script")
+
+    # NOTE: TEMPORARY FIX! Files should not be written in-place from S3, it's wasteful!
+    s3 = boto3.client(
+        service_name="s3",
+        endpoint_url="https://s3ds.g100st.cineca.it/",
+    )
+    for key in files_in:
+        obj = s3.get_object(Bucket="s3poc", Key=key)
+        with open(key, "wb") as f:
+            f.write(obj["Body"].read())
 
     try:
         user_main = getattr(user_module, "main")
