@@ -12,46 +12,6 @@ import os
 import sys
 import json
 from typing import Dict
-from warnings import warn
-
-
-def sanitize_string(version: str, string: str):
-    """Sanitize string for use on shell, replacing special characters.
-    For server, escape character \\ must itself be escaped, as the string
-    passes via two shells, one in the ssh command call and one within the
-    slurm script.
-
-    WARNING: this function is now deprecated and will be removed in future versions
-
-    Parameters
-    ----------
-    version : str
-        specifies whether the string must be "cleaned up" for client or server
-    string : str
-        "raw" string to be sanitized
-
-    Returns
-    -------
-    str
-        sanitized string
-    """
-    warn(
-        "This function is deprecated as no longer necessary and will be removed in future versions",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-
-    if version not in ["client", "server"]:
-        raise NameError("version must either be 'client' or 'server'")
-
-    sanitized_string = string.replace("'", r"\'" if version == "client" else r"\\\'")
-    sanitized_string = sanitized_string.replace('"', r"\"" if version == "client" else r"\\\"")
-    sanitized_string = sanitized_string.replace(r"\n", r"\\n" if version == "client" else r"\\\\n")
-    sanitized_string = sanitized_string.replace("*", r"\*")
-    sanitized_string = sanitized_string.replace("(", r"\(")
-    sanitized_string = sanitized_string.replace(")", r"\)")
-
-    return sanitized_string
 
 
 class UserInput:
