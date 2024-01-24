@@ -17,7 +17,14 @@ def config_client():
 @pytest.fixture(scope="module")
 def config_server():
     config_server = Config("server")
-    config_server.load_custom_config({"walltime": "00:10:00", "ntasks_per_node": 1})
+    config_server.load_custom_config(
+        {
+            "account": "cin_staff",
+            "mail": "NO",
+            "walltime": "00:10:00",
+            "ntasks_per_node": 1,
+        }
+    )
     return config_server
 
 
