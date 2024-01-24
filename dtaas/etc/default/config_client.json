@@ -6,5 +6,6 @@
   "database": "datalake",
   "collection": "metadata",
   "s3_endpoint_url": "https://s3ds.g100st.cineca.it/",
-  "s3_bucket": "s3poc"
+  "s3_bucket": "s3poc",
+  "pfs_path_prefix": "/g100_s3/DRES_"
 }

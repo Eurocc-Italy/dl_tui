@@ -6,7 +6,7 @@ Wrapper which needs to be run from command line providing the following informat
   - query: path to a file containing an SQL query
   - script (optional): the content of a Python script. This Python script must contain a `main` function which takes 
     as input a list (of file paths), does some user-defined analysis, and returns a list (of file paths) which the 
-    wrapper then takes and stores in a compressed archive. TODO: S3 implementation and POST to datalake.
+    wrapper then takes and stores in a compressed archive.
 
 The wrapper then does the following:
 
@@ -70,9 +70,6 @@ def main():
     wrapper(
         collection=collection,
         sql_query=user_input.sql_query,
-        endpoint_url=config.s3_endpoint_url,
-        s3_bucket=config.s3_bucket,
-        id=user_input.id,
         script=script,
     )
 

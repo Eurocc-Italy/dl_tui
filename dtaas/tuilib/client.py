@@ -59,7 +59,8 @@ def retrieve_files(
     query_filters: Dict[str, str],
     query_fields: Dict[str, str],
 ) -> List[str]:
-    """Generate a list of S3 object keys according to user query
+    """Generate a list of paths according to user query, interrogating the MongoDB database.
+    NOTE: entries must have a "path" key and must be available at that path on the filesystem.
 
     Parameters
     ----------
@@ -73,13 +74,13 @@ def retrieve_files(
     Returns
     -------
     List[str]
-        list containing the S3 object keys of the files matching the query
+        list containing the paths of the files matching the query
     """
 
     query_matches = []
 
     for entry in collection.find(filter=query_filters, projection=query_fields):
-        query_matches.append(entry["s3_key"])
+        query_matches.append(entry["path"])
 
     logger.debug(f"Query results: {query_matches}")
 
@@ -100,12 +101,12 @@ def run_script(script: str, files_in: List[str]) -> List[str]:
     script : str
         content of the Python script provided by the user, to be run on the query results
     files_in : List[str]
-        list of paths with the files on which to run the script  # TODO: paths? S3 keys?
+        list of paths with the files on which to run the script
 
     Returns
     -------
     List[str]
-        list of paths with the output/processed files the user wants to save  # TODO: paths? S3 keys?
+        list of paths with the output/processed files the user wants to save
 
     Raises
     ------
@@ -123,16 +124,6 @@ def run_script(script: str, files_in: List[str]) -> List[str]:
     # loading user script dynamically
     sys.path.insert(0, os.getcwd())
     user_module = import_module("user_script")
-
-    # NOTE: TEMPORARY FIX! Files should not be written in-place from S3, it's wasteful!
-    s3 = boto3.client(
-        service_name="s3",
-        endpoint_url="https://s3ds.g100st.cineca.it/",
-    )
-    for key in files_in:
-        obj = s3.get_object(Bucket="s3poc", Key=key)
-        with open(key, "wb") as f:
-            f.write(obj["Body"].read())
 
     try:
         user_main = getattr(user_module, "main")
@@ -152,60 +143,51 @@ def run_script(script: str, files_in: List[str]) -> List[str]:
     return files_out
 
 
-def save_output(files_out: List[str], endpoint_url: str, s3_bucket: str, key: str):
-    """Take a list of paths and save the corresponding files in a zipped archive,
-    which is then uploaded to the S3 bucket.
+def save_output(files_out: List[str]):
+    """Take a list of paths and save the corresponding files in a zipped archive.
 
     Parameters
     ----------
     files_out : List[str]
         list containing the paths to the files to be saved
-    endpoint_url: str
-        URL where the S3 bucket is located
-    s3_bucket : str
-        name of the S3 bucket in which the results need to be saved
-    key : str
-        S3 Object Key identifying the results for the specific job
     """
 
-    # NOTE: S3 credentials must be saved in ~/.aws/config file
-    s3 = boto3.client(
-        service_name="s3",
-        endpoint_url=endpoint_url,
-    )
+    # # NOTE: S3 credentials must be saved in ~/.aws/config file
+    # s3 = boto3.client(
+    #     service_name="s3",
+    #     endpoint_url=endpoint_url,
+    # )
 
     logger.debug(f"Processed results: {files_out}")
 
-    os.makedirs(f"RESULTS", exist_ok=True)
+    os.makedirs(f"results", exist_ok=True)
 
-    # TODO: create temporary public URL for download?
     for file in files_out:
         try:
-            shutil.copy(file, f"RESULTS/{os.path.basename(file)}")
+            # TODO: consider using the move function to save storage
+            shutil.copy(file, f"results/{os.path.basename(file)}")
         except FileNotFoundError:
             logger.error(f"No such file or directory: '{file}'")
 
-    shutil.make_archive("results", "zip", "RESULTS")
-    response = s3.upload_file(
-        Filename="results.zip",
-        Bucket=s3_bucket,
-        Key=f"results_{key}.zip",
-    )
-    shutil.rmtree("RESULTS")
+    shutil.make_archive(f"results", "zip", "results")
 
-    logger.debug(f"S3 upload response: {response}")
+    # response = s3.upload_file(
+    #     Filename="results.zip",
+    #     Bucket=s3_bucket,
+    #     Key=f"results_{id}.zip",
+    # )
+    # logger.debug(f"S3 upload response: {response}")
+
+    shutil.rmtree(f"results")
+
     # TODO: check if this is true
-    logger.info(f"Processed files available at the following URL: {endpoint_url}/{s3_bucket}/results_{key}.zip")
-
-    return response
+    # logger.info(f"Processed files available at the following URL: {endpoint_url}/{s3_bucket}/results_{id}.zip")
+    logger.info(f"Processed files available in the results.zip archive")
 
 
 def wrapper(
     collection: Collection,
     sql_query: str,
-    endpoint_url: str,
-    s3_bucket: str,
-    id: str,
     script: str = None,
 ):
     """Get the SQL query and script, convert them to MongoDB spec, run the process query on the DB retrieving
@@ -218,12 +200,6 @@ def wrapper(
         MongoDB collection on which to run the query
     sql_query : str
         SQL query
-    endpoint_url: str
-        URL where the S3 bucket is located
-    s3_bucket : str
-        name of the S3 bucket in which the results need to be saved
-    id : str
-        unique identifier for the job, will be used to upload results to S3 bucket with unique key
     script : str, optional
         content of the Python script provided by the user, to be run on the query results
     """
@@ -246,12 +222,7 @@ def wrapper(
         # moving to temporary directory and working within the context manager
         with pushd(tdir):
             files_out = run_script(script=script, files_in=files_in)
-        save_output(
-            files_out=files_out,
-            endpoint_url=endpoint_url,
-            s3_bucket=s3_bucket,
-            key=id,
-        )
+        save_output(files_out=files_out)
         shutil.rmtree(tdir)
 
     else:
