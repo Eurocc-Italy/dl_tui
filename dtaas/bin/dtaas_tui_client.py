@@ -14,7 +14,7 @@ The wrapper then does the following:
   2. Runs query on remote DB and retrieves the matching entries, generating a list with the paths to the files
   3. Takes the user-provided python script and runs it locally, feeding the input files list to the `main` function
   4. Retrieves the output files from the `main` function and saves the files (of any kind, user-defined) in a zipped 
-  archive which the user can then download
+  archive which is then uploaded to the S3 bucket specified in the client config file.
 
 Author: @lbabetto
 """
@@ -70,6 +70,9 @@ def main():
     wrapper(
         collection=collection,
         sql_query=user_input.sql_query,
+        endpoint_url=config.s3_endpoint_url,
+        s3_bucket=config.s3_bucket,
+        job_id=user_input.id,
         script=script,
     )
 

@@ -143,20 +143,28 @@ def run_script(script: str, files_in: List[str]) -> List[str]:
     return files_out
 
 
-def save_output(files_out: List[str]):
-    """Take a list of paths and save the corresponding files in a zipped archive.
+def save_output(files_out: List[str], endpoint_url: str, s3_bucket: str, job_id: str):
+    """Take a list of paths and save the corresponding files in a zipped archive,
+    which is then uploaded to an S3 bucket.
 
     Parameters
     ----------
     files_out : List[str]
         list containing the paths to the files to be saved
+    s3_endpoint_url: str
+        URL where the S3 bucket is located
+    s3_bucket : str
+        name of the S3 bucket in which the results need to be saved
+    job_id : str
+        unique job identifier, used to create the S3 object key
+
     """
 
-    # # NOTE: S3 credentials must be saved in ~/.aws/config file
-    # s3 = boto3.client(
-    #     service_name="s3",
-    #     endpoint_url=endpoint_url,
-    # )
+    # NOTE: S3 credentials must be saved in ~/.aws/config file
+    s3 = boto3.client(
+        service_name="s3",
+        endpoint_url=endpoint_url,
+    )
 
     logger.debug(f"Processed results: {files_out}")
 
@@ -171,23 +179,25 @@ def save_output(files_out: List[str]):
 
     shutil.make_archive(f"results", "zip", "results")
 
-    # response = s3.upload_file(
-    #     Filename="results.zip",
-    #     Bucket=s3_bucket,
-    #     Key=f"results_{id}.zip",
-    # )
-    # logger.debug(f"S3 upload response: {response}")
+    response = s3.upload_file(
+        Filename="results.zip",
+        Bucket=s3_bucket,
+        Key=f"results_{job_id}.zip",
+    )
+    logger.debug(f"S3 upload response: {response}")
 
     shutil.rmtree(f"results")
 
     # TODO: check if this is true
-    # logger.info(f"Processed files available at the following URL: {endpoint_url}/{s3_bucket}/results_{id}.zip")
-    logger.info(f"Processed files available in the results.zip archive")
+    logger.info(f"Processed files available at the following URL: {endpoint_url}/{s3_bucket}/results_{job_id}.zip")
 
 
 def wrapper(
     collection: Collection,
     sql_query: str,
+    endpoint_url: str,
+    s3_bucket: str,
+    job_id: str,
     script: str = None,
 ):
     """Get the SQL query and script, convert them to MongoDB spec, run the process query on the DB retrieving
@@ -200,6 +210,12 @@ def wrapper(
         MongoDB collection on which to run the query
     sql_query : str
         SQL query
+    endpoint_url: str
+        URL where the S3 bucket is located
+    s3_bucket : str
+        name of the S3 bucket in which the results need to be saved
+    job_id : str
+        unique job identifier, used to create the S3 object key
     script : str, optional
         content of the Python script provided by the user, to be run on the query results
     """
@@ -222,7 +238,13 @@ def wrapper(
         # moving to temporary directory and working within the context manager
         with pushd(tdir):
             files_out = run_script(script=script, files_in=files_in)
-        save_output(files_out=files_out)
+        save_output(
+            files_out=files_out,
+            endpoint_url=endpoint_url,
+            s3_bucket=s3_bucket,
+            key=job_id,
+        )
+
         shutil.rmtree(tdir)
 
     else:

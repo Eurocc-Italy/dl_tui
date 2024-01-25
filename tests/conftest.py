@@ -10,7 +10,16 @@ from glob import glob
 @pytest.fixture(scope="module")
 def config_client():
     config_client = Config("client")
-    config_client.load_custom_config({"ip": "localhost"})
+    config_client.load_custom_config(
+        {
+            "user": "user",
+            "password": "passwd",
+            "ip": "localhost",
+            "port": "27017",
+            "database": "test_db",
+            "collection": "test_coll",
+        }
+    )
     return config_client
 
 
@@ -19,9 +28,15 @@ def config_server():
     config_server = Config("server")
     config_server.load_custom_config(
         {
+            "user": "lbabetto",
+            "host": "login02-ext.g100.cineca.it",
+            "venv_path": "~/virtualenvs/dtaas",
+            "ssh_key": "~/.ssh/luca-g100",
+            "partition": "g100_usr_prod",
             "account": "cin_staff",
             "mail": "NO",
             "walltime": "00:10:00",
+            "nodes": 1,
             "ntasks_per_node": 1,
         }
     )
@@ -68,6 +83,8 @@ def test_collection(config_client):
 
     # access collection
     collection = client[config.database][config.collection]
+
+    collection.insert_many({})
 
     # run tests
     yield collection
