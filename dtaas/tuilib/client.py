@@ -248,4 +248,9 @@ def wrapper(
         shutil.rmtree(tdir)
 
     else:
-        save_output(files_in)
+        save_output(
+            files_out=files_in,
+            s3_endpoint_url=s3_endpoint_url,
+            s3_bucket=s3_bucket,
+            key=job_id,
+        )
