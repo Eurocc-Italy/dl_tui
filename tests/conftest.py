@@ -108,7 +108,7 @@ def cleanup(config_server):
 
     # removing temporary folders on HPC
     server = config_server
-    # os.system(f"ssh -i {server.ssh_key} {server.user}@{server.host} 'rm -rf ~/DTAAS-TUI-TEST-*'")
+    os.system(f"ssh -i {server.ssh_key} {server.user}@{server.host} 'rm -rf ~/DTAAS-TUI-TEST-*'")
 
 
 @pytest.fixture(scope="function")

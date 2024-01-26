@@ -58,7 +58,7 @@ def test_just_search(config_server, config_client):
         # checking that results file is present
         assert (
             os.system(
-                f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DTAAS-TUI-TEST-just_search/results_DTAAS-TUI-TEST-just_search.zip'"
+                f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DTAAS-TUI-TEST-just_search/results.zip'"
             )
             == 0
         ), "Results file not found"
@@ -66,13 +66,13 @@ def test_just_search(config_server, config_client):
         assert (
             "test1.txt"
             in os.popen(
-                f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'unzip -l ~/DTAAS-TUI-TEST-just_search/results_DTAAS-TUI-TEST-just_search.zip'"
+                f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'unzip -l ~/DTAAS-TUI-TEST-just_search/results.zip'"
             )
             .read()
             .split()
             and "test2.txt"
             in os.popen(
-                f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'unzip -l ~/DTAAS-TUI-TEST-just_search/results_DTAAS-TUI-TEST-just_search.zip'"
+                f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'unzip -l ~/DTAAS-TUI-TEST-just_search/results.zip'"
             )
             .read()
             .split()
@@ -127,7 +127,7 @@ def test_return_first(config_server, config_client):
     # checking that results file is present
     assert (
         os.system(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DTAAS-TUI-TEST-return_first/results_DTAAS-TUI-TEST-return_first.zip'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DTAAS-TUI-TEST-return_first/results.zip'"
         )
         == 0
     ), "Results file not found"
@@ -135,7 +135,7 @@ def test_return_first(config_server, config_client):
     assert (
         "test1.txt"
         in os.popen(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'unzip -l ~/DTAAS-TUI-TEST-return_first/results_DTAAS-TUI-TEST-return_first.zip'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'unzip -l ~/DTAAS-TUI-TEST-return_first/results.zip'"
         )
         .read()
         .split()
@@ -186,7 +186,7 @@ def test_invalid_script(config_server, config_client):
     # checking that results file is present
     assert (
         os.system(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DTAAS-TUI-TEST-invalid_job/results_DTAAS-TUI-TEST-invalid_job.zip'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DTAAS-TUI-TEST-invalid_job/results.zip'"
         )
         == 512
     ), "Results file found, should not have worked"
