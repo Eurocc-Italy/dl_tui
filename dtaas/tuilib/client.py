@@ -242,7 +242,7 @@ def wrapper(
             files_out=files_out,
             s3_endpoint_url=s3_endpoint_url,
             s3_bucket=s3_bucket,
-            key=job_id,
+            job_id=job_id,
         )
 
         shutil.rmtree(tdir)
@@ -252,5 +252,5 @@ def wrapper(
             files_out=files_in,
             s3_endpoint_url=s3_endpoint_url,
             s3_bucket=s3_bucket,
-            key=job_id,
+            job_id=job_id,
         )
