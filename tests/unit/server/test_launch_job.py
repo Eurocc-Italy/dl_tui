@@ -3,7 +3,17 @@ import pytest
 #
 # Testing the launch_job function in module server.py
 #
-# TODO: make a mock test file and test database so the tests do not rely on any previously prepared database
+"""
+NOTE: for these tests to work, the following requirements must be met:
+
+    1. The device must have access to a HPC infrastructure running Slurm, please set up the config_server fixture
+    in conftest.py according to your specific setup.
+    2. The HPC cluster must have access to a machine running a MongoDB server containing the datalake files metadata,
+    which must include:
+        - "id": identifier used in these tests for SQL search
+        - "s3_key": S3 object key identifying the file on the S3 bucket
+        - "path": POSIX path locating the file in the parallel filesystem on HPC (which must actually exist)
+"""
 
 import os
 import json
@@ -21,7 +31,7 @@ def test_just_search(config_server):
             {
                 "id": "DTAAS-TUI-TEST-just_search",
                 "sql_query": "SELECT * FROM metadata WHERE id = 1 OR id = 2",
-                "config_server": config,
+                "config_server": config.__dict__,
             },
             f,
         )
@@ -45,20 +55,22 @@ def test_just_search(config_server):
 
     # checking that results file is present
     assert (
-        os.system(f"ssh -i {config.ssh_key} {config.user}@{config.host} 'ls ~/DTAAS-TUI-TEST-just_search/results.zip'")
+        os.system(
+            f"ssh -i {config.ssh_key} {config.user}@{config.host} 'ls ~/DTAAS-TUI-TEST-just_search/results_DTAAS-TUI-TEST-just_search.zip'"
+        )
         == 0
     ), "Results file not found"
     # checking zip content
     assert (
-        "COCO_val2014_000000554625.jpg"
+        "test1.txt"
         in os.popen(
-            f"ssh -i {config.ssh_key} {config.user}@{config.host} 'unzip -l ~/DTAAS-TUI-TEST-just_search/results.zip'"
+            f"ssh -i {config.ssh_key} {config.user}@{config.host} 'unzip -l ~/DTAAS-TUI-TEST-just_search/results_DTAAS-TUI-TEST-just_search.zip'"
         )
         .read()
         .split()
-        and "COCO_val2014_000000222564.jpg"
+        and "test2.txt"
         in os.popen(
-            f"ssh -i {config.ssh_key} {config.user}@{config.host} 'unzip -l ~/DTAAS-TUI-TEST-just_search/results.zip'"
+            f"ssh -i {config.ssh_key} {config.user}@{config.host} 'unzip -l ~/DTAAS-TUI-TEST-just_search/results_DTAAS-TUI-TEST-just_search.zip'"
         )
         .read()
         .split()
@@ -84,7 +96,7 @@ def test_return_first(config_server):
                 "id": "DTAAS-TUI-TEST-return_first",
                 "sql_query": "SELECT * FROM metadata WHERE id = 1 OR id = 2",
                 "script": "user_script.py",
-                "config_server": config,
+                "config_server": config.__dict__,
             },
             f,
         )
@@ -112,14 +124,16 @@ def test_return_first(config_server):
 
     # checking that results file is present
     assert (
-        os.system(f"ssh -i {config.ssh_key} {config.user}@{config.host} 'ls ~/DTAAS-TUI-TEST-return_first/results.zip'")
+        os.system(
+            f"ssh -i {config.ssh_key} {config.user}@{config.host} 'ls ~/DTAAS-TUI-TEST-return_first/results_DTAAS-TUI-TEST-return_first.zip'"
+        )
         == 0
     ), "Results file not found"
     # checking zip content
     assert (
-        "COCO_val2014_000000554625.jpg"
+        "test1.txt"
         in os.popen(
-            f"ssh -i {config.ssh_key} {config.user}@{config.host} 'unzip -l ~/DTAAS-TUI-TEST-return_first/results.zip'"
+            f"ssh -i {config.ssh_key} {config.user}@{config.host} 'unzip -l ~/DTAAS-TUI-TEST-return_first/results_DTAAS-TUI-TEST-return_first.zip'"
         )
         .read()
         .split()
@@ -144,7 +158,7 @@ def test_invalid_script(config_server):
             {
                 "id": "DTAAS-TUI-TEST-invalid_job",
                 "sql_query": "blablabla",
-                "config_server": config,
+                "config_server": config.__dict__,
             },
             f,
         )
@@ -167,7 +181,9 @@ def test_invalid_script(config_server):
 
     # checking that results file is present
     assert (
-        os.system(f"ssh -i {config.ssh_key} {config.user}@{config.host} 'ls ~/DTAAS-TUI-TEST-invalid_job/results.zip'")
+        os.system(
+            f"ssh -i {config.ssh_key} {config.user}@{config.host} 'ls ~/DTAAS-TUI-TEST-invalid_job/results_DTAAS-TUI-TEST-invalid_job.zip'"
+        )
         == 512
     ), "Results file found, should not have worked"
 

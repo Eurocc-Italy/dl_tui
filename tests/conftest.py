@@ -1,7 +1,6 @@
 import pytest
 
 import os
-from pymongo import MongoClient
 from dtaas.tuilib.common import Config
 import shutil
 from glob import glob
@@ -23,10 +22,32 @@ def empty_bucket():
     try:
         moto_fake.start()
         conn = boto3.client("s3")
-        conn.create_bucket(Bucket="test-bucket")
+        conn.create_bucket(Bucket="test_bucket")
         yield conn
     finally:
         moto_fake.stop()
+
+
+@pytest.fixture(scope="function")
+def mock_mongodb():
+    """Setting up a mock MongoDB collection
+
+    Yields
+    ------
+    Collection
+        MongoDB Collection on which to run the tests
+    """
+    collection = mongomock.MongoClient().db.collection
+
+    collection.insert_many(
+        [
+            {"id": 1, "s3_key": "testfile_1.txt", "path": "/test/path/testfile_1.txt"},
+            {"id": 2, "s3_key": "testfile_2.txt", "path": "/test/path/testfile_2.txt"},
+        ]
+    )
+
+    # run tests
+    yield collection
 
 
 @pytest.fixture(scope="module")
@@ -87,28 +108,6 @@ def cleanup(config_server):
     # removing temporary folders on HPC
     server = config_server
     os.system(f"ssh -i {server.ssh_key} {server.user}@{server.host} 'rm -rf ~/DTAAS-TUI-TEST-*'")
-
-
-@pytest.fixture(scope="function")
-def mock_mongodb():
-    """Setting up a mock MongoDB collection
-
-    Yields
-    ------
-    Collection
-        MongoDB Collection on which to run the tests
-    """
-    collection = mongomock.MongoClient().db.collection
-
-    collection.insert_many(
-        [
-            {"id": 1, "s3_key": "testfile_1.txt", "path": "/test/path/testfile_1.txt"},
-            {"id": 2, "s3_key": "testfile_2.txt", "path": "/test/path/testfile_2.txt"},
-        ]
-    )
-
-    # run tests
-    yield collection
 
 
 @pytest.fixture(scope="function")

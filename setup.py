@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="dtaas-tui",
-    version="0.3.1",
+    version="0.3.2",
     description="Query/Process interface for DTaaS",
     packages=find_packages(include=["dtaas", "dtaas.*"]),
     package_data={
