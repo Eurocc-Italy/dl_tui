@@ -5,12 +5,20 @@ from pymongo import MongoClient
 from dtaas.tuilib.common import Config
 import shutil
 from glob import glob
+import mongomock
 import moto
 import boto3
 
 
 @pytest.fixture(scope="function")
 def empty_bucket():
+    """Sets up a mock S3 bucket.
+
+    Yields
+    ------
+    boto3.Session.client
+        S3 client on which to run the tests
+    """
     moto_fake = moto.mock_s3()
     try:
         moto_fake.start()
@@ -82,23 +90,15 @@ def cleanup(config_server):
 
 
 @pytest.fixture(scope="function")
-def test_collection(config_client):
-    """Setting up testing environment and yielding test MongoDB collection
+def mock_mongodb():
+    """Setting up a mock MongoDB collection
 
     Yields
     ------
     Collection
         MongoDB Collection on which to run the tests
     """
-    # load config and set up testing environment
-    config = config_client
-    mongodb_uri = f"mongodb://localhost:{config.port}/"
-
-    # connect to client
-    client = MongoClient(mongodb_uri)
-
-    # access collection
-    collection = client[config.database][config.collection]
+    collection = mongomock.MongoClient().db.collection
 
     collection.insert_many(
         [
@@ -109,8 +109,6 @@ def test_collection(config_client):
 
     # run tests
     yield collection
-
-    collection.delete_many({})
 
 
 @pytest.fixture(scope="function")

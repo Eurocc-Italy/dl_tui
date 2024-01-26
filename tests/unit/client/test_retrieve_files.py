@@ -7,7 +7,7 @@ import pytest
 from dtaas.tuilib.client import retrieve_files
 
 
-def test_search_specific_files(test_collection):
+def test_search_specific_files(mock_mongodb):
     """
     Search for two specific files
     """
@@ -16,7 +16,7 @@ def test_search_specific_files(test_collection):
     mongo_fields = {}
 
     files_in = retrieve_files(
-        collection=test_collection,
+        collection=mock_mongodb,
         query_filters=mongo_filters,
         query_fields=mongo_fields,
     )
@@ -27,7 +27,7 @@ def test_search_specific_files(test_collection):
     ]
 
 
-def test_search_missing_entry(test_collection):
+def test_search_missing_entry(mock_mongodb):
     """
     Search for a file that does not exist
     """
@@ -36,7 +36,7 @@ def test_search_missing_entry(test_collection):
     mongo_fields = {}
 
     files_in = retrieve_files(
-        collection=test_collection,
+        collection=mock_mongodb,
         query_filters=mongo_filters,
         query_fields=mongo_fields,
     )
