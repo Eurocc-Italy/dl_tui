@@ -9,35 +9,59 @@ import os
 from zipfile import ZipFile
 
 
-def test_save_output(generate_test_files):
+def test_save_output(generate_test_files, empty_bucket):
     """
     Test that the function actually generates a zip file.
     """
 
-    save_output(generate_test_files)
+    save_output(
+        files_out=generate_test_files,
+        s3_endpoint_url="https://s3.amazonaws.com",
+        s3_bucket="test-bucket",
+        job_id=1,
+    )
 
-    assert os.path.exists("results.zip"), "Zipped archive was not created."
+    assert len(empty_bucket.list_objects_v2(Bucket="test-bucket")["Contents"]) == 1, "Zipped archive was not uploaded."
 
-    with ZipFile("results.zip", "r") as archive:
+    assert (
+        empty_bucket.list_objects_v2(Bucket="test-bucket")["Contents"][0]["Key"] == "results_1.zip"
+    ), "Zipped archive was not uploaded."
+
+    empty_bucket.download_file(Bucket="test-bucket", Key="results_1.zip", Filename="results_1.zip")
+
+    with ZipFile("results_1.zip", "r") as archive:
         filelist = archive.namelist()
         filelist.sort()  # For some reason, the zip contains the files in reverse order...
         assert filelist == ["TESTFILE_1.txt", "TESTFILE_2.txt"]
 
     os.remove("results.zip")
+    os.remove("results_1.zip")
 
 
-def test_nonexistent_files():
+def test_nonexistent_files(empty_bucket):
     """
     Test the function with nonexistent files (e.g., from incorrect return in user_script `main`).
-    UPDATED: code no longer raises the exception, 
+    UPDATED: code no longer raises the exception,
     """
 
-    save_output(["test1", "test2"])
+    save_output(
+        files_out=["test1", "test2"],
+        s3_endpoint_url="https://s3.amazonaws.com",
+        s3_bucket="test-bucket",
+        job_id=2,
+    )
 
-    assert os.path.exists("results.zip"), "Zipped archive was not created."
+    assert len(empty_bucket.list_objects_v2(Bucket="test-bucket")["Contents"]) == 1, "Zipped archive was not uploaded."
 
-    with ZipFile("results.zip", "r") as archive:
+    assert (
+        empty_bucket.list_objects_v2(Bucket="test-bucket")["Contents"][0]["Key"] == "results_2.zip"
+    ), "Zipped archive was not uploaded."
+
+    empty_bucket.download_file(Bucket="test-bucket", Key="results_2.zip", Filename="results_2.zip")
+
+    with ZipFile("results_2.zip", "r") as archive:
         filelist = archive.namelist()
         assert filelist == []
 
     os.remove("results.zip")
+    os.remove("results_2.zip")

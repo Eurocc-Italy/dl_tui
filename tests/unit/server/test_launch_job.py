@@ -20,8 +20,8 @@ def test_just_search(config_server):
         json.dump(
             {
                 "id": "DTAAS-TUI-TEST-just_search",
-                "sql_query": "SELECT * FROM metadata WHERE id = 554625 OR id = 222564",
-                "config_server": {"walltime": "00:10:00", "ntasks_per_node": 1},
+                "sql_query": "SELECT * FROM metadata WHERE id = 1 OR id = 2",
+                "config_server": config,
             },
             f,
         )
@@ -82,9 +82,9 @@ def test_return_first(config_server):
         json.dump(
             {
                 "id": "DTAAS-TUI-TEST-return_first",
-                "sql_query": "SELECT * FROM metadata WHERE id = 554625 OR id = 222564",
+                "sql_query": "SELECT * FROM metadata WHERE id = 1 OR id = 2",
                 "script": "user_script.py",
-                "config_server": {"walltime": "00:10:00", "ntasks_per_node": 1},
+                "config_server": config,
             },
             f,
         )
@@ -144,7 +144,7 @@ def test_invalid_script(config_server):
             {
                 "id": "DTAAS-TUI-TEST-invalid_job",
                 "sql_query": "blablabla",
-                "config_server": {"walltime": "00:10:00", "ntasks_per_node": 1},
+                "config_server": config,
             },
             f,
         )

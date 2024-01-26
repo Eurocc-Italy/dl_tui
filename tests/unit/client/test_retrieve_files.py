@@ -3,7 +3,6 @@ import pytest
 #
 # Testing retrieve_files function in client.py library
 #
-# TODO: make a mock test file and test database so the tests do not rely on any previously prepared database
 
 from dtaas.tuilib.client import retrieve_files
 
@@ -13,7 +12,7 @@ def test_search_specific_files(test_collection):
     Search for two specific files
     """
 
-    mongo_filters = {"$or": [{"id": 554625}, {"id": 222564}]}
+    mongo_filters = {"$or": [{"id": 1}, {"id": 2}]}
     mongo_fields = {}
 
     files_in = retrieve_files(
@@ -23,8 +22,8 @@ def test_search_specific_files(test_collection):
     )
 
     assert files_in == [
-        "/home/lbabetto/PROJECTS/DTaaS/data/COCO/COCO_val2014_000000554625.jpg",
-        "/home/lbabetto/PROJECTS/DTaaS/data/COCO/COCO_val2014_000000222564.jpg",
+        "/test/path/testfile_1.txt",
+        "/test/path/testfile_2.txt",
     ]
 
 

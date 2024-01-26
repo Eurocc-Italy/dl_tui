@@ -143,7 +143,7 @@ def run_script(script: str, files_in: List[str]) -> List[str]:
     return files_out
 
 
-def save_output(files_out: List[str], endpoint_url: str, s3_bucket: str, job_id: str):
+def save_output(files_out: List[str], s3_endpoint_url: str, s3_bucket: str, job_id: str):
     """Take a list of paths and save the corresponding files in a zipped archive,
     which is then uploaded to an S3 bucket.
 
@@ -163,7 +163,7 @@ def save_output(files_out: List[str], endpoint_url: str, s3_bucket: str, job_id:
     # NOTE: S3 credentials must be saved in ~/.aws/config file
     s3 = boto3.client(
         service_name="s3",
-        endpoint_url=endpoint_url,
+        endpoint_url=s3_endpoint_url,
     )
 
     logger.debug(f"Processed results: {files_out}")
@@ -189,13 +189,13 @@ def save_output(files_out: List[str], endpoint_url: str, s3_bucket: str, job_id:
     shutil.rmtree(f"results")
 
     # TODO: check if this is true
-    logger.info(f"Processed files available at the following URL: {endpoint_url}/{s3_bucket}/results_{job_id}.zip")
+    logger.info(f"Processed files available at the following URL: {s3_endpoint_url}/{s3_bucket}/results_{job_id}.zip")
 
 
 def wrapper(
     collection: Collection,
     sql_query: str,
-    endpoint_url: str,
+    s3_endpoint_url: str,
     s3_bucket: str,
     job_id: str,
     script: str = None,
@@ -210,7 +210,7 @@ def wrapper(
         MongoDB collection on which to run the query
     sql_query : str
         SQL query
-    endpoint_url: str
+    s3_endpoint_url: str
         URL where the S3 bucket is located
     s3_bucket : str
         name of the S3 bucket in which the results need to be saved
@@ -240,7 +240,7 @@ def wrapper(
             files_out = run_script(script=script, files_in=files_in)
         save_output(
             files_out=files_out,
-            endpoint_url=endpoint_url,
+            s3_endpoint_url=s3_endpoint_url,
             s3_bucket=s3_bucket,
             key=job_id,
         )

@@ -5,6 +5,20 @@ from pymongo import MongoClient
 from dtaas.tuilib.common import Config
 import shutil
 from glob import glob
+import moto
+import boto3
+
+
+@pytest.fixture(scope="function")
+def empty_bucket():
+    moto_fake = moto.mock_s3()
+    try:
+        moto_fake.start()
+        conn = boto3.client("s3")
+        conn.create_bucket(Bucket="test-bucket")
+        yield conn
+    finally:
+        moto_fake.stop()
 
 
 @pytest.fixture(scope="module")
@@ -14,10 +28,12 @@ def config_client():
         {
             "user": "user",
             "password": "passwd",
-            "ip": "localhost",
+            "ip": "131.175.205.87",
             "port": "27017",
             "database": "test_db",
             "collection": "test_coll",
+            "s3_endpoint_url": "https://s3ds.g100st.cineca.it/",
+            "s3_bucket": "s3poc",
         }
     )
     return config_client
@@ -35,7 +51,7 @@ def config_server():
             "partition": "g100_usr_prod",
             "account": "cin_staff",
             "mail": "NO",
-            "walltime": "00:10:00",
+            "walltime": "00:01:00",
             "nodes": 1,
             "ntasks_per_node": 1,
         }
@@ -65,7 +81,7 @@ def cleanup(config_server):
     os.system(f"ssh -i {server.ssh_key} {server.user}@{server.host} 'rm -rf ~/DTAAS-TUI-TEST-*'")
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def test_collection(config_client):
     """Setting up testing environment and yielding test MongoDB collection
 
@@ -76,7 +92,7 @@ def test_collection(config_client):
     """
     # load config and set up testing environment
     config = config_client
-    mongodb_uri = f"mongodb://{config.user}:{config.password}@{config.ip}:{config.port}/"
+    mongodb_uri = f"mongodb://localhost:{config.port}/"
 
     # connect to client
     client = MongoClient(mongodb_uri)
@@ -84,10 +100,17 @@ def test_collection(config_client):
     # access collection
     collection = client[config.database][config.collection]
 
-    collection.insert_many({})
+    collection.insert_many(
+        [
+            {"id": 1, "s3_key": "testfile_1.txt", "path": "/test/path/testfile_1.txt"},
+            {"id": 2, "s3_key": "testfile_2.txt", "path": "/test/path/testfile_2.txt"},
+        ]
+    )
 
     # run tests
     yield collection
+
+    collection.delete_many({})
 
 
 @pytest.fixture(scope="function")
