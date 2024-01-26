@@ -189,7 +189,7 @@ def launch_job(json_path: str):
 
     # Generating SSH command
     ssh_cmd = f"cd {user_input.id}; "
-    ssh_cmd += f"sbatch -p {partition} -A {account} --qos {qos}"
+    ssh_cmd += f"sbatch -p {partition} -A {account} --qos {qos} "
     ssh_cmd += f"--mail-type ALL --mail-user {mail} "
     ssh_cmd += f"-t {walltime} -N {nodes} "
     ssh_cmd += f"--ntasks-per-node {ntasks_per_node} "
