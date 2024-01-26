@@ -53,35 +53,35 @@ def test_just_search(config_server):
         ):
             break
 
-    # checking that results file is present
-    assert (
-        os.system(
-            f"ssh -i {config.ssh_key} {config.user}@{config.host} 'ls ~/DTAAS-TUI-TEST-just_search/results_DTAAS-TUI-TEST-just_search.zip'"
-        )
-        == 0
-    ), "Results file not found"
-    # checking zip content
-    assert (
-        "test1.txt"
-        in os.popen(
-            f"ssh -i {config.ssh_key} {config.user}@{config.host} 'unzip -l ~/DTAAS-TUI-TEST-just_search/results_DTAAS-TUI-TEST-just_search.zip'"
-        )
-        .read()
-        .split()
-        and "test2.txt"
-        in os.popen(
-            f"ssh -i {config.ssh_key} {config.user}@{config.host} 'unzip -l ~/DTAAS-TUI-TEST-just_search/results_DTAAS-TUI-TEST-just_search.zip'"
-        )
-        .read()
-        .split()
-    ), "Missing output file"
-    # checking that slurm output is empty
-    assert (
-        os.popen(
-            f"ssh -i {config.ssh_key} {config.user}@{config.host} 'cat ~/DTAAS-TUI-TEST-just_search/slurm*'"
-        ).read()
-        == " \n"
-    ), "Slurm output file is not empty"
+        # checking that results file is present
+        assert (
+            os.system(
+                f"ssh -i {config.ssh_key} {config.user}@{config.host} 'ls ~/DTAAS-TUI-TEST-just_search/results_DTAAS-TUI-TEST-just_search.zip'"
+            )
+            == 0
+        ), "Results file not found"
+        # checking zip content
+        assert (
+            "test1.txt"
+            in os.popen(
+                f"ssh -i {config.ssh_key} {config.user}@{config.host} 'unzip -l ~/DTAAS-TUI-TEST-just_search/results_DTAAS-TUI-TEST-just_search.zip'"
+            )
+            .read()
+            .split()
+            and "test2.txt"
+            in os.popen(
+                f"ssh -i {config.ssh_key} {config.user}@{config.host} 'unzip -l ~/DTAAS-TUI-TEST-just_search/results_DTAAS-TUI-TEST-just_search.zip'"
+            )
+            .read()
+            .split()
+        ), "Missing output file"
+        # checking that slurm output is empty
+        assert (
+            os.popen(
+                f"ssh -i {config.ssh_key} {config.user}@{config.host} 'cat ~/DTAAS-TUI-TEST-just_search/slurm*'"
+            ).read()
+            == " \n"
+        ), "Slurm output file is not empty"
 
 
 def test_return_first(config_server):

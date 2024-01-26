@@ -78,6 +78,7 @@ def config_server():
             "venv_path": "~/virtualenvs/dtaas",
             "ssh_key": "~/.ssh/luca-g100",
             "partition": "g100_usr_prod",
+            "qos": "g100_qos_dbg",
             "account": "cin_staff",
             "mail": "NO",
             "walltime": "00:01:00",
@@ -107,7 +108,7 @@ def cleanup(config_server):
 
     # removing temporary folders on HPC
     server = config_server
-    os.system(f"ssh -i {server.ssh_key} {server.user}@{server.host} 'rm -rf ~/DTAAS-TUI-TEST-*'")
+    # os.system(f"ssh -i {server.ssh_key} {server.user}@{server.host} 'rm -rf ~/DTAAS-TUI-TEST-*'")
 
 
 @pytest.fixture(scope="function")
