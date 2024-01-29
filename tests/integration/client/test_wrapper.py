@@ -6,47 +6,62 @@ import pytest
 
 from dtaas.tuilib.client import wrapper
 import os
+import shutil
 from zipfile import ZipFile
 
 
-def test_search_specific_files(test_collection):
+@pytest.fixture(scope="function", autouse=True)
+def create_tmpdir():
+    """Creates temporary directory for storing results file, and then deletes it"""
+    os.makedirs(f"{os.path.dirname(os.path.abspath(__file__))}/testbucket", exist_ok=True)
+    yield
+    shutil.rmtree(f"{os.path.dirname(os.path.abspath(__file__))}/testbucket")
+
+
+def test_search_specific_files(test_mongodb):
     """
     Search for two specific files
     """
-    query = "SELECT * FROM metadata WHERE id = 554625 OR id = 222564"
+    query = "SELECT * FROM metadata WHERE id = 1 OR id = 2"
 
     wrapper(
-        collection=test_collection,
+        collection=test_mongodb,
         sql_query=query,
+        pfs_prefix_path=f"{os.path.dirname(os.path.abspath(__file__))}/",
+        s3_bucket="testbucket",
+        job_id=1,
     )
 
-    assert os.path.exists("results.zip"), "Zipped archive was not created."
+    assert os.path.exists("results_1.zip"), "Zipped archive was not created."
 
-    with ZipFile("results.zip", "r") as archive:
+    with ZipFile("results_1.zip", "r") as archive:
         assert archive.namelist() == [
-            "COCO_val2014_000000222564.jpg",
-            "COCO_val2014_000000554625.jpg",
+            "test1.txt",
+            "test2.txt",
         ]
 
-    os.remove("results.zip")
+    os.remove("results_1.zip")
 
 
-def test_search_specific_files_return_only_first(test_collection):
+def test_search_specific_files_return_only_first(test_mongodb):
     """
     Search for two specific files and return just the first item
     """
-    query = "SELECT * FROM metadata WHERE id = 554625 OR id = 222564"
+    query = "SELECT * FROM metadata WHERE id = 1 OR id = 2"
     script = "def main(files_in):\n files_out=files_in.copy()\n return [files_out[0]]"
 
     wrapper(
-        collection=test_collection,
+        collection=test_mongodb,
         sql_query=query,
+        pfs_prefix_path=f"{os.path.dirname(os.path.abspath(__file__))}/",
+        s3_bucket="testbucket",
+        job_id=2,
         script=script,
     )
 
-    assert os.path.exists("results.zip"), "Zipped archive was not created."
+    assert os.path.exists("results_2.zip"), "Zipped archive was not created."
 
-    with ZipFile("results.zip", "r") as archive:
-        assert archive.namelist() == ["COCO_val2014_000000554625.jpg"]
+    with ZipFile("results_2.zip", "r") as archive:
+        assert archive.namelist() == ["test1.txt"]
 
-    os.remove("results.zip")
+    os.remove("results_2.zip")

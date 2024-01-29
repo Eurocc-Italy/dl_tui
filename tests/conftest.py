@@ -5,6 +5,7 @@ from dtaas.tuilib.common import Config
 import shutil
 from glob import glob
 import mongomock
+from pymongo import MongoClient
 import boto3
 
 
@@ -82,6 +83,39 @@ def mock_mongodb():
 
     # run tests
     yield collection
+
+
+@pytest.fixture(scope="function")
+def test_mongodb():
+    """Setting up a test MongoDB collection
+
+    Yields
+    ------
+    Collection
+        MongoDB Collection on which to run the tests
+    """
+    client = MongoClient("mongodb://user:passwd@localhost:27017/")
+    collection = client["test_db"]["test_coll"]
+
+    collection.insert_many(
+        [
+            {
+                "id": 1,
+                "s3_key": "test1.txt",
+                "path": f"{os.path.dirname(os.path.abspath(__file__))}/utils/sample_files/test1.txt",
+            },
+            {
+                "id": 2,
+                "s3_key": "test2.txt",
+                "path": f"{os.path.dirname(os.path.abspath(__file__))}/utils/sample_files/test2.txt",
+            },
+        ]
+    )
+
+    # run tests
+    yield collection
+
+    collection.delete_many({})
 
 
 @pytest.fixture(scope="module")
