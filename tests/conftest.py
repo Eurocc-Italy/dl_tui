@@ -63,6 +63,7 @@ def config_client():
             "collection": "test_coll",
             "s3_endpoint_url": "https://s3ds.g100st.cineca.it/",
             "s3_bucket": "s3poc",
+            "pfs_prefix_path": "/g100_s3/DRES_",
         }
     )
     return config_client

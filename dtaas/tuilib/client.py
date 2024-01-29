@@ -143,16 +143,17 @@ def run_script(script: str, files_in: List[str]) -> List[str]:
     return files_out
 
 
-def save_output(files_out: List[str], s3_endpoint_url: str, s3_bucket: str, job_id: str):
+def save_output(files_out: List[str], pfs_prefix_path: str, s3_bucket: str, job_id: str):
     """Take a list of paths and save the corresponding files in a zipped archive,
-    which is then uploaded to an S3 bucket.
+    which is then moved to the correct location on the parallel filesystem ({pfs_prefix_path}{s3_bucket}/)
+    and synced to the S3 bucket via a curl command.
 
     Parameters
     ----------
     files_out : List[str]
         list containing the paths to the files to be saved
-    s3_endpoint_url: str
-        URL where the S3 bucket is located
+    pfs_prefix_path: str
+        path prefix for the location on the parallel filesystem
     s3_bucket : str
         name of the S3 bucket in which the results need to be saved
     job_id : str
@@ -160,42 +161,29 @@ def save_output(files_out: List[str], s3_endpoint_url: str, s3_bucket: str, job_
 
     """
 
-    # NOTE: S3 credentials must be saved in ~/.aws/config file
-    s3 = boto3.client(
-        service_name="s3",
-        endpoint_url=s3_endpoint_url,
-    )
-
     logger.debug(f"Processed results: {files_out}")
 
     os.makedirs(f"results", exist_ok=True)
 
     for file in files_out:
         try:
-            # TODO: consider using the move function to save storage
-            shutil.copy(file, f"results/{os.path.basename(file)}")
+            shutil.move(file, f"results/{os.path.basename(file)}")
         except FileNotFoundError:
             logger.error(f"No such file or directory: '{file}'")
 
-    shutil.make_archive(f"results", "zip", "results")
+    shutil.make_archive(f"results_{job_id}", "zip", "results")
 
-    response = s3.upload_file(
-        Filename="results.zip",
-        Bucket=s3_bucket,
-        Key=f"results_{job_id}.zip",
-    )
-    logger.debug(f"S3 upload response: {response}")
+    shutil.move(f"results_{job_id}.zip", f"{pfs_prefix_path}{s3_bucket}/results_{job_id}.zip")
 
     shutil.rmtree(f"results")
 
-    # TODO: check if this is true
-    logger.info(f"Processed files available at the following URL: {s3_endpoint_url}/{s3_bucket}/results_{job_id}.zip")
+    # TODO: curl sync command for S3 bucket
 
 
 def wrapper(
     collection: Collection,
     sql_query: str,
-    s3_endpoint_url: str,
+    pfs_prefix_path: str,
     s3_bucket: str,
     job_id: str,
     script: str = None,
@@ -210,8 +198,8 @@ def wrapper(
         MongoDB collection on which to run the query
     sql_query : str
         SQL query
-    s3_endpoint_url: str
-        URL where the S3 bucket is located
+    pfs_prefix_path: str
+        path prefix for the location on the parallel filesystem
     s3_bucket : str
         name of the S3 bucket in which the results need to be saved
     job_id : str
@@ -240,7 +228,7 @@ def wrapper(
             files_out = run_script(script=script, files_in=files_in)
         save_output(
             files_out=files_out,
-            s3_endpoint_url=s3_endpoint_url,
+            pfs_prefix_path=pfs_prefix_path,
             s3_bucket=s3_bucket,
             job_id=job_id,
         )
@@ -250,7 +238,7 @@ def wrapper(
     else:
         save_output(
             files_out=files_in,
-            s3_endpoint_url=s3_endpoint_url,
+            pfs_prefix_path=pfs_prefix_path,
             s3_bucket=s3_bucket,
             job_id=job_id,
         )

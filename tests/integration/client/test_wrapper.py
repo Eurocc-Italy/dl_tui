@@ -3,7 +3,6 @@ import pytest
 #
 # Testing wrapper function in wrapper.py
 #
-# TODO: make a mock test file and test database so the tests do not rely on any previously prepared database
 
 from dtaas.tuilib.client import wrapper
 import os

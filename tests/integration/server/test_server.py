@@ -3,7 +3,6 @@ import pytest
 #
 # Testing the launcher module
 #
-# TODO: make a mock test file and test database so the tests do not rely on any previously prepared database
 
 import os
 import subprocess
