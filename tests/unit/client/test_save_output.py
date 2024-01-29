@@ -34,15 +34,17 @@ def test_save_output(empty_bucket):
         job_id=1,
     )
 
-    assert os.path.exists("results_1.zip"), "Zipped archive was not created."
+    assert os.path.exists(
+        f"{os.path.dirname(os.path.abspath(__file__))}/emptybucket/results_1.zip"
+    ), "Zipped archive was not created."
 
-    with ZipFile("results_1.zip", "r") as archive:
+    with ZipFile(f"{os.path.dirname(os.path.abspath(__file__))}/emptybucket/results_1.zip", "r") as archive:
         assert archive.namelist() == [
             "test1.txt",
             "test2.txt",
         ]
 
-    os.remove(f"{os.path.dirname(os.path.abspath(__file__))}/results_1.zip")
+    os.remove(f"{os.path.dirname(os.path.abspath(__file__))}/emptybucket/results_1.zip")
 
     s3_keys = [obj.key for obj in empty_bucket.objects.all()]
 
@@ -58,7 +60,7 @@ def test_save_output(empty_bucket):
         assert filelist == ["test1.txt", "test2.txt"]
 
 
-def test_nonexistent_files(s3_bucket):
+def test_nonexistent_files(empty_bucket):
     """
     Test the function with nonexistent files (e.g., from incorrect return in user_script `main`).
     UPDATED: code no longer raises the exception,
@@ -66,25 +68,29 @@ def test_nonexistent_files(s3_bucket):
 
     save_output(
         files_out=[
-            f"{os.path.dirname(os.path.abspath(__file__))}/../../utils/sample_files/test3.txt",
+            f"{os.path.dirname(os.path.abspath(__file__))}/../../utils/sample_files/notafile.txt",
         ],
-        pfs_prefix_path=os.path.dirname(os.path.abspath(__file__)),
-        s3_bucket="",
+        pfs_prefix_path=f"{os.path.dirname(os.path.abspath(__file__))}/",
+        s3_bucket="emptybucket",
         job_id=2,
     )
 
-    assert os.path.exists("results_2.zip"), "Zipped archive was not created."
+    assert os.path.exists(
+        f"{os.path.dirname(os.path.abspath(__file__))}/emptybucket/results_2.zip"
+    ), "Zipped archive was not created."
 
-    with ZipFile("results_2.zip", "r") as archive:
+    with ZipFile(f"{os.path.dirname(os.path.abspath(__file__))}/emptybucket/results_2.zip", "r") as archive:
         assert archive.namelist() == []
 
-    os.remove(f"{os.path.dirname(os.path.abspath(__file__))}/results_2.zip")
+    os.remove(f"{os.path.dirname(os.path.abspath(__file__))}/emptybucket/results_2.zip")
 
-    assert len(empty_bucket.objects.all()) == 1, "Zipped archive was not uploaded."
+    s3_keys = [obj.key for obj in empty_bucket.objects.all()]
 
-    assert empty_bucket.objects.all()[0]["Key"] == "results_2.zip", "Zipped archive was not uploaded."
+    assert len(s3_keys) == 1, "Zipped archive was not uploaded."
 
-    s3_bucket.download_file(Bucket="emptybucket", Key="results_2.zip", Filename="results_2.zip")
+    assert s3_keys[0] == "results_2.zip", "Zipped archive was not uploaded."
+
+    empty_bucket.download_file(Key="results_2.zip", Filename="results_2.zip")
 
     with ZipFile("results_2.zip", "r") as archive:
         filelist = archive.namelist()

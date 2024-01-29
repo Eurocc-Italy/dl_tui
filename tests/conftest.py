@@ -114,7 +114,7 @@ def cleanup(config_server):
     for match in glob("run_script*"):
         shutil.rmtree(match)
     for match in glob("results_*.zip"):
-        shutil.rmtree(match)
+        os.remove(match)
     if os.path.exists("user_script.py"):
         os.remove("user_script.py")
     if os.path.exists("input.json"):

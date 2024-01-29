@@ -20,8 +20,6 @@ from pymongo.collection import Collection
 from importlib import import_module
 from sqlparse.builders.mongo_builder import MongoQueryBuilder
 
-import boto3
-
 
 def convert_SQL_to_mongo(sql_query: str) -> Tuple[Dict[str, str], Dict[str, str]]:
     """Converts SQL query to MongoDB spec
@@ -167,6 +165,7 @@ def save_output(files_out: List[str], pfs_prefix_path: str, s3_bucket: str, job_
 
     for file in files_out:
         try:
+            # consider using shutil.move to save space, here and when copying the results
             shutil.copy(file, f"results/{os.path.basename(file)}")
         except FileNotFoundError:
             logger.error(f"No such file or directory: '{file}'")
