@@ -8,6 +8,8 @@ import os
 import subprocess
 import json
 
+from conftest import ROOT_DIR
+
 
 def test_just_search(config_server):
     """
@@ -25,7 +27,7 @@ def test_just_search(config_server):
             f,
         )
 
-    os.system(f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_server.py input.json")
+    os.system(f"{ROOT_DIR}/dtaas/bin/dtaas_tui_server.py input.json")
 
     while True:
         # checking that JOB_DONE file has been made
@@ -83,7 +85,7 @@ def test_return_first(config_server):
     with open("user_script.py", "w") as f:
         f.write("def main(files_in):\n files_out=files_in.copy()\n return [files_out[0]]")
 
-    os.system(f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_server.py input.json")
+    os.system(f"{ROOT_DIR}/dtaas/bin/dtaas_tui_server.py input.json")
 
     while True:
         # checking that JOB_DONE file has been made
@@ -134,7 +136,7 @@ def test_invalid_script():
         )
 
     stdout, stderr = subprocess.Popen(
-        f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_server.py input.json",
+        f"{ROOT_DIR}/dtaas/bin/dtaas_tui_server.py input.json",
         shell=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
