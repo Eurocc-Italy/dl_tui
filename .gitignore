@@ -1,3 +1,7 @@
+# Localstack files
+tests/utils/localstack/volume
+tests/utils/localstack/volume*
+
 # VSCode
 **.vscode/
 

@@ -5,27 +5,61 @@ from dtaas.tuilib.common import Config
 import shutil
 from glob import glob
 import mongomock
-import moto
 import boto3
 
 
 @pytest.fixture(scope="function")
 def empty_bucket():
-    """Sets up a mock S3 bucket.
+    """Sets up an empty S3 bucket using the LocalStack local server
 
     Yields
     ------
     boto3.Session.client
         S3 client on which to run the tests
     """
-    moto_fake = moto.mock_s3()
-    try:
-        moto_fake.start()
-        conn = boto3.client("s3")
-        conn.create_bucket(Bucket="test_bucket")
-        yield conn
-    finally:
-        moto_fake.stop()
+    s3 = boto3.resource(
+        "s3",
+        endpoint_url="http://localhost.localstack.cloud:4566",
+        aws_access_key_id="test",
+        aws_secret_access_key="test",
+    )
+    s3.create_bucket(Bucket="emptybucket")
+    bucket = s3.Bucket("emptybucket")
+
+    yield bucket
+
+    bucket.objects.all().delete()
+
+
+@pytest.fixture(scope="function")
+def test_bucket():
+    """Sets up the test S3 bucket using the LocalStack local server
+
+    Yields
+    ------
+    boto3.Session.client
+        S3 client on which to run the tests
+    """
+    s3 = boto3.resource(
+        "s3",
+        endpoint_url="http://localhost.localstack.cloud:4566",
+        aws_access_key_id="test",
+        aws_secret_access_key="test",
+    )
+    s3.create_bucket(Bucket="testbucket")
+    bucket = s3.Bucket("testbucket")
+    bucket.upload_file(
+        Key="test1.txt",
+        Filename=f"{os.path.dirname(os.path.abspath(__file__))}/utils/sample_files/test1.txt",
+    )
+    bucket.upload_file(
+        Key="test2.txt",
+        Filename=f"{os.path.dirname(os.path.abspath(__file__))}/utils/sample_files/test1.txt",
+    )
+
+    yield bucket
+
+    bucket.objects.all().delete()
 
 
 @pytest.fixture(scope="function")
@@ -48,25 +82,6 @@ def mock_mongodb():
 
     # run tests
     yield collection
-
-
-@pytest.fixture(scope="module")
-def config_client():
-    config_client = Config("client")
-    config_client.load_custom_config(
-        {
-            "user": "user",
-            "password": "passwd",
-            "ip": "131.175.205.87",
-            "port": "27017",
-            "database": "test_db",
-            "collection": "test_coll",
-            "s3_endpoint_url": "https://s3ds.g100st.cineca.it/",
-            "s3_bucket": "s3poc",
-            "pfs_prefix_path": "/g100_s3/DRES_",
-        }
-    )
-    return config_client
 
 
 @pytest.fixture(scope="module")
@@ -98,6 +113,8 @@ def cleanup(config_server):
     # cleanup temporary files and folders
     for match in glob("run_script*"):
         shutil.rmtree(match)
+    for match in glob("results_*.zip"):
+        shutil.rmtree(match)
     if os.path.exists("user_script.py"):
         os.remove("user_script.py")
     if os.path.exists("input.json"):
@@ -110,23 +127,3 @@ def cleanup(config_server):
     # removing temporary folders on HPC
     server = config_server
     os.system(f"ssh -i {server.ssh_key} {server.user}@{server.host} 'rm -rf ~/DTAAS-TUI-TEST-*'")
-
-
-@pytest.fixture(scope="function")
-def generate_test_files():
-    """generate a text file to test the library
-
-    Yields
-    ------
-    str
-        path to the test file
-    """
-    with open("TESTFILE_1.txt", "w") as f:
-        f.write("THIS IS THE FIRST TEST FILE.\n")
-    with open("TESTFILE_2.txt", "w") as f:
-        f.write("THIS IS THE SECOND TEST FILE.\n")
-
-    yield ["TESTFILE_1.txt", "TESTFILE_2.txt"]
-
-    os.remove("TESTFILE_1.txt")
-    os.remove("TESTFILE_2.txt")

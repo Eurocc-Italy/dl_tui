@@ -1,5 +1,11 @@
 import pytest
 
+import os
+import shutil
+import json
+from dtaas.tuilib.common import Config
+from zipfile import ZipFile
+
 #
 # Testing the wrapper module in standalone mode
 #
@@ -33,12 +39,12 @@ NOTE: to be able to run correctly, the following requsites must be met:
                     {
                         "id": 1, 
                         "s3_key": "test1.txt", 
-                        "path": "<repo-path>/dtaas-tui/tests/sample_files/test1.txt"
+                        "path": "<repo-path>/dtaas-tui/tests/utils/sample_files/test1.txt"
                     },
                     {
                         "id": 2, 
                         "s3_key": "test2.txt", 
-                        "path": "<repo-path>/dtaas-tui/tests/sample_files/test2.txt"
+                        "path": "<repo-path>/dtaas-tui/tests/utils/sample_files/test2.txt"
                     }
                 ]
             )
@@ -46,22 +52,45 @@ NOTE: to be able to run correctly, the following requsites must be met:
     2. An S3 server (we recommend setting one up locally via localstack in a docker container) containing the
     corresponding S3 keys in a test bucket (test1.txt and test2.txt). To generate the files on the spot, follow
     these instructions:
-        - Start your localstack environment: 
-            localstack start -d (if you want to run in detached mode)
+        - Move to the dtaas-tui/tests/utils/localstack folder and start the docker environment: 
+            docker-compose up -d
         - Create test bucket: 
-            awslocal s3api create-bucket --bucket test-bucket
-        - Upload test files to bucket: 
-            awslocal s3api put-object --bucket test-bucket --key test[1|2].txt --body test[1|2].txt
+            awslocal s3api create-bucket --bucket testbucket
+        - Move to the ../sample_files folder and upload test files to bucket: 
+            awslocal s3api put-object --bucket testbucket --key test[1|2].txt --body test[1|2].txt
         - Check that files were correctly uploaded:
-            awslocal s3api list-objects --bucket test-bucket
+            awslocal s3api list-objects --bucket testbucket
 """
 
-import os
-import json
-from zipfile import ZipFile
+
+@pytest.fixture(scope="function", autouse=True)
+def create_tmpdir():
+    """Creates temporary directory for storing results file, and then deletes it"""
+    os.makedirs(f"{os.getcwd()}/tests/integration/testbucket", exist_ok=True)
+    yield
+    shutil.rmtree(f"{os.getcwd()}/tests/integration/testbucket")
 
 
-def test_search_only():
+@pytest.fixture(scope="function")
+def config_client():
+    config_client = Config("client")
+    config_client.load_custom_config(
+        {
+            "user": "user",
+            "password": "passwd",
+            "ip": "localhost",
+            "port": "27017",
+            "database": "test_db",
+            "collection": "test_coll",
+            "s3_endpoint_url": "https://s3.amazonaws.com/",
+            "s3_bucket": "testbucket",
+            "pfs_prefix_path": f"{os.path.dirname(os.path.abspath(__file__))}/../",
+        }
+    )
+    return config_client
+
+
+def test_search_only(config_client):
     """
     Search for two specific files
     """
@@ -71,11 +100,7 @@ def test_search_only():
             {
                 "id": "1",
                 "sql_query": "SELECT * FROM test_coll WHERE id = 1 OR id = 2",
-                "config_client": {
-                    "ip": "localhost",
-                    "pfs_prefix_path": f"{os.getcwd()}/tests/integration/",
-                    "s3_bucket": "test-bucket",
-                },
+                "config_client": config_client.__dict__,
             },
             f,
         )
@@ -83,16 +108,14 @@ def test_search_only():
     os.system(f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client.py input.json")
 
     assert os.path.exists(
-        f"{os.getcwd()}/tests/integration/test-bucket/results_1.zip"
+        f"{os.getcwd()}/tests/integration/testbucket/results_1.zip"
     ), "Zipped archive was not created."
 
-    with ZipFile(f"{os.getcwd()}/tests/integration/test-bucket/results_1.zip", "r") as archive:
+    with ZipFile(f"{os.getcwd()}/tests/integration/testbucket/results_1.zip", "r") as archive:
         assert archive.namelist() == [
             "test1.txt",
             "test2.txt",
         ]
-
-    os.remove(f"{os.getcwd()}/tests/integration/test-bucket/results_1.zip")
 
 
 def test_return_first():

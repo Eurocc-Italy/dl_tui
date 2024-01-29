@@ -3,65 +3,89 @@ import pytest
 #
 # Testing save_output function in client.py library
 #
+# TODO: missing S3 sync part
 
 from dtaas.tuilib.client import save_output
 import os
+import shutil
 from zipfile import ZipFile
 
 
-def test_save_output(generate_test_files, empty_bucket):
+@pytest.fixture(scope="function", autouse=True)
+def create_tmpdir():
+    """Creates temporary directory for storing results file, and then deletes it"""
+    os.makedirs(f"{os.path.dirname(os.path.abspath(__file__))}/emptybucket", exist_ok=True)
+    yield
+    shutil.rmtree(f"{os.path.dirname(os.path.abspath(__file__))}/emptybucket")
+
+
+def test_save_output(empty_bucket):
     """
     Test that the function actually generates a zip file.
     """
 
     save_output(
-        files_out=generate_test_files,
-        s3_endpoint_url="https://s3.amazonaws.com",
-        s3_bucket="test_bucket",
+        files_out=[
+            f"{os.path.dirname(os.path.abspath(__file__))}/../../utils/sample_files/test1.txt",
+            f"{os.path.dirname(os.path.abspath(__file__))}/../../utils/sample_files/test2.txt",
+        ],
+        pfs_prefix_path=f"{os.path.dirname(os.path.abspath(__file__))}/",
+        s3_bucket="emptybucket",
         job_id=1,
     )
 
-    assert len(empty_bucket.list_objects_v2(Bucket="test_bucket")["Contents"]) == 1, "Zipped archive was not uploaded."
+    assert os.path.exists("results_1.zip"), "Zipped archive was not created."
 
-    assert (
-        empty_bucket.list_objects_v2(Bucket="test_bucket")["Contents"][0]["Key"] == "results_1.zip"
-    ), "Zipped archive was not uploaded."
+    with ZipFile("results_1.zip", "r") as archive:
+        assert archive.namelist() == [
+            "test1.txt",
+            "test2.txt",
+        ]
 
-    empty_bucket.download_file(Bucket="test_bucket", Key="results_1.zip", Filename="results_1.zip")
+    os.remove(f"{os.path.dirname(os.path.abspath(__file__))}/results_1.zip")
+
+    s3_keys = [obj.key for obj in empty_bucket.objects.all()]
+
+    assert len(s3_keys) == 1, "Zipped archive was not uploaded."
+
+    assert s3_keys[0] == "results_1.zip", "Zipped archive was not uploaded."
+
+    empty_bucket.download_file(Key="results_1.zip", Filename="results_1.zip")
 
     with ZipFile("results_1.zip", "r") as archive:
         filelist = archive.namelist()
         filelist.sort()  # For some reason, the zip contains the files in reverse order...
-        assert filelist == ["TESTFILE_1.txt", "TESTFILE_2.txt"]
-
-    os.remove("results.zip")
-    os.remove("results_1.zip")
+        assert filelist == ["test1.txt", "test2.txt"]
 
 
-def test_nonexistent_files(empty_bucket):
+def test_nonexistent_files(s3_bucket):
     """
     Test the function with nonexistent files (e.g., from incorrect return in user_script `main`).
     UPDATED: code no longer raises the exception,
     """
 
     save_output(
-        files_out=["test1", "test2"],
-        s3_endpoint_url="https://s3.amazonaws.com",
-        s3_bucket="test_bucket",
+        files_out=[
+            f"{os.path.dirname(os.path.abspath(__file__))}/../../utils/sample_files/test3.txt",
+        ],
+        pfs_prefix_path=os.path.dirname(os.path.abspath(__file__)),
+        s3_bucket="",
         job_id=2,
     )
 
-    assert len(empty_bucket.list_objects_v2(Bucket="test_bucket")["Contents"]) == 1, "Zipped archive was not uploaded."
+    assert os.path.exists("results_2.zip"), "Zipped archive was not created."
 
-    assert (
-        empty_bucket.list_objects_v2(Bucket="test_bucket")["Contents"][0]["Key"] == "results_2.zip"
-    ), "Zipped archive was not uploaded."
+    with ZipFile("results_2.zip", "r") as archive:
+        assert archive.namelist() == []
 
-    empty_bucket.download_file(Bucket="test_bucket", Key="results_2.zip", Filename="results_2.zip")
+    os.remove(f"{os.path.dirname(os.path.abspath(__file__))}/results_2.zip")
+
+    assert len(empty_bucket.objects.all()) == 1, "Zipped archive was not uploaded."
+
+    assert empty_bucket.objects.all()[0]["Key"] == "results_2.zip", "Zipped archive was not uploaded."
+
+    s3_bucket.download_file(Bucket="emptybucket", Key="results_2.zip", Filename="results_2.zip")
 
     with ZipFile("results_2.zip", "r") as archive:
         filelist = archive.namelist()
         assert filelist == []
-
-    os.remove("results.zip")
-    os.remove("results_2.zip")

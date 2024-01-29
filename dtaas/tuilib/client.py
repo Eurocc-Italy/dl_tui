@@ -167,17 +167,16 @@ def save_output(files_out: List[str], pfs_prefix_path: str, s3_bucket: str, job_
 
     for file in files_out:
         try:
-            shutil.move(file, f"results/{os.path.basename(file)}")
+            shutil.copy(file, f"results/{os.path.basename(file)}")
         except FileNotFoundError:
             logger.error(f"No such file or directory: '{file}'")
 
     shutil.make_archive(f"results_{job_id}", "zip", "results")
-
-    shutil.move(f"results_{job_id}.zip", f"{pfs_prefix_path}{s3_bucket}/results_{job_id}.zip")
-
+    shutil.copy(f"results_{job_id}.zip", f"{pfs_prefix_path}{s3_bucket}/results_{job_id}.zip")
     shutil.rmtree(f"results")
 
-    # TODO: curl sync command for S3 bucket
+    # TODO: curl sync command for S3 bucket, this is a temporary fix!
+    os.system(f"awslocal s3api put-object --bucket {s3_bucket} --key results_{job_id}.zip --body results_{job_id}.zip")
 
 
 def wrapper(
