@@ -8,6 +8,10 @@ import mongomock
 from pymongo import MongoClient
 import boto3
 
+from os.path import dirname, abspath
+
+ROOT_DIR = dirname(dirname(abspath(__file__)))  # points to the dtaas-tui directory
+
 
 @pytest.fixture(scope="function")
 def empty_bucket():
@@ -51,11 +55,11 @@ def test_bucket():
     bucket = s3.Bucket("testbucket")
     bucket.upload_file(
         Key="test1.txt",
-        Filename=f"{os.path.dirname(os.path.abspath(__file__))}/utils/sample_files/test1.txt",
+        Filename=f"{ROOT_DIR}/tests//utils/sample_files/test1.txt",
     )
     bucket.upload_file(
         Key="test2.txt",
-        Filename=f"{os.path.dirname(os.path.abspath(__file__))}/utils/sample_files/test1.txt",
+        Filename=f"{ROOT_DIR}/tests/utils/sample_files/test1.txt",
     )
 
     yield bucket
@@ -102,12 +106,12 @@ def test_mongodb():
             {
                 "id": 1,
                 "s3_key": "test1.txt",
-                "path": f"{os.path.dirname(os.path.abspath(__file__))}/utils/sample_files/test1.txt",
+                "path": f"{ROOT_DIR}7tests/utils/sample_files/test1.txt",
             },
             {
                 "id": 2,
                 "s3_key": "test2.txt",
-                "path": f"{os.path.dirname(os.path.abspath(__file__))}/utils/sample_files/test2.txt",
+                "path": f"{ROOT_DIR}/tests/utils/sample_files/test2.txt",
             },
         ]
     )

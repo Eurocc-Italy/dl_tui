@@ -6,6 +6,8 @@ import json
 from dtaas.tuilib.common import Config
 from zipfile import ZipFile
 
+from conftest import ROOT_DIR
+
 
 #
 # Testing the wrapper module in standalone mode
@@ -48,9 +50,9 @@ NOTE: to be able to run correctly, the following requsites must be met:
 @pytest.fixture(scope="function", autouse=True)
 def create_tmpdir():
     """Creates temporary directory for storing results file, and then deletes it"""
-    os.makedirs(f"{os.path.dirname(os.path.abspath(__file__))}/testbucket", exist_ok=True)
+    os.makedirs(f"{ROOT_DIR}/testbucket", exist_ok=True)
     yield
-    shutil.rmtree(f"{os.path.dirname(os.path.abspath(__file__))}/testbucket")
+    shutil.rmtree(f"{ROOT_DIR}/testbucket")
 
 
 @pytest.fixture(scope="function")
@@ -66,7 +68,7 @@ def config_client():
             "collection": "test_coll",
             "s3_endpoint_url": "http://localhost.localstack.cloud:4566/",
             "s3_bucket": "testbucket",
-            "pfs_prefix_path": f"{os.path.dirname(os.path.abspath(__file__))}/",
+            "pfs_prefix_path": f"{ROOT_DIR}/",
         }
     )
     return config_client
@@ -87,11 +89,9 @@ def test_search_only(test_bucket, test_mongodb, config_client):
             f,
         )
 
-    os.system(f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client.py input.json")
+    os.system(f"{ROOT_DIR}/dtaas/bin/dtaas_tui_client.py input.json")
 
-    assert os.path.exists(
-        f"{os.path.dirname(os.path.abspath(__file__))}/testbucket/results_1.zip"
-    ), "Zipped archive was not created."
+    assert os.path.exists(f"{ROOT_DIR}/testbucket/results_1.zip"), "Zipped archive was not created."
 
     test_bucket.download_file(Key="results_1.zip", Filename="results_1.zip")
     with ZipFile("results_1.zip", "r") as archive:
@@ -119,11 +119,9 @@ def test_return_first(test_bucket, test_mongodb, config_client):
     with open("user_script.py", "w") as f:
         f.write("def main(files_in):\n files_out=files_in.copy()\n return [files_out[0]]")
 
-    os.system(f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client.py input.json")
+    os.system(f"{ROOT_DIR}/dtaas/bin/dtaas_tui_client.py input.json")
 
-    assert os.path.exists(
-        f"{os.path.dirname(os.path.abspath(__file__))}/testbucket/results_2.zip"
-    ), "Zipped archive was not created."
+    assert os.path.exists(f"{ROOT_DIR}/testbucket/results_2.zip"), "Zipped archive was not created."
 
     test_bucket.download_file(Key="results_2.zip", Filename="results_2.zip")
     with ZipFile("results_2.zip", "r") as archive:
@@ -145,11 +143,9 @@ def test_double_quotes_in_SQL(test_bucket, test_mongodb, config_client):
             f,
         )
 
-    os.system(f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client.py input.json")
+    os.system(f"{ROOT_DIR}/dtaas/bin/dtaas_tui_client.py input.json")
 
-    assert os.path.exists(
-        f"{os.path.dirname(os.path.abspath(__file__))}/testbucket/results_3.zip"
-    ), "Zipped archive was not created."
+    assert os.path.exists(f"{ROOT_DIR}/testbucket/results_3.zip"), "Zipped archive was not created."
 
     test_bucket.download_file(Key="results_3.zip", Filename="results_3.zip")
     with ZipFile("results_3.zip", "r") as archive:
@@ -171,11 +167,9 @@ def test_single_quotes_in_SQL(test_bucket, test_mongodb, config_client):
             f,
         )
 
-    os.system(f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client.py input.json")
+    os.system(f"{ROOT_DIR}/dtaas/bin/dtaas_tui_client.py input.json")
 
-    assert os.path.exists(
-        f"{os.path.dirname(os.path.abspath(__file__))}/testbucket/results_4.zip"
-    ), "Zipped archive was not created."
+    assert os.path.exists(f"{ROOT_DIR}/testbucket/results_4.zip"), "Zipped archive was not created."
 
     test_bucket.download_file(Key="results_4.zip", Filename="results_4.zip")
     with ZipFile("results_4.zip", "r") as archive:
@@ -200,11 +194,9 @@ def test_double_quotes_in_script(test_bucket, test_mongodb, config_client):
     with open("user_script.py", "w") as f:
         f.write('def main(files_in):\n files_out=files_in.copy()\n print("HELLO!")\n return [files_out[0]]')
 
-    os.system(f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client.py input.json")
+    os.system(f"{ROOT_DIR}/dtaas/bin/dtaas_tui_client.py input.json")
 
-    assert os.path.exists(
-        f"{os.path.dirname(os.path.abspath(__file__))}/testbucket/results_5.zip"
-    ), "Zipped archive was not created."
+    assert os.path.exists(f"{ROOT_DIR}/testbucket/results_5.zip"), "Zipped archive was not created."
 
     test_bucket.download_file(Key="results_5.zip", Filename="results_5.zip")
     with ZipFile("results_5.zip", "r") as archive:
@@ -229,11 +221,9 @@ def test_single_quotes_in_script(test_bucket, test_mongodb, config_client):
     with open("user_script.py", "w") as f:
         f.write("def main(files_in):\n files_out=files_in.copy()\n print('HELLO!')\n return [files_out[0]]")
 
-    os.system(f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client.py input.json")
+    os.system(f"{ROOT_DIR}/dtaas/bin/dtaas_tui_client.py input.json")
 
-    assert os.path.exists(
-        f"{os.path.dirname(os.path.abspath(__file__))}/testbucket/results_6.zip"
-    ), "Zipped archive was not created."
+    assert os.path.exists(f"{ROOT_DIR}/testbucket/results_6.zip"), "Zipped archive was not created."
 
     test_bucket.download_file(Key="results_6.zip", Filename="results_6.zip")
     with ZipFile("results_6.zip", "r") as archive:

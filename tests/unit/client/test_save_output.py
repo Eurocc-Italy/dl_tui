@@ -10,13 +10,15 @@ import os
 import shutil
 from zipfile import ZipFile
 
+from conftest import ROOT_DIR
+
 
 @pytest.fixture(scope="function", autouse=True)
 def create_tmpdir():
     """Creates temporary directory for storing results file, and then deletes it"""
-    os.makedirs(f"{os.path.dirname(os.path.abspath(__file__))}/emptybucket", exist_ok=True)
+    os.makedirs(f"{ROOT_DIR}/emptybucket", exist_ok=True)
     yield
-    shutil.rmtree(f"{os.path.dirname(os.path.abspath(__file__))}/emptybucket")
+    shutil.rmtree(f"{ROOT_DIR}/emptybucket")
 
 
 def test_save_output(empty_bucket):
@@ -26,25 +28,23 @@ def test_save_output(empty_bucket):
 
     save_output(
         files_out=[
-            f"{os.path.dirname(os.path.abspath(__file__))}/../../utils/sample_files/test1.txt",
-            f"{os.path.dirname(os.path.abspath(__file__))}/../../utils/sample_files/test2.txt",
+            f"{ROOT_DIR}/tests/utils/sample_files/test1.txt",
+            f"{ROOT_DIR}/tests/utils/sample_files/test2.txt",
         ],
-        pfs_prefix_path=f"{os.path.dirname(os.path.abspath(__file__))}/",
+        pfs_prefix_path=f"{ROOT_DIR}/",
         s3_bucket="emptybucket",
         job_id=1,
     )
 
-    assert os.path.exists(
-        f"{os.path.dirname(os.path.abspath(__file__))}/emptybucket/results_1.zip"
-    ), "Zipped archive was not created."
+    assert os.path.exists(f"{ROOT_DIR}/emptybucket/results_1.zip"), "Zipped archive was not created."
 
-    with ZipFile(f"{os.path.dirname(os.path.abspath(__file__))}/emptybucket/results_1.zip", "r") as archive:
+    with ZipFile(f"{ROOT_DIR}/emptybucket/results_1.zip", "r") as archive:
         assert archive.namelist() == [
             "test1.txt",
             "test2.txt",
         ]
 
-    os.remove(f"{os.path.dirname(os.path.abspath(__file__))}/emptybucket/results_1.zip")
+    os.remove(f"{ROOT_DIR}/emptybucket/results_1.zip")
 
     s3_keys = [obj.key for obj in empty_bucket.objects.all()]
 
@@ -68,21 +68,19 @@ def test_nonexistent_files(empty_bucket):
 
     save_output(
         files_out=[
-            f"{os.path.dirname(os.path.abspath(__file__))}/../../utils/sample_files/notafile.txt",
+            f"{ROOT_DIR}/tests/utils/sample_files/notafile.txt",
         ],
-        pfs_prefix_path=f"{os.path.dirname(os.path.abspath(__file__))}/",
+        pfs_prefix_path=f"{ROOT_DIR}/",
         s3_bucket="emptybucket",
         job_id=2,
     )
 
-    assert os.path.exists(
-        f"{os.path.dirname(os.path.abspath(__file__))}/emptybucket/results_2.zip"
-    ), "Zipped archive was not created."
+    assert os.path.exists(f"{ROOT_DIR}/emptybucket/results_2.zip"), "Zipped archive was not created."
 
-    with ZipFile(f"{os.path.dirname(os.path.abspath(__file__))}/emptybucket/results_2.zip", "r") as archive:
+    with ZipFile(f"{ROOT_DIR}/emptybucket/results_2.zip", "r") as archive:
         assert archive.namelist() == []
 
-    os.remove(f"{os.path.dirname(os.path.abspath(__file__))}/emptybucket/results_2.zip")
+    os.remove(f"{ROOT_DIR}/emptybucket/results_2.zip")
 
     s3_keys = [obj.key for obj in empty_bucket.objects.all()]
 

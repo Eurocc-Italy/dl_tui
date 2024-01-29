@@ -9,13 +9,15 @@ import os
 import shutil
 from zipfile import ZipFile
 
+from conftest import ROOT_DIR
+
 
 @pytest.fixture(scope="function", autouse=True)
 def create_tmpdir():
     """Creates temporary directory for storing results file, and then deletes it"""
-    os.makedirs(f"{os.path.dirname(os.path.abspath(__file__))}/testbucket", exist_ok=True)
+    os.makedirs(f"{ROOT_DIR}/testbucket", exist_ok=True)
     yield
-    shutil.rmtree(f"{os.path.dirname(os.path.abspath(__file__))}/testbucket")
+    shutil.rmtree(f"{ROOT_DIR}/testbucket")
 
 
 def test_search_specific_files(test_mongodb):
@@ -27,12 +29,12 @@ def test_search_specific_files(test_mongodb):
     wrapper(
         collection=test_mongodb,
         sql_query=query,
-        pfs_prefix_path=f"{os.path.dirname(os.path.abspath(__file__))}/",
+        pfs_prefix_path=f"{ROOT_DIR}/",
         s3_bucket="testbucket",
         job_id=1,
     )
 
-    assert os.path.exists("results_1.zip"), "Zipped archive was not created."
+    assert os.path.exists(f"results_1.zip"), "Zipped archive was not created."
 
     with ZipFile("results_1.zip", "r") as archive:
         assert archive.namelist() == [
@@ -53,7 +55,7 @@ def test_search_specific_files_return_only_first(test_mongodb):
     wrapper(
         collection=test_mongodb,
         sql_query=query,
-        pfs_prefix_path=f"{os.path.dirname(os.path.abspath(__file__))}/",
+        pfs_prefix_path=f"{ROOT_DIR}/",
         s3_bucket="testbucket",
         job_id=2,
         script=script,
