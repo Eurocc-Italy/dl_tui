@@ -106,7 +106,7 @@ def test_mongodb():
             {
                 "id": 1,
                 "s3_key": "test1.txt",
-                "path": f"{ROOT_DIR}7tests/utils/sample_files/test1.txt",
+                "path": f"{ROOT_DIR}/tests/utils/sample_files/test1.txt",
             },
             {
                 "id": 2,
