@@ -144,28 +144,30 @@ def run_script(script: str, files_in: List[str]) -> List[str]:
 def save_output(
     files_out: List[str],
     pfs_prefix_path: str,
+    s3_endpoint_url: str,
     s3_bucket: str,
     job_id: str,
     collection: Collection,
 ):
-    """Take a list of paths and save the corresponding files in a zipped archive,
-    which is then moved to the correct location on the parallel filesystem
-    {pfs_prefix_path}{s3_bucket}/results{job_id}.zip and synced to the S3 bucket via a curl command.
-    The MongoDB database is also updated with this entry
+    """Take a list of paths and save the corresponding files in a zipped archive, updating the MongoDB database
+    with the relevant data for the job (path oh parallel filesystem, s3 key, job identifier). Also, prepares a Python
+    script for the upload of the results to the S3 bucket, which is supposed to be launched via a subsequent job
+    on HPC with access to the S3 bucket.
 
     Parameters
     ----------
     files_out : List[str]
         list containing the paths to the files to be saved
-    pfs_prefix_path: str
+    pfs_prefix_path : str
         path prefix for the location on the parallel filesystem
+    s3_endpoint_url : str
+        endpoint url at which the S3 bucket can be found
     s3_bucket : str
         name of the S3 bucket in which the results need to be saved
     job_id : str
         unique job identifier, used to create the S3 object key
     collection : Collection
         MongoDB collection on which to save the results metadata
-
     """
 
     logger.debug(f"Processed results: {files_out}")
@@ -180,11 +182,13 @@ def save_output(
             logger.error(f"No such file or directory: '{file}'")
 
     shutil.make_archive(f"results_{job_id}", "zip", "results")
-    shutil.copy(f"results_{job_id}.zip", f"{pfs_prefix_path}{s3_bucket}/results_{job_id}.zip")
     shutil.rmtree(f"results")
 
-    # TODO: curl sync command for S3 bucket, this is a temporary fix!
-    os.system(f"awslocal s3api put-object --bucket {s3_bucket} --key results_{job_id}.zip --body results_{job_id}.zip")
+    with open(f"upload_results_{job_id}.py", "w") as f:
+        content = "import boto3\n"
+        content += f's3 = boto3.client(service_name="s3", endpoint_url="{s3_endpoint_url}")\n'
+        content += f's3.upload_file(File="results_{job_id}.zip", Bucket="{s3_bucket}", Key="results_{job_id}.zip")'
+        f.write(content)
 
     collection.insert_one(
         {
@@ -199,6 +203,7 @@ def wrapper(
     collection: Collection,
     sql_query: str,
     pfs_prefix_path: str,
+    s3_endpoint_url: str,
     s3_bucket: str,
     job_id: str,
     script: str = None,
@@ -217,6 +222,8 @@ def wrapper(
         SQL query
     pfs_prefix_path: str
         path prefix for the location on the parallel filesystem
+    s3_endpoint_url : str
+        endpoint url at which the S3 bucket can be found
     s3_bucket : str
         name of the S3 bucket in which the results need to be saved
     job_id : str
@@ -246,6 +253,7 @@ def wrapper(
         save_output(
             files_out=files_out,
             pfs_prefix_path=pfs_prefix_path,
+            s3_endpoint_url=s3_endpoint_url,
             s3_bucket=s3_bucket,
             job_id=job_id,
             collection=collection,
@@ -257,6 +265,7 @@ def wrapper(
         save_output(
             files_out=files_in,
             pfs_prefix_path=pfs_prefix_path,
+            s3_endpoint_url=s3_endpoint_url,
             s3_bucket=s3_bucket,
             job_id=job_id,
             collection=collection,

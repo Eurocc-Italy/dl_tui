@@ -71,6 +71,7 @@ def main():
         collection=collection,
         sql_query=user_input.sql_query,
         pfs_prefix_path=config.pfs_prefix_path,
+        s3_endpoint_url=config.s3_endpoint_url,
         s3_bucket=config.s3_bucket,
         job_id=user_input.id,
         script=script,

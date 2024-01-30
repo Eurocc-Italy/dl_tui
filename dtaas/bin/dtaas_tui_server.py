@@ -18,7 +18,7 @@ fh.setFormatter(formatter)
 logger.addHandler(fh)
 
 import sys
-from dtaas.tuilib.server import create_remote_directory, copy_json_input, copy_user_script, launch_job
+from dtaas.tuilib.server import create_remote_directory, copy_json_input, copy_user_script, launch_job, upload_results
 
 
 def main():
@@ -28,7 +28,8 @@ def main():
     create_remote_directory(json_path=json_path)
     copy_json_input(json_path=json_path)
     copy_user_script(json_path=json_path)
-    launch_job(json_path=json_path)
+    stdout, stderr, slurm_job_id = launch_job(json_path=json_path)
+    upload_results(json_path=json_path, slurm_job_id=slurm_job_id)
 
 
 if __name__ == "__main__":
