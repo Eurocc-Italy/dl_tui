@@ -34,8 +34,7 @@ def cleanup(config_server):
         os.remove("server.log")
 
     # removing temporary folders on HPC
-    server = config_server
-    os.system(f"ssh -i {server.ssh_key} {server.user}@{server.host} 'rm -rf ~/DTAAS-TUI-TEST-*'")
+    os.system(f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'rm -rf ~/DTAAS-TUI-TEST-*'")
 
 
 @pytest.fixture(scope="function")
@@ -123,3 +122,22 @@ def config_server():
         }
     )
     return config_server
+
+
+@pytest.fixture(scope="module")
+def config_client():
+    config_client = Config("client")
+    config_client.load_custom_config(
+        {
+            "user": "user",
+            "password": "passwd",
+            "ip": "131.175.205.87",
+            "port": "27017",
+            "database": "datalake",
+            "collection": "metadata",
+            "s3_endpoint_url": "https://s3ds.g100st.cineca.it/",
+            "s3_bucket": "s3poc",
+            "pfs_prefix_path": "/g100_s3/DRES_",
+        }
+    )
+    return config_client

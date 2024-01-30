@@ -3,6 +3,8 @@ import pytest
 #
 # Testing the launch_job function in module server.py
 #
+# NOTE: remember to delete the entries from the S3 bucket and MongoDB after testing!
+
 """
 NOTE: for these tests to work, the following requirements must be met:
 
@@ -92,7 +94,7 @@ def test_just_search(config_server, config_client):
         os.popen(
             f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'cat ~/DTAAS-TUI-TEST-just_search/slurm*'"
         ).read()
-        == " \n"
+        == ""
     ), "Slurm output file is not empty."
 
 
@@ -145,7 +147,7 @@ def test_return_first(config_server, config_client):
     # checking that the upload script is present
     assert (
         os.system(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DTAAS-TUI-TEST-just_search/upload_results_DTAAS-TUI-TEST-return_first.py'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DTAAS-TUI-TEST-return_first/upload_results_DTAAS-TUI-TEST-return_first.py'"
         )
         == 0
     ), "Upload script not found."
@@ -165,7 +167,7 @@ def test_return_first(config_server, config_client):
         os.popen(
             f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'cat ~/DTAAS-TUI-TEST-return_first/slurm*'"
         ).read()
-        == " \n"
+        == ""
     ), "Slurm output file is not empty."
 
 
@@ -211,18 +213,18 @@ def test_invalid_script(config_server, config_client):
         == 512
     ), "Results file found, should not have worked."
 
-    # checking that the upload script is present
+    # checking that the upload script is NOT present
     assert (
         os.system(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DTAAS-TUI-TEST-just_search/upload_results_DTAAS-TUI-TEST-invalid_job.py'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DTAAS-TUI-TEST-invalid_job/upload_results_DTAAS-TUI-TEST-invalid_job.py'"
         )
-        == 0
-    ), "Upload script not found."
+        == 512
+    ), "Upload script found, should not have been present."
 
     # checking that slurm output contains an error
     assert (
         os.popen(
             f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'cat ~/DTAAS-TUI-TEST-invalid_job/slurm*'"
         ).read()[:35]
-        == " \nTraceback (most recent call last)"
+        == "Traceback (most recent call last):\n"
     ), "Unexpected output in Slurm file."

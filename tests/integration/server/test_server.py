@@ -21,7 +21,7 @@ def test_just_search(config_server):
         json.dump(
             {
                 "id": "DTAAS-TUI-TEST-just_search",
-                "sql_query": "SELECT * FROM metadata WHERE id = 554625 OR id = 222564",
+                "sql_query": "SELECT * FROM metadata WHERE id = 1 OR id = 2",
                 "config_server": {"walltime": "00:10:00", "ntasks_per_node": 1},
             },
             f,
@@ -39,31 +39,43 @@ def test_just_search(config_server):
 
     # checking that results file is present
     assert (
-        os.system(f"ssh -i {config.ssh_key} {config.user}@{config.host} 'ls ~/DTAAS-TUI-TEST-just_search/results.zip'")
+        os.system(
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DTAAS-TUI-TEST-just_search/results_DTAAS-TUI-TEST-just_search.zip'"
+        )
         == 0
-    ), "Results file not found"
+    ), "Results file not found."
+
+    # checking that the upload script is present
+    assert (
+        os.system(
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DTAAS-TUI-TEST-just_search/upload_results_DTAAS-TUI-TEST-just_search.py'"
+        )
+        == 0
+    ), "Upload script not found."
+
     # checking zip content
     assert (
-        "COCO_val2014_000000554625.jpg"
+        "test1.txt"
         in os.popen(
-            f"ssh -i {config.ssh_key} {config.user}@{config.host} 'unzip -l ~/DTAAS-TUI-TEST-just_search/results.zip'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'unzip -l ~/DTAAS-TUI-TEST-just_search/results_DTAAS-TUI-TEST-just_search.zip'"
         )
         .read()
         .split()
-        and "COCO_val2014_000000222564.jpg"
+        and "test2.txt"
         in os.popen(
-            f"ssh -i {config.ssh_key} {config.user}@{config.host} 'unzip -l ~/DTAAS-TUI-TEST-just_search/results.zip'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'unzip -l ~/DTAAS-TUI-TEST-just_search/results_DTAAS-TUI-TEST-just_search.zip'"
         )
         .read()
         .split()
-    ), "Missing output file"
+    ), "Missing output file."
+
     # checking that slurm output is empty
     assert (
         os.popen(
-            f"ssh -i {config.ssh_key} {config.user}@{config.host} 'cat ~/DTAAS-TUI-TEST-just_search/slurm*'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'cat ~/DTAAS-TUI-TEST-just_search/slurm*'"
         ).read()
-        == " \n"
-    ), "Slurm output file is not empty"
+        == ""
+    ), "Slurm output file is not empty."
 
 
 def test_return_first(config_server):
@@ -76,7 +88,7 @@ def test_return_first(config_server):
         json.dump(
             {
                 "id": "DTAAS-TUI-TEST-return_first",
-                "sql_query": "SELECT * FROM metadata WHERE id = 554625 OR id = 222564",
+                "sql_query": "SELECT * FROM metadata WHERE id = 1 OR id = 2",
                 "script": "user_script.py",
                 "config_server": {"walltime": "00:10:00", "ntasks_per_node": 1},
             },
@@ -99,25 +111,37 @@ def test_return_first(config_server):
 
     # checking that results file is present
     assert (
-        os.system(f"ssh -i {config.ssh_key} {config.user}@{config.host} 'ls ~/DTAAS-TUI-TEST-return_first/results.zip'")
+        os.system(
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DTAAS-TUI-TEST-return_first/results_DTAAS-TUI-TEST-return_first.zip'"
+        )
         == 0
-    ), "Results file not found"
+    ), "Results file not found."
+
+    # checking that the upload script is present
+    assert (
+        os.system(
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DTAAS-TUI-TEST-return_first/upload_results_DTAAS-TUI-TEST-return_first.py'"
+        )
+        == 0
+    ), "Upload script not found."
+
     # checking zip content
     assert (
-        "COCO_val2014_000000554625.jpg"
+        "test1.txt"
         in os.popen(
-            f"ssh -i {config.ssh_key} {config.user}@{config.host} 'unzip -l ~/DTAAS-TUI-TEST-return_first/results.zip'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'unzip -l ~/DTAAS-TUI-TEST-return_first/results_DTAAS-TUI-TEST-return_first.zip'"
         )
         .read()
         .split()
-    ), "Missing output file"
+    ), "Missing output file."
+
     # checking that slurm output is empty
     assert (
         os.popen(
-            f"ssh -i {config.ssh_key} {config.user}@{config.host} 'cat ~/DTAAS-TUI-TEST-return_first/slurm*'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'cat ~/DTAAS-TUI-TEST-return_first/slurm*'"
         ).read()
-        == " \n"
-    ), "Slurm output file is not empty"
+        == ""
+    ), "Slurm output file is not empty."
 
 
 def test_invalid_script():

@@ -5,6 +5,7 @@ import pytest
 #
 
 from dtaas.tuilib.client import retrieve_files
+from conftest import ROOT_DIR
 
 
 def test_search_specific_files(mock_mongodb):
@@ -22,8 +23,8 @@ def test_search_specific_files(mock_mongodb):
     )
 
     assert files_in == [
-        "/test/path/testfile_1.txt",
-        "/test/path/testfile_2.txt",
+        f"{ROOT_DIR}/tests/utils/sample_files/test1.txt",
+        f"{ROOT_DIR}/tests/utils/sample_files/test2.txt",
     ]
 
 
