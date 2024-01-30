@@ -36,23 +36,7 @@ NOTE: to be able to run correctly, the following requsites must be met:
                 }
             )
         - database and collection creation is taken care of by the fixtures
-        
-    2. An S3 server (we recommend setting one up locally via localstack in a docker container) containing the
-    corresponding S3 keys in a test bucket (test1.txt and test2.txt). To generate the files on the spot, follow
-    these instructions:
-    # TODO: automate docker setup and cleanup
-        - Move to the dtaas-tui/tests/utils/localstack folder and start the docker environment: 
-            docker-compose up -d
-        - bucket and data setup is taken care of by the conftest fixtures
 """
-
-
-@pytest.fixture(scope="function", autouse=True)
-def create_tmpdir():
-    """Creates temporary directory for storing results file, and then deletes it"""
-    os.makedirs(f"{ROOT_DIR}/testbucket", exist_ok=True)
-    yield
-    shutil.rmtree(f"{ROOT_DIR}/testbucket")
 
 
 @pytest.fixture(scope="function")
@@ -66,15 +50,15 @@ def config_client():
             "port": "27017",
             "database": "test_db",
             "collection": "test_coll",
-            "s3_endpoint_url": "http://localhost.localstack.cloud:4566/",
-            "s3_bucket": "testbucket",
+            "s3_endpoint_url": "https://testurl.com/",
+            "s3_bucket": "test",
             "pfs_prefix_path": f"{ROOT_DIR}/",
         }
     )
     return config_client
 
 
-def test_search_only(test_bucket, test_mongodb, config_client):
+def test_search_only(test_mongodb, config_client):
     """
     Search for two specific files
     """
@@ -91,17 +75,28 @@ def test_search_only(test_bucket, test_mongodb, config_client):
 
     os.system(f"{ROOT_DIR}/dtaas/bin/dtaas_tui_client.py input.json")
 
-    assert os.path.exists(f"{ROOT_DIR}/testbucket/results_1.zip"), "Zipped archive was not created."
+    assert os.path.exists(f"results_1.zip"), "Zipped archive was not created."
 
-    test_bucket.download_file(Key="results_1.zip", Filename="results_1.zip")
     with ZipFile("results_1.zip", "r") as archive:
         assert archive.namelist() == [
             "test1.txt",
             "test2.txt",
-        ]
+        ], "Results archive does not contain the expected files."
+
+    assert os.path.exists("upload_results_1.py"), "Upload script was not created."
+
+    with open("upload_results_1.py", "r") as f:
+        expected = "import boto3\n"
+        expected += 's3 = boto3.client(service_name="s3", endpoint_url="https://testurl.com/")\n'
+        expected += 's3.upload_file(File="results_1.zip", Bucket="test", Key="results_1.zip")'
+
+        actual = f.read()
+        assert actual == expected
+
+    assert len([_ for _ in test_mongodb.find({"job_id": 1})]) == 1
 
 
-def test_return_first(test_bucket, test_mongodb, config_client):
+def test_return_first(test_mongodb, config_client):
     """
     Search for two specific files and only return the first item
     """
@@ -121,14 +116,25 @@ def test_return_first(test_bucket, test_mongodb, config_client):
 
     os.system(f"{ROOT_DIR}/dtaas/bin/dtaas_tui_client.py input.json")
 
-    assert os.path.exists(f"{ROOT_DIR}/testbucket/results_2.zip"), "Zipped archive was not created."
+    assert os.path.exists(f"results_2.zip"), "Zipped archive was not created."
 
-    test_bucket.download_file(Key="results_2.zip", Filename="results_2.zip")
     with ZipFile("results_2.zip", "r") as archive:
-        assert archive.namelist() == ["test1.txt"]
+        assert archive.namelist() == ["test1.txt"], "Results archive does not contain the expected files."
+
+    assert os.path.exists("upload_results_2.py"), "Upload script was not created."
+
+    with open("upload_results_2.py", "r") as f:
+        expected = "import boto3\n"
+        expected += 's3 = boto3.client(service_name="s3", endpoint_url="https://testurl.com/")\n'
+        expected += 's3.upload_file(File="results_2.zip", Bucket="test", Key="results_2.zip")'
+
+        actual = f.read()
+        assert actual == expected
+
+    assert len([_ for _ in test_mongodb.find({"job_id": 2})]) == 1
 
 
-def test_double_quotes_in_SQL(test_bucket, test_mongodb, config_client):
+def test_double_quotes_in_SQL(test_mongodb, config_client):
     """
     Search for a specific file using double quotes in SQL query
     """
@@ -145,14 +151,25 @@ def test_double_quotes_in_SQL(test_bucket, test_mongodb, config_client):
 
     os.system(f"{ROOT_DIR}/dtaas/bin/dtaas_tui_client.py input.json")
 
-    assert os.path.exists(f"{ROOT_DIR}/testbucket/results_3.zip"), "Zipped archive was not created."
+    assert os.path.exists(f"results_3.zip"), "Zipped archive was not created."
 
-    test_bucket.download_file(Key="results_3.zip", Filename="results_3.zip")
     with ZipFile("results_3.zip", "r") as archive:
-        assert archive.namelist() == ["test1.txt"]
+        assert archive.namelist() == ["test1.txt"], "Results archive does not contain the expected files."
+
+    assert os.path.exists("upload_results_3.py"), "Upload script was not created."
+
+    with open("upload_results_3.py", "r") as f:
+        expected = "import boto3\n"
+        expected += 's3 = boto3.client(service_name="s3", endpoint_url="https://testurl.com/")\n'
+        expected += 's3.upload_file(File="results_3.zip", Bucket="test", Key="results_3.zip")'
+
+        actual = f.read()
+        assert actual == expected
+
+    assert len([_ for _ in test_mongodb.find({"job_id": 3})]) == 1
 
 
-def test_single_quotes_in_SQL(test_bucket, test_mongodb, config_client):
+def test_single_quotes_in_SQL(test_mongodb, config_client):
     """
     Search for a specific file using single quotes in SQL query.
     """
@@ -169,14 +186,25 @@ def test_single_quotes_in_SQL(test_bucket, test_mongodb, config_client):
 
     os.system(f"{ROOT_DIR}/dtaas/bin/dtaas_tui_client.py input.json")
 
-    assert os.path.exists(f"{ROOT_DIR}/testbucket/results_4.zip"), "Zipped archive was not created."
+    assert os.path.exists(f"results_4.zip"), "Zipped archive was not created."
 
-    test_bucket.download_file(Key="results_4.zip", Filename="results_4.zip")
     with ZipFile("results_4.zip", "r") as archive:
-        assert archive.namelist() == ["test1.txt"]
+        assert archive.namelist() == ["test1.txt"], "Results archive does not contain the expected files."
+
+    assert os.path.exists("upload_results_4.py"), "Upload script was not created."
+
+    with open("upload_results_4.py", "r") as f:
+        expected = "import boto3\n"
+        expected += 's3 = boto3.client(service_name="s3", endpoint_url="https://testurl.com/")\n'
+        expected += 's3.upload_file(File="results_4.zip", Bucket="test", Key="results_4.zip")'
+
+        actual = f.read()
+        assert actual == expected
+
+    assert len([_ for _ in test_mongodb.find({"job_id": 4})]) == 1
 
 
-def test_double_quotes_in_script(test_bucket, test_mongodb, config_client):
+def test_double_quotes_in_script(test_mongodb, config_client):
     """
     Search for a specific file using double quotes in user script
     """
@@ -196,14 +224,25 @@ def test_double_quotes_in_script(test_bucket, test_mongodb, config_client):
 
     os.system(f"{ROOT_DIR}/dtaas/bin/dtaas_tui_client.py input.json")
 
-    assert os.path.exists(f"{ROOT_DIR}/testbucket/results_5.zip"), "Zipped archive was not created."
+    assert os.path.exists(f"results_5.zip"), "Zipped archive was not created."
 
-    test_bucket.download_file(Key="results_5.zip", Filename="results_5.zip")
     with ZipFile("results_5.zip", "r") as archive:
-        assert archive.namelist() == ["test1.txt"]
+        assert archive.namelist() == ["test1.txt"], "Results archive does not contain the expected files."
+
+    assert os.path.exists("upload_results_5.py"), "Upload script was not created."
+
+    with open("upload_results_5.py", "r") as f:
+        expected = "import boto3\n"
+        expected += 's3 = boto3.client(service_name="s3", endpoint_url="https://testurl.com/")\n'
+        expected += 's3.upload_file(File="results_5.zip", Bucket="test", Key="results_5.zip")'
+
+        actual = f.read()
+        assert actual == expected
+
+    assert len([_ for _ in test_mongodb.find({"job_id": 1})]) == 1
 
 
-def test_single_quotes_in_script(test_bucket, test_mongodb, config_client):
+def test_single_quotes_in_script(test_mongodb, config_client):
     """
     Search for a specific file using single quotes in user script
     """
@@ -223,8 +262,19 @@ def test_single_quotes_in_script(test_bucket, test_mongodb, config_client):
 
     os.system(f"{ROOT_DIR}/dtaas/bin/dtaas_tui_client.py input.json")
 
-    assert os.path.exists(f"{ROOT_DIR}/testbucket/results_6.zip"), "Zipped archive was not created."
+    assert os.path.exists(f"results_6.zip"), "Zipped archive was not created."
 
-    test_bucket.download_file(Key="results_6.zip", Filename="results_6.zip")
     with ZipFile("results_6.zip", "r") as archive:
-        assert archive.namelist() == ["test1.txt"]
+        assert archive.namelist() == ["test1.txt"], "Results archive does not contain the expected files."
+
+    assert os.path.exists("upload_results_6.py"), "Upload script was not created."
+
+    with open("upload_results_6.py", "r") as f:
+        expected = "import boto3\n"
+        expected += 's3 = boto3.client(service_name="s3", endpoint_url="https://testurl.com/")\n'
+        expected += 's3.upload_file(File="results_6.zip", Bucket="test", Key="results_6.zip")'
+
+        actual = f.read()
+        assert actual == expected
+
+    assert len([_ for _ in test_mongodb.find({"job_id": 6})]) == 1

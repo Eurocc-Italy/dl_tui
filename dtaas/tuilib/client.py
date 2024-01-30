@@ -187,7 +187,7 @@ def save_output(
     with open(f"upload_results_{job_id}.py", "w") as f:
         content = "import boto3\n"
         content += f's3 = boto3.client(service_name="s3", endpoint_url="{s3_endpoint_url}")\n'
-        content += f's3.upload_file(File="results_{job_id}.zip", Bucket="{s3_bucket}", Key="results_{job_id}.zip")'
+        content += f's3.upload_file(Filename="results_{job_id}.zip", Bucket="{s3_bucket}", Key="results_{job_id}.zip")'
         f.write(content)
 
     collection.insert_one(

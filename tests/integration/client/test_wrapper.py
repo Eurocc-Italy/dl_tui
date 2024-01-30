@@ -20,17 +20,18 @@ def create_tmpdir():
     shutil.rmtree(f"{ROOT_DIR}/testbucket")
 
 
-def test_search_specific_files(test_mongodb):
+def test_search_specific_files(mock_mongodb):
     """
     Search for two specific files
     """
     query = "SELECT * FROM metadata WHERE id = 1 OR id = 2"
 
     wrapper(
-        collection=test_mongodb,
+        collection=mock_mongodb,
         sql_query=query,
         pfs_prefix_path=f"{ROOT_DIR}/",
-        s3_bucket="testbucket",
+        s3_endpoint_url="https://testurl.com/",
+        s3_bucket="test",
         job_id=1,
     )
 
@@ -40,12 +41,22 @@ def test_search_specific_files(test_mongodb):
         assert archive.namelist() == [
             "test1.txt",
             "test2.txt",
-        ]
+        ], "Results archive does not contain the expected files."
 
-    os.remove("results_1.zip")
+    assert os.path.exists("upload_results_1.py"), "Upload script was not created."
+
+    with open("upload_results_1.py", "r") as f:
+        expected = "import boto3\n"
+        expected += 's3 = boto3.client(service_name="s3", endpoint_url="https://testurl.com/")\n'
+        expected += 's3.upload_file(File="results_1.zip", Bucket="test", Key="results_1.zip")'
+
+        actual = f.read()
+        assert actual == expected
+
+    assert len([_ for _ in mock_mongodb.find({"job_id": 1})]) == 1
 
 
-def test_search_specific_files_return_only_first(test_mongodb):
+def test_search_specific_files_return_only_first(mock_mongodb):
     """
     Search for two specific files and return just the first item
     """
@@ -53,10 +64,11 @@ def test_search_specific_files_return_only_first(test_mongodb):
     script = "def main(files_in):\n files_out=files_in.copy()\n return [files_out[0]]"
 
     wrapper(
-        collection=test_mongodb,
+        collection=mock_mongodb,
         sql_query=query,
         pfs_prefix_path=f"{ROOT_DIR}/",
-        s3_bucket="testbucket",
+        s3_endpoint_url="https://testurl.com/",
+        s3_bucket="test",
         job_id=2,
         script=script,
     )
@@ -64,6 +76,18 @@ def test_search_specific_files_return_only_first(test_mongodb):
     assert os.path.exists("results_2.zip"), "Zipped archive was not created."
 
     with ZipFile("results_2.zip", "r") as archive:
-        assert archive.namelist() == ["test1.txt"]
+        assert archive.namelist() == ["test1.txt"], "Results archive does not contain the expected files."
 
-    os.remove("results_2.zip")
+    os.remove("results_2.zip"), "Results archive does not contain the expected files."
+
+    assert os.path.exists("upload_results_2.py"), "Upload script was not created."
+
+    with open("upload_results_2.py", "r") as f:
+        expected = "import boto3\n"
+        expected += 's3 = boto3.client(service_name="s3", endpoint_url="https://testurl.com/")\n'
+        expected += 's3.upload_file(File="results_2.zip", Bucket="test", Key="results_2.zip")'
+
+        actual = f.read()
+        assert actual == expected
+
+    assert len([_ for _ in mock_mongodb.find({"job_id": 2})]) == 1
