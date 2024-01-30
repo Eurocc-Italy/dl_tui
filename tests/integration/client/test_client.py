@@ -1,7 +1,6 @@
 import pytest
 
 import os
-import shutil
 import json
 from dtaas.tuilib.common import Config
 from zipfile import ZipFile
@@ -13,11 +12,9 @@ from conftest import ROOT_DIR
 # Testing the wrapper module in standalone mode
 #
 """
-NOTE: to be able to run correctly, the following requsites must be met:
-
-    1. A MongoDB database must be running, it must have a "user" user with password "passwd" 
-    with access to the "test_db" database and "test_coll" collection, in which these entries are stored. 
-    To do so, follow these steps:
+NOTE: to be able to run correctly, a MongoDB database must be running, it must have a "user" user with 
+    password "passwd" with access to the "test_db" database and "test_coll" collection, 
+    in which these entries are stored. To do so, follow these steps:
     # TODO: automate also user creation via pymongo
         - Make sure the mongodb server is running and log in via command line (mongo or mongosh)
         - Switch to the admin database:
@@ -66,7 +63,7 @@ def test_search_only(test_mongodb, config_client):
     with open("input.json", "w") as f:
         json.dump(
             {
-                "id": "1",
+                "id": 1,
                 "sql_query": "SELECT * FROM test_coll WHERE id = 1 OR id = 2",
                 "config_client": config_client.__dict__,
             },
@@ -88,7 +85,7 @@ def test_search_only(test_mongodb, config_client):
     with open("upload_results_1.py", "r") as f:
         expected = "import boto3\n"
         expected += 's3 = boto3.client(service_name="s3", endpoint_url="https://testurl.com/")\n'
-        expected += 's3.upload_file(File="results_1.zip", Bucket="test", Key="results_1.zip")'
+        expected += 's3.upload_file(Filename="results_1.zip", Bucket="test", Key="results_1.zip")'
 
         actual = f.read()
         assert actual == expected
@@ -104,7 +101,7 @@ def test_return_first(test_mongodb, config_client):
     with open("input.json", "w") as f:
         json.dump(
             {
-                "id": "2",
+                "id": 2,
                 "sql_query": "SELECT * FROM test_coll WHERE id = 1 OR id = 2",
                 "script_path": "user_script.py",
                 "config_client": config_client.__dict__,
@@ -126,7 +123,7 @@ def test_return_first(test_mongodb, config_client):
     with open("upload_results_2.py", "r") as f:
         expected = "import boto3\n"
         expected += 's3 = boto3.client(service_name="s3", endpoint_url="https://testurl.com/")\n'
-        expected += 's3.upload_file(File="results_2.zip", Bucket="test", Key="results_2.zip")'
+        expected += 's3.upload_file(Filename="results_2.zip", Bucket="test", Key="results_2.zip")'
 
         actual = f.read()
         assert actual == expected
@@ -142,7 +139,7 @@ def test_double_quotes_in_SQL(test_mongodb, config_client):
     with open("input.json", "w") as f:
         json.dump(
             {
-                "id": "3",
+                "id": 3,
                 "sql_query": 'SELECT * FROM test_coll WHERE s3_key = "test1.txt"',
                 "config_client": config_client.__dict__,
             },
@@ -161,7 +158,7 @@ def test_double_quotes_in_SQL(test_mongodb, config_client):
     with open("upload_results_3.py", "r") as f:
         expected = "import boto3\n"
         expected += 's3 = boto3.client(service_name="s3", endpoint_url="https://testurl.com/")\n'
-        expected += 's3.upload_file(File="results_3.zip", Bucket="test", Key="results_3.zip")'
+        expected += 's3.upload_file(Filename="results_3.zip", Bucket="test", Key="results_3.zip")'
 
         actual = f.read()
         assert actual == expected
@@ -177,7 +174,7 @@ def test_single_quotes_in_SQL(test_mongodb, config_client):
     with open("input.json", "w") as f:
         json.dump(
             {
-                "id": "4",
+                "id": 4,
                 "sql_query": "SELECT * FROM test_coll WHERE s3_key = 'test1.txt'",
                 "config_client": config_client.__dict__,
             },
@@ -196,7 +193,7 @@ def test_single_quotes_in_SQL(test_mongodb, config_client):
     with open("upload_results_4.py", "r") as f:
         expected = "import boto3\n"
         expected += 's3 = boto3.client(service_name="s3", endpoint_url="https://testurl.com/")\n'
-        expected += 's3.upload_file(File="results_4.zip", Bucket="test", Key="results_4.zip")'
+        expected += 's3.upload_file(Filename="results_4.zip", Bucket="test", Key="results_4.zip")'
 
         actual = f.read()
         assert actual == expected
@@ -212,7 +209,7 @@ def test_double_quotes_in_script(test_mongodb, config_client):
     with open("input.json", "w") as f:
         json.dump(
             {
-                "id": "5",
+                "id": 5,
                 "sql_query": "SELECT * FROM test_coll WHERE id = 1 OR id = 2",
                 "script_path": "user_script.py",
                 "config_client": config_client.__dict__,
@@ -234,12 +231,12 @@ def test_double_quotes_in_script(test_mongodb, config_client):
     with open("upload_results_5.py", "r") as f:
         expected = "import boto3\n"
         expected += 's3 = boto3.client(service_name="s3", endpoint_url="https://testurl.com/")\n'
-        expected += 's3.upload_file(File="results_5.zip", Bucket="test", Key="results_5.zip")'
+        expected += 's3.upload_file(Filename="results_5.zip", Bucket="test", Key="results_5.zip")'
 
         actual = f.read()
         assert actual == expected
 
-    assert len([_ for _ in test_mongodb.find({"job_id": 1})]) == 1
+    assert len([_ for _ in test_mongodb.find({"job_id": 5})]) == 1
 
 
 def test_single_quotes_in_script(test_mongodb, config_client):
@@ -250,7 +247,7 @@ def test_single_quotes_in_script(test_mongodb, config_client):
     with open("input.json", "w") as f:
         json.dump(
             {
-                "id": "6",
+                "id": 6,
                 "sql_query": "SELECT * FROM test_coll WHERE id = 1 OR id = 2",
                 "script_path": "user_script.py",
                 "config_client": config_client.__dict__,
@@ -272,7 +269,7 @@ def test_single_quotes_in_script(test_mongodb, config_client):
     with open("upload_results_6.py", "r") as f:
         expected = "import boto3\n"
         expected += 's3 = boto3.client(service_name="s3", endpoint_url="https://testurl.com/")\n'
-        expected += 's3.upload_file(File="results_6.zip", Bucket="test", Key="results_6.zip")'
+        expected += 's3.upload_file(Filename="results_6.zip", Bucket="test", Key="results_6.zip")'
 
         actual = f.read()
         assert actual == expected

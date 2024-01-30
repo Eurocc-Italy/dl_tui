@@ -48,7 +48,7 @@ def test_search_specific_files(mock_mongodb):
     with open("upload_results_1.py", "r") as f:
         expected = "import boto3\n"
         expected += 's3 = boto3.client(service_name="s3", endpoint_url="https://testurl.com/")\n'
-        expected += 's3.upload_file(File="results_1.zip", Bucket="test", Key="results_1.zip")'
+        expected += 's3.upload_file(Filename="results_1.zip", Bucket="test", Key="results_1.zip")'
 
         actual = f.read()
         assert actual == expected
@@ -85,7 +85,7 @@ def test_search_specific_files_return_only_first(mock_mongodb):
     with open("upload_results_2.py", "r") as f:
         expected = "import boto3\n"
         expected += 's3 = boto3.client(service_name="s3", endpoint_url="https://testurl.com/")\n'
-        expected += 's3.upload_file(File="results_2.zip", Bucket="test", Key="results_2.zip")'
+        expected += 's3.upload_file(Filename="results_2.zip", Bucket="test", Key="results_2.zip")'
 
         actual = f.read()
         assert actual == expected
