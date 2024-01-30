@@ -6,7 +6,6 @@ import shutil
 from glob import glob
 import mongomock
 from pymongo import MongoClient
-import boto3
 
 from os.path import dirname, abspath
 
@@ -124,57 +123,3 @@ def config_server():
         }
     )
     return config_server
-
-
-# @pytest.fixture(scope="function")
-# def empty_bucket():
-#     """Sets up an empty S3 bucket using the LocalStack local server
-
-#     Yields
-#     ------
-#     boto3.Session.client
-#         S3 client on which to run the tests
-#     """
-#     s3 = boto3.resource(
-#         "s3",
-#         endpoint_url="http://localhost.localstack.cloud:4566",
-#         aws_access_key_id="test",
-#         aws_secret_access_key="test",
-#     )
-#     s3.create_bucket(Bucket="emptybucket")
-#     bucket = s3.Bucket("emptybucket")
-
-#     yield bucket
-
-#     bucket.objects.all().delete()
-
-
-# @pytest.fixture(scope="function")
-# def test_bucket():
-#     """Sets up the test S3 bucket using the LocalStack local server
-
-#     Yields
-#     ------
-#     boto3.Session.client
-#         S3 client on which to run the tests
-#     """
-#     s3 = boto3.resource(
-#         "s3",
-#         endpoint_url="http://localhost.localstack.cloud:4566",
-#         aws_access_key_id="test",
-#         aws_secret_access_key="test",
-#     )
-#     s3.create_bucket(Bucket="testbucket")
-#     bucket = s3.Bucket("testbucket")
-#     bucket.upload_file(
-#         Key="test1.txt",
-#         Filename=f"{ROOT_DIR}/tests//utils/sample_files/test1.txt",
-#     )
-#     bucket.upload_file(
-#         Key="test2.txt",
-#         Filename=f"{ROOT_DIR}/tests/utils/sample_files/test1.txt",
-#     )
-
-#     yield bucket
-
-#     bucket.objects.all().delete()

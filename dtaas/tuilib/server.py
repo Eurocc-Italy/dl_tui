@@ -257,7 +257,8 @@ def upload_results(json_path: str, slurm_job_id: int):
 
     # Creating wrap command to be passed to sbatch
     wrap_cmd = f"source {config.venv_path}/bin/activate; "
-    wrap_cmd += f"python upload_results_{user_input.id}.py"
+    wrap_cmd += f"python upload_results_{user_input.id}.py; "
+    wrap_cmd += "touch RESULTS_UPLOADED"
 
     # Generating SSH command
     ssh_cmd = f"cd {user_input.id}; "

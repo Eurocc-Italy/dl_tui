@@ -3,13 +3,13 @@ import pytest
 #
 # Testing the copy_json_input function in module server.py
 #
-# TODO: make a mock test file and test database so the tests do not rely on any previously prepared database
 
 import os
 import json
 from dtaas.tuilib.server import create_remote_directory, copy_json_input
 
 # TODO: add test for json passed as full path
+
 
 def test_copy_json_input(config_server):
     """

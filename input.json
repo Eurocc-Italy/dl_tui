@@ -1,0 +1,1 @@
+{"id": "DTAAS-TUI-TEST-create_remote_dir", "sql_query": "SELECT * FROM metadata"}

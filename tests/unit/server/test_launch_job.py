@@ -40,7 +40,7 @@ def test_just_search(config_server, config_client):
     copy_json_input(json_path="input.json")
     copy_user_script(json_path="input.json")
 
-    stdout, stderr = launch_job(json_path="input.json")
+    stdout, stderr, slurm_job_id = launch_job(json_path="input.json")
 
     assert stdout[:19] == "Submitted batch job"
     assert stderr == ""
@@ -55,35 +55,45 @@ def test_just_search(config_server, config_client):
         ):
             break
 
-        # checking that results file is present
-        assert (
-            os.system(
-                f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DTAAS-TUI-TEST-just_search/results.zip'"
-            )
-            == 0
-        ), "Results file not found"
-        # checking zip content
-        assert (
-            "test1.txt"
-            in os.popen(
-                f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'unzip -l ~/DTAAS-TUI-TEST-just_search/results.zip'"
-            )
-            .read()
-            .split()
-            and "test2.txt"
-            in os.popen(
-                f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'unzip -l ~/DTAAS-TUI-TEST-just_search/results.zip'"
-            )
-            .read()
-            .split()
-        ), "Missing output file"
-        # checking that slurm output is empty
-        assert (
-            os.popen(
-                f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'cat ~/DTAAS-TUI-TEST-just_search/slurm*'"
-            ).read()
-            == " \n"
-        ), "Slurm output file is not empty"
+    # checking that results file is present
+    assert (
+        os.system(
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DTAAS-TUI-TEST-just_search/results_DTAAS-TUI-TEST-just_search.zip'"
+        )
+        == 0
+    ), "Results file not found."
+
+    # checking that the upload script is present
+    assert (
+        os.system(
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DTAAS-TUI-TEST-just_search/upload_results_DTAAS-TUI-TEST-just_search.py'"
+        )
+        == 0
+    ), "Upload script not found."
+
+    # checking zip content
+    assert (
+        "test1.txt"
+        in os.popen(
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'unzip -l ~/DTAAS-TUI-TEST-just_search/results_DTAAS-TUI-TEST-just_search.zip'"
+        )
+        .read()
+        .split()
+        and "test2.txt"
+        in os.popen(
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'unzip -l ~/DTAAS-TUI-TEST-just_search/results_DTAAS-TUI-TEST-just_search.zip'"
+        )
+        .read()
+        .split()
+    ), "Missing output file."
+
+    # checking that slurm output is empty
+    assert (
+        os.popen(
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'cat ~/DTAAS-TUI-TEST-just_search/slurm*'"
+        ).read()
+        == " \n"
+    ), "Slurm output file is not empty."
 
 
 def test_return_first(config_server, config_client):
@@ -109,7 +119,7 @@ def test_return_first(config_server, config_client):
     copy_json_input(json_path="input.json")
     copy_user_script(json_path="input.json")
 
-    stdout, stderr = launch_job(json_path="input.json")
+    stdout, stderr, slurm_job_id = launch_job(json_path="input.json")
 
     assert stdout[:19] == "Submitted batch job"
     assert stderr == ""
@@ -127,26 +137,36 @@ def test_return_first(config_server, config_client):
     # checking that results file is present
     assert (
         os.system(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DTAAS-TUI-TEST-return_first/results.zip'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DTAAS-TUI-TEST-return_first/results_DTAAS-TUI-TEST-return_first.zip'"
         )
         == 0
-    ), "Results file not found"
+    ), "Results file not found."
+
+    # checking that the upload script is present
+    assert (
+        os.system(
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DTAAS-TUI-TEST-just_search/upload_results_DTAAS-TUI-TEST-return_first.py'"
+        )
+        == 0
+    ), "Upload script not found."
+
     # checking zip content
     assert (
         "test1.txt"
         in os.popen(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'unzip -l ~/DTAAS-TUI-TEST-return_first/results.zip'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'unzip -l ~/DTAAS-TUI-TEST-return_first/results_DTAAS-TUI-TEST-return_first.zip'"
         )
         .read()
         .split()
-    ), "Missing output file"
+    ), "Missing output file."
+
     # checking that slurm output is empty
     assert (
         os.popen(
             f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'cat ~/DTAAS-TUI-TEST-return_first/slurm*'"
         ).read()
         == " \n"
-    ), "Slurm output file is not empty"
+    ), "Slurm output file is not empty."
 
 
 def test_invalid_script(config_server, config_client):
@@ -168,7 +188,7 @@ def test_invalid_script(config_server, config_client):
     copy_json_input(json_path="input.json")
     copy_user_script(json_path="input.json")
 
-    stdout, stderr = launch_job(json_path="input.json")
+    stdout, stderr, slurm_job_id = launch_job(json_path="input.json")
 
     assert stdout[:19] == "Submitted batch job"
     assert stderr == ""
@@ -186,10 +206,18 @@ def test_invalid_script(config_server, config_client):
     # checking that results file is present
     assert (
         os.system(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DTAAS-TUI-TEST-invalid_job/results.zip'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DTAAS-TUI-TEST-invalid_job/results_DTAAS-TUI-TEST-invalid_job.zip'"
         )
         == 512
-    ), "Results file found, should not have worked"
+    ), "Results file found, should not have worked."
+
+    # checking that the upload script is present
+    assert (
+        os.system(
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DTAAS-TUI-TEST-just_search/upload_results_DTAAS-TUI-TEST-invalid_job.py'"
+        )
+        == 0
+    ), "Upload script not found."
 
     # checking that slurm output contains an error
     assert (
