@@ -21,7 +21,7 @@ def create_tmpdir():
     shutil.rmtree(f"{ROOT_DIR}/emptybucket")
 
 
-def test_save_output(empty_bucket):
+def test_save_output(test_mongodb, empty_bucket):
     """
     Test that the function actually generates a zip file.
     """
@@ -34,6 +34,7 @@ def test_save_output(empty_bucket):
         pfs_prefix_path=f"{ROOT_DIR}/",
         s3_bucket="emptybucket",
         job_id=1,
+        collection=test_mongodb,
     )
 
     assert os.path.exists(f"{ROOT_DIR}/emptybucket/results_1.zip"), "Zipped archive was not created."
@@ -59,8 +60,10 @@ def test_save_output(empty_bucket):
         filelist.sort()  # For some reason, the zip contains the files in reverse order...
         assert filelist == ["test1.txt", "test2.txt"]
 
+    assert len([_ for _ in test_mongodb.find({"job_id": 1})]) == 1
 
-def test_nonexistent_files(empty_bucket):
+
+def test_nonexistent_files(test_mongodb, empty_bucket):
     """
     Test the function with nonexistent files (e.g., from incorrect return in user_script `main`).
     UPDATED: code no longer raises the exception,
@@ -73,6 +76,7 @@ def test_nonexistent_files(empty_bucket):
         pfs_prefix_path=f"{ROOT_DIR}/",
         s3_bucket="emptybucket",
         job_id=2,
+        collection=test_mongodb,
     )
 
     assert os.path.exists(f"{ROOT_DIR}/emptybucket/results_2.zip"), "Zipped archive was not created."
@@ -93,3 +97,5 @@ def test_nonexistent_files(empty_bucket):
     with ZipFile("results_2.zip", "r") as archive:
         filelist = archive.namelist()
         assert filelist == []
+
+    assert len([_ for _ in test_mongodb.find({"job_id": 2})]) == 1

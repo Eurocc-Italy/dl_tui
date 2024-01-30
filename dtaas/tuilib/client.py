@@ -141,10 +141,17 @@ def run_script(script: str, files_in: List[str]) -> List[str]:
     return files_out
 
 
-def save_output(files_out: List[str], pfs_prefix_path: str, s3_bucket: str, job_id: str):
+def save_output(
+    files_out: List[str],
+    pfs_prefix_path: str,
+    s3_bucket: str,
+    job_id: str,
+    collection: Collection,
+):
     """Take a list of paths and save the corresponding files in a zipped archive,
-    which is then moved to the correct location on the parallel filesystem ({pfs_prefix_path}{s3_bucket}/)
-    and synced to the S3 bucket via a curl command.
+    which is then moved to the correct location on the parallel filesystem
+    {pfs_prefix_path}{s3_bucket}/results{job_id}.zip and synced to the S3 bucket via a curl command.
+    The MongoDB database is also updated with this entry
 
     Parameters
     ----------
@@ -156,6 +163,8 @@ def save_output(files_out: List[str], pfs_prefix_path: str, s3_bucket: str, job_
         name of the S3 bucket in which the results need to be saved
     job_id : str
         unique job identifier, used to create the S3 object key
+    collection : Collection
+        MongoDB collection on which to save the results metadata
 
     """
 
@@ -177,6 +186,14 @@ def save_output(files_out: List[str], pfs_prefix_path: str, s3_bucket: str, job_
     # TODO: curl sync command for S3 bucket, this is a temporary fix!
     os.system(f"awslocal s3api put-object --bucket {s3_bucket} --key results_{job_id}.zip --body results_{job_id}.zip")
 
+    collection.insert_one(
+        {
+            "job_id": job_id,
+            "s3_key": f"results_{job_id}.zip",
+            "path": f"{pfs_prefix_path}{s3_bucket}/results_{job_id}.zip",
+        }
+    )
+
 
 def wrapper(
     collection: Collection,
@@ -188,12 +205,14 @@ def wrapper(
 ):
     """Get the SQL query and script, convert them to MongoDB spec, run the process query on the DB retrieving
     matching files, run the user-provided script (if present) in a temporary directory, retrieve the output
-    file list from the main function, save the files and zip them in an archive
+    file list from the main function, save the files and zip them in an archive. This archive is then moved to
+    the parallel filesystem at the location {pfs_prefix_path}{s3_bucket}/results_{job_id}.zip. Finally, the S3
+    bucket is synced via curl and the results are uploaded to the MongoDB database with key results_{job_id}.zip
 
     Parameters
     ----------
     collection : Collection
-        MongoDB collection on which to run the query
+        MongoDB collection on which to run the query and save the results metadata
     sql_query : str
         SQL query
     pfs_prefix_path: str
@@ -229,6 +248,7 @@ def wrapper(
             pfs_prefix_path=pfs_prefix_path,
             s3_bucket=s3_bucket,
             job_id=job_id,
+            collection=collection,
         )
 
         shutil.rmtree(tdir)
@@ -239,4 +259,5 @@ def wrapper(
             pfs_prefix_path=pfs_prefix_path,
             s3_bucket=s3_bucket,
             job_id=job_id,
+            collection=collection,
         )
