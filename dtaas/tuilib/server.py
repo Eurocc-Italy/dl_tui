@@ -182,7 +182,7 @@ def launch_job(json_path: str):
     ssh_key = config.ssh_key
 
     # Creating wrap command to be passed to sbatch
-    wrap_cmd += f"source {config.venv_path}/bin/activate; "
+    wrap_cmd = f"source {config.venv_path}/bin/activate; "
     wrap_cmd += f"dtaas_tui_client {basename(json_path)}; "
     wrap_cmd += "touch JOB_DONE"
 
