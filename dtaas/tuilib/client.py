@@ -194,7 +194,7 @@ def save_output(
         {
             "job_id": job_id,
             "s3_key": f"results_{job_id}.zip",
-            "path": f"{pfs_prefix_path}{s3_bucket}/results_{job_id}.zip",
+            "path": f"{pfs_prefix_path}/results_{job_id}.zip",
         }
     )
 
@@ -211,7 +211,7 @@ def wrapper(
     """Get the SQL query and script, convert them to MongoDB spec, run the process query on the DB retrieving
     matching files, run the user-provided script (if present) in a temporary directory, retrieve the output
     file list from the main function, save the files and zip them in an archive. This archive is then moved to
-    the parallel filesystem at the location {pfs_prefix_path}{s3_bucket}/results_{job_id}.zip. Finally, the S3
+    the parallel filesystem at the location {pfs_prefix_path}/results_{job_id}.zip. Finally, the S3
     bucket is synced via curl and the results are uploaded to the MongoDB database with key results_{job_id}.zip
 
     Parameters
