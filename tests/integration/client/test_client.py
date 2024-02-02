@@ -49,7 +49,7 @@ def config_client():
             "collection": "test_coll",
             "s3_endpoint_url": "https://testurl.com/",
             "s3_bucket": "test",
-            "pfs_prefix_path": f"{ROOT_DIR}/",
+            "pfs_prefix_path": ROOT_DIR,
         }
     )
     return config_client
@@ -91,6 +91,8 @@ def test_search_only(test_mongodb, config_client):
         assert actual == expected
 
     assert len([_ for _ in test_mongodb.find({"job_id": 1})]) == 1
+    assert test_mongodb.find_one({"job_id": 1})["path"] == f"{ROOT_DIR}/results_1.zip"
+    assert test_mongodb.find_one({"job_id": 1})["s3_key"] == "results_1.zip"
 
 
 def test_return_first(test_mongodb, config_client):
@@ -129,6 +131,8 @@ def test_return_first(test_mongodb, config_client):
         assert actual == expected
 
     assert len([_ for _ in test_mongodb.find({"job_id": 2})]) == 1
+    assert test_mongodb.find_one({"job_id": 2})["path"] == f"{ROOT_DIR}/results_2.zip"
+    assert test_mongodb.find_one({"job_id": 2})["s3_key"] == "results_2.zip"
 
 
 def test_double_quotes_in_SQL(test_mongodb, config_client):
@@ -164,6 +168,8 @@ def test_double_quotes_in_SQL(test_mongodb, config_client):
         assert actual == expected
 
     assert len([_ for _ in test_mongodb.find({"job_id": 3})]) == 1
+    assert test_mongodb.find_one({"job_id": 3})["path"] == f"{ROOT_DIR}/results_3.zip"
+    assert test_mongodb.find_one({"job_id": 3})["s3_key"] == "results_3.zip"
 
 
 def test_single_quotes_in_SQL(test_mongodb, config_client):
@@ -199,6 +205,8 @@ def test_single_quotes_in_SQL(test_mongodb, config_client):
         assert actual == expected
 
     assert len([_ for _ in test_mongodb.find({"job_id": 4})]) == 1
+    assert test_mongodb.find_one({"job_id": 4})["path"] == f"{ROOT_DIR}/results_4.zip"
+    assert test_mongodb.find_one({"job_id": 4})["s3_key"] == "results_4.zip"
 
 
 def test_double_quotes_in_script(test_mongodb, config_client):
@@ -237,6 +245,8 @@ def test_double_quotes_in_script(test_mongodb, config_client):
         assert actual == expected
 
     assert len([_ for _ in test_mongodb.find({"job_id": 5})]) == 1
+    assert test_mongodb.find_one({"job_id": 5})["path"] == f"{ROOT_DIR}/results_5.zip"
+    assert test_mongodb.find_one({"job_id": 5})["s3_key"] == "results_5.zip"
 
 
 def test_single_quotes_in_script(test_mongodb, config_client):
@@ -275,3 +285,5 @@ def test_single_quotes_in_script(test_mongodb, config_client):
         assert actual == expected
 
     assert len([_ for _ in test_mongodb.find({"job_id": 6})]) == 1
+    assert test_mongodb.find_one({"job_id": 6})["path"] == f"{ROOT_DIR}/results_6.zip"
+    assert test_mongodb.find_one({"job_id": 6})["s3_key"] == "results_6.zip"

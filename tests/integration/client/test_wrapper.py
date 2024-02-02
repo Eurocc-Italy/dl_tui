@@ -29,7 +29,7 @@ def test_search_specific_files(mock_mongodb):
     wrapper(
         collection=mock_mongodb,
         sql_query=query,
-        pfs_prefix_path=f"{ROOT_DIR}/",
+        pfs_prefix_path=ROOT_DIR,
         s3_endpoint_url="https://testurl.com/",
         s3_bucket="test",
         job_id=1,
@@ -54,6 +54,8 @@ def test_search_specific_files(mock_mongodb):
         assert actual == expected
 
     assert len([_ for _ in mock_mongodb.find({"job_id": 1})]) == 1
+    assert mock_mongodb.find_one({"job_id": 1})["path"] == f"{ROOT_DIR}/results_1.zip"
+    assert mock_mongodb.find_one({"job_id": 1})["s3_key"] == "results_1.zip"
 
 
 def test_search_specific_files_return_only_first(mock_mongodb):
@@ -66,7 +68,7 @@ def test_search_specific_files_return_only_first(mock_mongodb):
     wrapper(
         collection=mock_mongodb,
         sql_query=query,
-        pfs_prefix_path=f"{ROOT_DIR}/",
+        pfs_prefix_path=ROOT_DIR,
         s3_endpoint_url="https://testurl.com/",
         s3_bucket="test",
         job_id=2,
@@ -91,3 +93,5 @@ def test_search_specific_files_return_only_first(mock_mongodb):
         assert actual == expected
 
     assert len([_ for _ in mock_mongodb.find({"job_id": 2})]) == 1
+    assert mock_mongodb.find_one({"job_id": 2})["path"] == f"{ROOT_DIR}/results_2.zip"
+    assert mock_mongodb.find_one({"job_id": 2})["s3_key"] == "results_2.zip"

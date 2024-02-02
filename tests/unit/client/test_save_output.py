@@ -22,7 +22,7 @@ def test_save_output(mock_mongodb):
             f"{ROOT_DIR}/tests/utils/sample_files/test1.txt",
             f"{ROOT_DIR}/tests/utils/sample_files/test2.txt",
         ],
-        pfs_prefix_path=f"{ROOT_DIR}/",
+        pfs_prefix_path=ROOT_DIR,
         s3_endpoint_url="https://testurl.com/",
         s3_bucket="test",
         job_id=1,
@@ -49,6 +49,9 @@ def test_save_output(mock_mongodb):
 
     assert len([_ for _ in mock_mongodb.find({"job_id": 1})]) == 1
 
+    assert mock_mongodb.find_one({"job_id": 1})["path"] == f"{ROOT_DIR}/results_1.zip"
+    assert mock_mongodb.find_one({"job_id": 1})["s3_key"] == "results_1.zip"
+
 
 def test_nonexistent_files(mock_mongodb):
     """
@@ -60,7 +63,7 @@ def test_nonexistent_files(mock_mongodb):
         files_out=[
             f"{ROOT_DIR}/tests/utils/sample_files/notafile.txt",
         ],
-        pfs_prefix_path=f"{ROOT_DIR}/",
+        pfs_prefix_path=ROOT_DIR,
         s3_endpoint_url="https://testurl.com/",
         s3_bucket="test",
         job_id=2,
@@ -83,3 +86,5 @@ def test_nonexistent_files(mock_mongodb):
         assert actual == expected
 
     assert len([_ for _ in mock_mongodb.find({"job_id": 2})]) == 1
+    assert mock_mongodb.find_one({"job_id": 2})["path"] == f"{ROOT_DIR}/results_2.zip"
+    assert mock_mongodb.find_one({"job_id": 2})["s3_key"] == "results_2.zip"
