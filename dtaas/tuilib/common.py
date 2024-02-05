@@ -145,7 +145,8 @@ class Config:
         return str(self.__dict__)
 
     def load_default_config(self, version: str) -> Dict[str, str]:
-        """Load default configuration as found in /etc/default
+        """Load default configuration as found in /etc/default.
+        If present, overwrites these defaults with the contents of ~/.config/dtaas-tui/config_<version>.json.
 
         Parameters
         ----------
@@ -158,8 +159,20 @@ class Config:
             dictionary with the configuration info
         """
         with open(f"{os.path.dirname(__file__)}/../etc/default/config_{version}.json", "r") as f:
-            config = json.load(f)
-        return config
+            base_config: Dict[str, str] = json.load(f)
+
+        # TODO: write tests for this
+        if os.path.exists(f"{os.environ['HOME']}/.config/dtaas-tui/config_{version}.json"):
+            with open(f"{os.environ['HOME']}/.config/dtaas-tui/config_{version}.json", "r") as f:
+                config: Dict[str, str] = json.load(f)
+
+            for key in config:
+                if key not in base_config:
+                    raise KeyError(f"Unknown parameter in configuration file: '{key}'")
+
+            base_config.update(config)
+
+        return base_config
 
     def load_custom_config(self, custom_config: Dict[str, str]):
         """Overwrites the default configurations with custom options
