@@ -46,7 +46,7 @@ If no script is provided, the program will simply return the files matching the 
 
 Let's say you want to fetch a certain set of files from the database and run a Python analysis script on them.
 
-The Python script must have a `main` function, which will be what is actually run by the executable. This function should take a list as input, which will be populated by the interface with the paths of the files matching the SQL query. The function should also return a list as output, which contains the paths of the files which the user wants to save from the analysis. The interface will then take this list of paths, save the corresponding files (generated _in situ_ on HPC) in an archive and make them available to the user for download via the API/GUI.
+The Python script must have a `main` function, which will be what is actually run by the executable. This function should take a list as input, which will be populated by the interface with the paths of the files matching the SQL query. The function should also return a list as output, which contains the paths of the files which the user wants to save from the analysis. The interface will then take this list of paths, save the corresponding files (generated _in situ_ on HPC) in an archive which is uploaded to S3 and made available to the user for download via the API.
 
 This is an example of a valid Python script to be passed to the interface, with a `main` function taking a list of paths as input and returning a list of paths as output. 
 
@@ -93,6 +93,9 @@ For the client version, the configurable options are:
   * `port`: the port to access the MongoDB server
   * `database`: the name of the MongoDB database
   * `collection`: the name of the MongoDB collection within the database
+  * `s3_endpoint_url`: URL at which the S3 bucket can be found
+  * `s3_bucket`: name of the S3 bucket storing the data lake files 
+  * `pfs_prefix_path`: path at which the data lake files are stored on the parallel filesystem
 
 For the server version, the configurable options are:
 
@@ -100,10 +103,11 @@ For the server version, the configurable options are:
   * `host`: address of the HPC login node
   * `venv_path`: path of the virtual environment in which the library is installed
   * `ssh_key`: path to the SSH key used for authentication on the HPC login node
-  * `partition`: SLURM partition for the HPC job
+  * `compute_partition`: SLURM partition for running the HPC job
+  * `upload_partition`: SLURM partition for uploading the files to the S3 bucket
   * `account`: SLURM account for the HPC job
+  * `qos`: SLURM QoS for the HPC job
   * `mail`: email address to which the notifications for job start/end are sent
   * `walltime`: maximum walltime for HPC job
   * `nodes`: number of nodes requested for HPC job
   * `ntasks_per_node`: number of CPU cores per node requested for the HPC job
-
