@@ -1,6 +1,6 @@
 # DTaaS_TUI User Guide
 
-Version: [`0.2`](changelog)
+Version: [`0.3.4`](changelog)
 
 This is the user guide for the Digital Twin as a Service Text User Interface (`DTaaS_TUI`) Python library. The TUI is used to query the data lake and run processing scripts on the files matching the query.
 
@@ -13,7 +13,7 @@ The library consists of two executables, `dtaas_tui_client` and `dtaas_tui_serve
 
 The `client` version is intended to be run on the machine with direct access to the files of the data lake and runs the actual querying and processing.
 
-The `server` version is intended to be run on a cloud machine with access to an HPC infrastructure running Slurm. Its purpose is to parse the user input (query and processing script) and launch a Slurm job on HPC which calls the client version.
+The `server` version is intended to be run on a cloud machine with access to an HPC infrastructure running Slurm. Its purpose is to parse the user input (query and processing script) and launch a Slurm job on HPC which calls the client version. The results are then uploaded to S3 and their metadata stored in the database for querying.
 
 ::::{grid} 1 1 2 2
 :class-container: text-center

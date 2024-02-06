@@ -69,6 +69,9 @@ For the client version, the configurable options are:
   * `port`: the port to access the MongoDB server
   * `database`: the name of the MongoDB database
   * `collection`: the name of the MongoDB collection within the database
+  * `s3_endpoint_url`: URL at which the S3 bucket can be found
+  * `s3_bucket`: name of the S3 bucket storing the data lake files 
+  * `pfs_prefix_path`: path at which the data lake files are stored on the parallel filesystem
 
 For the server version, the configurable options are:
 
@@ -76,8 +79,10 @@ For the server version, the configurable options are:
   * `host`: address of the HPC login node
   * `venv_path`: path of the virtual environment in which the library is installed
   * `ssh_key`: path to the SSH key used for authentication on the HPC login node
-  * `partition`: SLURM partition for the HPC job
+  * `compute_partition`: SLURM partition for running the HPC job
+  * `upload_partition`: SLURM partition for uploading the files to the S3 bucket
   * `account`: SLURM account for the HPC job
+  * `qos`: SLURM QoS for the HPC job
   * `mail`: email address to which the notifications for job start/end are sent
   * `walltime`: maximum walltime for HPC job
   * `nodes`: number of nodes requested for HPC job
