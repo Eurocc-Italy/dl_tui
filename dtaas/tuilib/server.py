@@ -31,6 +31,8 @@ def create_remote_directory(json_path: str) -> Tuple[str, str]:
     """
 
     user_input = UserInput.from_json(json_path=json_path)
+    logger.info(f"Creating remote directory: {user_input.id}")
+    logger.debug(f"Full user input: {user_input.__dict__}")
 
     if user_input.script_path:
         logger.debug(f"Script name: \n{user_input.script_path}")
@@ -74,6 +76,8 @@ def copy_json_input(json_path: str):
     """
 
     user_input = UserInput.from_json(json_path=json_path)
+    logger.info(f"Copying user input in JSON form to HPC")
+    logger.debug(f"Full user input: {user_input.__dict__}")
 
     if user_input.script_path:
         logger.debug(f"Script name: \n{user_input.script_path}")
@@ -115,6 +119,8 @@ def copy_user_script(json_path: str):
     """
 
     user_input = UserInput.from_json(json_path=json_path)
+    logger.info(f"Copying user script to remote directory")
+    logger.debug(f"Full user input: {user_input.__dict__}")
 
     if user_input.script_path:
         logger.debug(f"Script name: \n{user_input.script_path}")
@@ -163,13 +169,17 @@ def launch_job(json_path: str):
     """
 
     user_input = UserInput.from_json(json_path=json_path)
+    logger.info(f"Launching job on HPC")
+    logger.debug(f"Full user input: {user_input.__dict__}")
 
-    logger.debug(f"Received SQL query: {user_input.sql_query}")
+    logger.info(f"Running SQL query: {user_input.sql_query}")
 
     # loading server config
     config = Config("server")
     if user_input.config_server:
         config.load_custom_config(user_input.config_server)
+
+    logger.debug(f"Server config: {config.__dict__}")
 
     # SLURM parameters
     partition = config.compute_partition
@@ -213,6 +223,7 @@ def launch_job(json_path: str):
     logger.debug(f"stderr: {stderr}")
 
     slurm_job_id = int(stdout.lstrip("Submitted batch job "))
+    logger.info(f"Launched job on HPC with ID: {slurm_job_id}")
 
     if "Submitted batch job" not in stdout:
         raise RuntimeError(f"Something gone wrong, job was not launched.\nstdout: {stdout}\nstderr: {stderr}")
@@ -243,11 +254,15 @@ def upload_results(json_path: str, slurm_job_id: int):
     """
 
     user_input = UserInput.from_json(json_path=json_path)
+    logger.info(f"Uploading results to S3 and MongoDB")
+    logger.debug(f"Full user input: {user_input.__dict__}")
 
     # loading server config
     config = Config("server")
     if user_input.config_server:
         config.load_custom_config(user_input.config_server)
+
+    logger.debug(f"Server config: {config.__dict__}")
 
     # SLURM parameters
     partition = config.upload_partition
@@ -285,6 +300,9 @@ def upload_results(json_path: str, slurm_job_id: int):
     stderr = str(stderr, encoding="utf-8")
     logger.debug(f"stdout: {stdout}")
     logger.debug(f"stderr: {stderr}")
+
+    logger.info(f"Results are available on S3 with the key: results_{slurm_job_id}.zip")
+    logger.info(f'Results are available on MongoDB with the key: "job_id": {slurm_job_id}')
 
     if "Submitted batch job" not in stdout:
         raise RuntimeError(f"Something gone wrong, job was not launched.\nstdout: {stdout}\nstderr: {stderr}")
