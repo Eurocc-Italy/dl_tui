@@ -146,3 +146,11 @@ The `query` action requires the following additional options:
 
   * `query_file=...`: path to the text file containing the SQL query to be ran on the Data Lake.
   * `python_file=...`: path to the Python file containing the processing to be ran on the files matching the query.
+
+Example commands:
+
+  * Upload: `dtaas_api upload file=/path/to/file.csv json_data=/path/to/metadata.json`
+  * Replace: `dtaas_api replace file=/path/to/updated/file.csv json_data=/path/to/updated_metadata.json`
+  * Update: `dtaas_api update file=file.csv json_data=/path/to/updated_metadata.json`
+  * Download: `dtaas_api download file=file.csv`
+  * Query: `dtaas_api upload query_file=/path/to/query.txt python_file=/path/to/script.py`
