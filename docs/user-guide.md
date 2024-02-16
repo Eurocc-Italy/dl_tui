@@ -107,7 +107,7 @@ The wrapper can be called via a third executable, `dtaas_api`, with one of the f
 
 The IP address of the API server will be taken by the `client_config.json` configuration file. Alternatively, it is possible to overwrite the default via the `ip=...` option.
 
-A valid authentication token is required. If saved in the `~/.config/dtaas-tui/api-token.txt` file, it will automatically be read by the wrapper. Otherwise, the token can be sent directly via the `token=...` option.
+A valid authentication token is required. If saved in the `~/.config/dtaas-tui/api-token` file, it will automatically be read by the wrapper. Otherwise, the token can be sent directly via the `token=...` option.
 
 The `upload` and `replace` actions require the following additional options:
 
