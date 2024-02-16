@@ -20,7 +20,7 @@ import os
 import sys
 
 from dtaas.tuilib.common import Config
-from dtaas.tuilib.api import upload, replace, update, download, delete
+from dtaas.tuilib.api import upload, replace, update, download, delete, query
 
 
 def main():
@@ -47,8 +47,8 @@ def main():
         "token",
         "file",
         "json_data",
-        "python_file",
         "query_file",
+        "python_file",
     ]
 
     # Loading default IP
@@ -144,6 +144,25 @@ def main():
             )
             if response.status_code == 200:
                 logger.info(f"Successfully deleted file {input_dict['file']}.")
+            else:
+                print(response.text)
+                response.raise_for_status()
+        except KeyError as key:
+            print(f"Required key is missing: {key}")
+
+    # Run query
+    if request.lower() == "query":
+        try:
+            response = query(
+                ip=input_dict["ip"],
+                token=input_dict["token"],
+                query_file=input_dict["query_file"],
+                python_file=input_dict["python_file"],
+            )
+            if response.status_code == 200:
+                logger.info(
+                    f"Successfully launched analysis script {input_dict['python_file']} on query {input_dict['query_file']}."
+                )
             else:
                 print(response.text)
                 response.raise_for_status()
