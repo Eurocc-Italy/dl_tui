@@ -9,3 +9,4 @@
 
 ## Version `0.3`
 * S3 implementation: result files can now be uploaded to S3 with their metadata stored in MongoDB
+* Added wrapper functions for the API to interact with the data lake directly

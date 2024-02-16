@@ -83,7 +83,11 @@ def main(files_in):  # main function, expecting a list of file paths as input
 
 ## Configuration
 
-Configuration options can be given via the `config_client` and `config_server` keys in the input JSON file. The library first loads the default options written the JSON files located in the library's `dtaas/etc/default` folder (which can be taken as a template to understand the kind of options which can be configured) and overwrites them with the content provided in the input JSON file.
+The library first loads the default options written the JSON files located in the library's `dtaas/etc/default` folder (which can be taken as a template to understand the kind of options which can be configured).
+
+If you wish to overwrite these defaults and customise your configuration, it is recommended to save a personalised version of the `client_config.json` and `server_config.json` files in the `~/.config/dtaas-tui` folder. The options indicated here will take precedence over the defaults. Missing keys will be left at the default values.
+
+If you wish to send a custom configurazion on the fly, it is also possible to pass configuration options via the `config_client` and `config_server` keys in the input JSON file, also in JSON format. These will take precedence over both defaults and what is found in `~/.config/dtaas-tui/config_<client/server>.json`.
 
 For the client version, the configurable options are:
 
@@ -111,3 +115,34 @@ For the server version, the configurable options are:
   * `walltime`: maximum walltime for HPC job
   * `nodes`: number of nodes requested for HPC job
   * `ntasks_per_node`: number of CPU cores per node requested for the HPC job
+
+## API Wrapper
+
+It is also possible to interact with the API server on the VM hosting the metadata database for uploading, downloading, replacing, and updating files, as well as launching queries for processing data.
+
+The wrapper can be called via a third executable, `dtaas_api`, with one of the following actions:
+
+  * `upload`
+  * `replace`
+  * `update`
+  * `download`
+  * `delete`
+  * `query`
+
+The IP address of the API server will be taken by the `client_config.json` configuration file. Alternatively, it is possible to overwrite the default via the `ip=...` option.
+
+A valid authentication token is required. If saved in the `~/.config/dtaas-tui/api-token.txt` file, it will automatically be read by the wrapper. Otherwise, the token can be sent directly via the `token=...` option.
+
+The `upload` and `replace` actions require the following additional options:
+
+  * `file=...`: path to the file to be uploaded to the Data Lake
+  * `json_data=...`: path to the .json file containing the metadata of the file to be uploaded to the Data Lake
+
+The `update` action also requires the `file=...` and `json_data=...` options, but in this case the `file=...` should be the S3 key corresponding to the file (i.e., the filename).
+
+The `download` and `delete` actions require a `file=...` option, which similarly to the `update` action should be the S3 key corresponding to the file to be downloaded/deleted.
+
+The `query` action requires the following additional options:
+
+  * `query_file=...`: path to the text file containing the SQL query to be ran on the Data Lake.
+  * `python_file=...`: path to the Python file containing the processing to be ran on the files matching the query.

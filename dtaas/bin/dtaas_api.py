@@ -55,8 +55,11 @@ def main():
     input_dict["ip"] = Config("client").ip
 
     # Loading default token
-    with open(f"{os.environ['HOME']}/.config/dtaas-tui/api-token", "r") as f:
-        input_dict["token"] = f.read()
+    try:
+        with open(f"{os.environ['HOME']}/.config/dtaas-tui/api-token", "r") as f:
+            input_dict["token"] = f.read()
+    except FileNotFoundError:
+        logger.info("Token not found. Unless provided explicitly via the token=... option, the commands will not work.")
 
     # Reading user-provided options
     for key in user_input:

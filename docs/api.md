@@ -8,3 +8,5 @@ This API reference is divided into the following submodules, matching the struct
 * [`dtaas.tuilib.client`](API-tuilib-client): functions used in client version
 
 * [`dtaas.tuilib.server`](API-tuilib-server): functions used in server version
+
+* [`dtaas.tuilib.api`](API-tuilib-api): functions used in the API wrapper
