@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="dtaas-tui",
-    version="0.3.4",
+    version="0.3.5",
     description="Query/Process interface for DTaaS",
     packages=find_packages(include=["dtaas", "dtaas.*"]),
     package_data={
@@ -13,6 +13,7 @@ setup(
     },
     entry_points={
         "console_scripts": [
+            "dtaas_api=dtaas.bin.dtaas_api:main",
             "dtaas_tui_client=dtaas.bin.dtaas_tui_client:main",
             "dtaas_tui_server=dtaas.bin.dtaas_tui_server:main",
         ],
@@ -24,6 +25,7 @@ setup(
         "pyparsing",
         "sqlparse @ git+https://github.com/lbabetto/sqlparse",
         "boto3",
+        "requests",
     ],
     author="Luca Babetto",
     author_email="l.babetto@cineca.it",

@@ -4,3 +4,4 @@ pymongo
 pyparsing
 sqlparse @ git+https://github.com/lbabetto/sqlparse
 boto3
+requests
