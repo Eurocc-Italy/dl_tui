@@ -128,12 +128,15 @@ def update(
         "Authorization": f"Bearer {token}",
     }
 
-    files = {
+    data = {
         "file": (file, file, "text/plain"),
+    }
+
+    files = {
         "json_data": (os.path.basename(json_data), open(json_data, "r"), "application/json"),
     }
 
-    response = requests.patch(f"http://{ip}:8080/v1/update", headers=headers, files=files)
+    response = requests.patch(f"http://{ip}:8080/v1/update", headers=headers, data=data, files=files)
 
     logger.info(f"Updating metadata for file {file} in Data Lake. Response: {response.status_code}")
 
