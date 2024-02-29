@@ -177,7 +177,7 @@ def main():
                 logger.info(msg)
                 print(msg)
 
-                msg = f"Job ID: {response.text.lstrip("Files processed successfully, ID: ")}"
+                msg = f"Job ID: {response.text.lstrip('Files processed successfully, ID: ')}"
                 logger.info(msg)
                 print(msg)
             else:
