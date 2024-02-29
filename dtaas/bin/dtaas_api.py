@@ -79,8 +79,10 @@ def main():
                 file=input_dict["file"],
                 json_data=input_dict["json_data"],
             )
-            if response.status_code == 200:
-                logger.info(f"Successfully uploaded file {input_dict['file']}.")
+            if response.status_code == 201:
+                msg = f"Successfully uploaded file {input_dict['file']}."
+                logger.info(msg)
+                print(msg)
             else:
                 print(response.text)
                 response.raise_for_status()
@@ -96,8 +98,10 @@ def main():
                 file=input_dict["file"],
                 json_data=input_dict["json_data"],
             )
-            if response.status_code == 200:
-                logger.info(f"Successfully replaced file {input_dict['file']}.")
+            if response.status_code == 201:
+                msg = f"Successfully replaced file {input_dict['file']}."
+                logger.info(msg)
+                print(msg)
             else:
                 print(response.text)
                 response.raise_for_status()
@@ -113,8 +117,10 @@ def main():
                 file=input_dict["file"],
                 json_data=input_dict["json_data"],
             )
-            if response.status_code == 200:
-                logger.info(f"Successfully updated metadata for file {input_dict['file']}.")
+            if response.status_code == 201:
+                msg = f"Successfully updated metadata for file {input_dict['file']}."
+                logger.info(msg)
+                print(msg)
             else:
                 print(response.text)
                 response.raise_for_status()
@@ -130,7 +136,9 @@ def main():
                 file=input_dict["file"],
             )
             if response.status_code == 200:
-                logger.info(f"Successfully downloaded file {input_dict['file']}.")
+                msg = f"Successfully downloaded file {input_dict['file']}."
+                logger.info(msg)
+                print(msg)
             else:
                 print(response.text)
                 response.raise_for_status()
@@ -146,7 +154,9 @@ def main():
                 file=input_dict["file"],
             )
             if response.status_code == 200:
-                logger.info(f"Successfully deleted file {input_dict['file']}.")
+                msg = f"Successfully deleted file {input_dict['file']}."
+                logger.info(msg)
+                print(msg)
             else:
                 print(response.text)
                 response.raise_for_status()
@@ -163,9 +173,13 @@ def main():
                 python_file=input_dict["python_file"],
             )
             if response.status_code == 200:
-                logger.info(
-                    f"Successfully launched analysis script {input_dict['python_file']} on query {input_dict['query_file']}."
-                )
+                msg = f"Successfully launched analysis script {input_dict['python_file']} on query {input_dict['query_file']}."
+                logger.info(msg)
+                print(msg)
+
+                msg = f"Job ID: {response.text.lstrip("Files processed successfully, ID: ")}"
+                logger.info(msg)
+                print(msg)
             else:
                 print(response.text)
                 response.raise_for_status()
