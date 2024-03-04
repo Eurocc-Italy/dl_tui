@@ -7,11 +7,40 @@ The service is composed of:
   - a Cloud-based infrastructure with a VM running a MongoDB database instance. This database contains the metadata for all the files in the data lake / digital twin, including the path to the actual corresponding file in the HPC parallel filesystem.
   - a HPC cluster which contains the actual files, stored in dual parallel filesystem/S3 mode. The HPC part runs the processing script sent by the user on the files matching the query.
 
-The library consists of two executables, `dtaas_tui_client` and `dtaas_tui_server`. 
+The library consists of two main executables, `dtaas_tui_client` and `dtaas_tui_server`. 
 
 The `client` version is intended to be run on the machine with direct access to the files of the data lake and runs the actual querying and processing.
 
 The `server` version is intended to be run on a cloud machine with access to an HPC infrastructure running Slurm. Its purpose is to parse the user input (query and processing script) and launch a Slurm job on HPC which calls the client version.
+
+A third executable, `dtaas_api` is provided and is used to launch commands to the service API to interact with the Data Lake portion of the service.
+
+## Code structure
+
+The library code is found in the `dtaas` folder, with the following structure:
+
+```
+dtaas
+├── __init__.py
+├── bin
+│   ├── __init__.py
+│   ├── dtaas_api.py
+│   ├── dtaas_tui_client.py
+│   └── dtaas_tui_server.py
+├── etc/default
+│   ├── config_client.json
+│   └── config_server.json
+└── tuilib
+    ├── __init__.py
+    ├── api.py
+    ├── client.py
+    ├── common.py
+    └── server.py
+```
+
+The `bin` directory contains the main executables, `dtaas_tui_client`, `dtaas_tui_server`, and `dtaas_api`. These executables utilize the various functions from the files present in the `tuilib` folder, according to the user request.
+
+The `etc/default` folder contains the default settings for the executables, and can be taken as a template for building custom configurations.
 
 ## Installation
 
