@@ -18,6 +18,7 @@ logger.addHandler(fh)
 
 import os
 import sys
+import json
 
 from dtaas.tuilib.common import Config
 from dtaas.tuilib.api import upload, replace, update, download, delete, query
@@ -49,6 +50,7 @@ def main():
         "json_data",
         "query_file",
         "python_file",
+        "config_json",
     ]
 
     # Loading default IP
@@ -65,7 +67,7 @@ def main():
     for key in user_input:
         for option in options:
             if key.startswith(f"{option}="):
-                input_dict[option] = key.lstrip(f"{option}=")
+                input_dict[option] = key.replace(f"{option}=", "")
                 break
 
     logger.debug(f"Options dictionary: {input_dict}")
@@ -165,12 +167,27 @@ def main():
 
     # Run query
     if request.lower() == "query":
+
+        config_json = {
+            "config_client": Config("client").__dict__,
+            "config_server": Config("server").__dict__,
+        }
+
+        try:
+            with open(input_dict["config_json"], "r") as f:
+                custom_config = json.load(f)
+                for key in custom_config:
+                    config_json[key].update(custom_config[key])
+        except KeyError:
+            pass
+
         try:
             response = query(
                 ip=input_dict["ip"],
                 token=input_dict["token"],
                 query_file=input_dict["query_file"],
                 python_file=input_dict["python_file"],
+                config_json=config_json,
             )
             if response.status_code == 200:
                 msg = f"Successfully launched analysis script {input_dict['python_file']} on query {input_dict['query_file']}."

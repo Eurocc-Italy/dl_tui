@@ -12,6 +12,9 @@ import requests
 from requests import Response
 
 import os
+import json
+
+from typing import Dict
 
 
 def upload(
@@ -220,6 +223,7 @@ def query(
     ip: str,
     token: str,
     query_file: str,
+    config_json: Dict[str, Dict[str, str]],
     python_file: str = None,
 ) -> Response:
     """Upload file to Data Lake using the DTaaS API.
@@ -232,6 +236,8 @@ def query(
         Authorization token for running commands via the API
     query_file : str
         Path of the file containing the SQL query to be launched
+    config_json: Dict[str, Dict[str, str]]
+        Dictionary containing the config_client and config_server configuration dictionaries
     python_file : str, optional
         Path of the Python analysis script to be ran on the query results
 
@@ -256,7 +262,12 @@ def query(
             "query_file": (os.path.basename(query_file), open(query_file, "r"), "text/plain"),
         }
 
-    response = requests.post(f"http://{ip}:8080/v1/query_and_process", headers=headers, files=files)
+    response = requests.post(
+        f"http://{ip}:8080/v1/query_and_process",
+        headers=headers,
+        files=files,
+        data={"config_json": json.dumps(config_json)},
+    )
 
     if python_file:
         logger.info(

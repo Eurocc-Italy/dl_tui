@@ -161,7 +161,6 @@ class Config:
         with open(f"{os.path.dirname(__file__)}/../etc/default/config_{version}.json", "r") as f:
             base_config: Dict[str, str] = json.load(f)
 
-        # TODO: write tests for this
         if os.path.exists(f"{os.environ['HOME']}/.config/dtaas-tui/config_{version}.json"):
             with open(f"{os.environ['HOME']}/.config/dtaas-tui/config_{version}.json", "r") as f:
                 config: Dict[str, str] = json.load(f)
