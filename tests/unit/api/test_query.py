@@ -72,6 +72,29 @@ def test_query_and_process(mocked_response):
     assert response.text == "Files processed successfully, ID: 12345"
 
 
+def test_custom_config(mocked_response):
+    """
+    Send query with custom config file
+    """
+
+    mocked_response.post(
+        "http://test.com:8080/v1/query_and_process",
+        status=200,
+        body="Files processed successfully, ID: 12345",
+    )
+
+    response = query(
+        ip="test.com",
+        token="not-necessary",
+        query_file="test-query.txt",
+        python_file="test-query.py",
+        config_json={"config_server": {"walltime": "10:00"}},
+    )
+
+    assert response.status_code == 200
+    assert response.text == "Files processed successfully, ID: 12345"
+
+
 def test_query_without_file(mocked_response):
     """
     Send query with Python script only
