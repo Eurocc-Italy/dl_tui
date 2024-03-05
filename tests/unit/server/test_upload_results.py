@@ -1,5 +1,7 @@
 import pytest
 
+from dtaas.tuilib.common import Config
+
 #
 # Testing the upload_results function in module server.py
 #
@@ -21,7 +23,7 @@ import json
 from dtaas.tuilib.server import create_remote_directory, copy_json_input, copy_user_script, launch_job, upload_results
 
 
-def test_just_search(config_server, config_client):
+def test_just_search(config_server: Config, config_client: Config, setup_testfiles_HPC):
     """
     Search for two specific files
     """
@@ -29,10 +31,10 @@ def test_just_search(config_server, config_client):
     with open("input.json", "w") as f:
         json.dump(
             {
-                "id": "DTAAS-TUI-TEST-upload_results",
+                "id": "DTAAS-TUI-TEST",
                 "sql_query": "SELECT * FROM metadata WHERE id = 1 OR id = 2",
                 "config_server": config_server.__dict__,
-                "config": config_client.__dict__,
+                "config_client": config_client.__dict__,
             },
             f,
         )
@@ -51,7 +53,46 @@ def test_just_search(config_server, config_client):
         # checking that RESULTS_UPLOADED file has been made
         if (
             os.system(
-                f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DTAAS-TUI-TEST-upload_results/RESULTS_UPLOADED'"
+                f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DTAAS-TUI-TEST/RESULTS_UPLOADED'"
+            )
+            == 0
+        ):
+            break
+
+    assert True
+
+
+def test_full_path(config_server: Config, config_client: Config, setup_testfiles_HPC):
+    """
+    Search for two specific files
+    """
+
+    with open(f"{os.getcwd()}/input.json", "w") as f:
+        json.dump(
+            {
+                "id": "DTAAS-TUI-TEST",
+                "sql_query": "SELECT * FROM metadata WHERE id = 1 OR id = 2",
+                "config_server": config_server.__dict__,
+                "config": config_client.__dict__,
+            },
+            f,
+        )
+
+    create_remote_directory(json_path=f"{os.getcwd()}/input.json")
+    copy_json_input(json_path=f"{os.getcwd()}/input.json")
+    copy_user_script(json_path=f"{os.getcwd()}/input.json")
+    _, _, slurm_job_id = launch_job(json_path=f"{os.getcwd()}/input.json")
+
+    stdout, stderr = upload_results(json_path=f"{os.getcwd()}/input.json", slurm_job_id=slurm_job_id)
+
+    assert stdout[:19] == "Submitted batch job"
+    assert stderr == ""
+
+    while True:
+        # checking that RESULTS_UPLOADED file has been made
+        if (
+            os.system(
+                f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DTAAS-TUI-TEST/RESULTS_UPLOADED'"
             )
             == 0
         ):

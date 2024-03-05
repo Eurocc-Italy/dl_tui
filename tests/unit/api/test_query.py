@@ -44,6 +44,7 @@ def test_query(mocked_response):
         ip="test.com",
         token="not-necessary",
         query_file="test-query.txt",
+        config_json={},
     )
 
     assert response.status_code == 200
@@ -66,6 +67,7 @@ def test_query_and_process(mocked_response):
         token="not-necessary",
         query_file="test-query.txt",
         python_file="test-query.py",
+        config_json={},
     )
 
     assert response.status_code == 200
@@ -105,6 +107,7 @@ def test_query_without_file(mocked_response):
             ip="test.com",
             token="not-necessary",
             python_file="test-query.py",
+            config_json={},
         )
 
 
@@ -119,6 +122,7 @@ def test_query_nonexistent(mocked_response):
             token="not-necessary",
             query_file="test-query.txt",
             python_file="test-nonexistent.py",
+            config_json={},
         )
 
 
@@ -133,4 +137,5 @@ def test_wrong_ip(mocked_response):
             token="not-necessary",
             query_file="test-query.txt",
             python_file="test-query.py",
+            config_json={},
         )

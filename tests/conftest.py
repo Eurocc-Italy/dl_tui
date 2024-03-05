@@ -1,15 +1,57 @@
 import pytest
 
 import os
-from dtaas.tuilib.common import Config
 import shutil
+import json
 from glob import glob
+
+from dtaas.tuilib.common import Config
+from dtaas.tuilib.api import upload, delete
+
 import mongomock
 from pymongo import MongoClient
 
 from os.path import dirname, abspath
 
 ROOT_DIR = dirname(dirname(abspath(__file__)))  # points to the dtaas-tui directory
+
+
+@pytest.fixture(scope="session")
+def setup_testfiles_HPC():
+
+    # creating test files
+    with open("test1.txt", "w") as f:
+        f.write("test1")
+    with open("test2.txt", "w") as f:
+        f.write("test1")
+
+    # creating metadata for test files
+    with open("test1.json", "w") as f:
+        json.dump({"id": 1}, f)
+    with open("test2.json", "w") as f:
+        json.dump({"id": 2}, f)
+
+    # loading IP and token for API
+    ip = Config("client").ip
+    with open(f"{os.environ['HOME']}/.config/dtaas-tui/api-token", "r") as f:
+        token = f.read()
+
+    # uploading test files to datalake via API
+    upload(ip=ip, token=token, file="test1.txt", json_data="test1.json")
+    upload(ip=ip, token=token, file="test2.txt", json_data="test2.json")
+
+    # run tests
+    yield
+
+    # delete files from datalake via API
+    delete(ip=ip, token=token, file="test1.txt")
+    delete(ip=ip, token=token, file="test2.txt")
+
+    # delete local test files
+    os.remove("test1.txt")
+    os.remove("test2.txt")
+    os.remove("test1.json")
+    os.remove("test2.json")
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -33,8 +75,15 @@ def cleanup(config_server):
     if os.path.exists("server.log"):
         os.remove("server.log")
 
-    # removing temporary folders on HPC
-    os.system(f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'rm -rf ~/DTAAS-TUI-TEST-*'")
+    # removing temporary folder on HPC
+    os.system(f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'rm -rf ~/DTAAS-TUI-TEST'")
+
+    # remove result files from datalake
+    ip = Config("client").ip
+    with open(f"{os.environ['HOME']}/.config/dtaas-tui/api-token", "r") as f:
+        token = f.read()
+
+    delete(ip=ip, token=token, file="DTAAS-TUI-TEST")
 
 
 @pytest.fixture(scope="function")
@@ -111,9 +160,9 @@ def config_server():
             "host": "login02-ext.g100.cineca.it",
             "venv_path": "~/virtualenvs/dtaas",
             "ssh_key": "~/.ssh/luca-g100",
-            "compute_partition": "g100_usr_prod",
+            "compute_partition": "g100_usr_dbg",
             "upload_partition": "g100_all_serial",
-            "qos": "g100_qos_dbg",
+            "qos": "normal",
             "account": "cin_staff",
             "mail": "NO",
             "walltime": "00:01:00",

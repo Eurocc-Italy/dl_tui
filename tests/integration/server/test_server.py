@@ -9,9 +9,10 @@ import subprocess
 import json
 
 from conftest import ROOT_DIR
+from dtaas.tuilib.common import Config
 
 
-def test_just_search(config_server):
+def test_just_search(config_server: Config, setup_testfiles_HPC):
     """
     Search for two specific files
     """
@@ -20,7 +21,7 @@ def test_just_search(config_server):
     with open("input.json", "w") as f:
         json.dump(
             {
-                "id": "DTAAS-TUI-TEST-just_search",
+                "id": "DTAAS-TUI-TEST",
                 "sql_query": "SELECT * FROM metadata WHERE id = 1 OR id = 2",
                 "config_server": {"walltime": "00:10:00", "ntasks_per_node": 1},
             },
@@ -31,16 +32,13 @@ def test_just_search(config_server):
 
     while True:
         # checking that JOB_DONE file has been made
-        if (
-            os.system(f"ssh -i {config.ssh_key} {config.user}@{config.host} 'ls ~/DTAAS-TUI-TEST-just_search/JOB_DONE'")
-            == 0
-        ):
+        if os.system(f"ssh -i {config.ssh_key} {config.user}@{config.host} 'ls ~/DTAAS-TUI-TEST/JOB_DONE'") == 0:
             break
 
     # checking that results file is present
     assert (
         os.system(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DTAAS-TUI-TEST-just_search/results_DTAAS-TUI-TEST-just_search.zip'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DTAAS-TUI-TEST/results_DTAAS-TUI-TEST.zip'"
         )
         == 0
     ), "Results file not found."
@@ -48,7 +46,7 @@ def test_just_search(config_server):
     # checking that the upload script is present
     assert (
         os.system(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DTAAS-TUI-TEST-just_search/upload_results_DTAAS-TUI-TEST-just_search.py'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DTAAS-TUI-TEST/upload_results_DTAAS-TUI-TEST.py'"
         )
         == 0
     ), "Upload script not found."
@@ -57,13 +55,13 @@ def test_just_search(config_server):
     assert (
         "test1.txt"
         in os.popen(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'unzip -l ~/DTAAS-TUI-TEST-just_search/results_DTAAS-TUI-TEST-just_search.zip'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'unzip -l ~/DTAAS-TUI-TEST/results_DTAAS-TUI-TEST.zip'"
         )
         .read()
         .split()
         and "test2.txt"
         in os.popen(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'unzip -l ~/DTAAS-TUI-TEST-just_search/results_DTAAS-TUI-TEST-just_search.zip'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'unzip -l ~/DTAAS-TUI-TEST/results_DTAAS-TUI-TEST.zip'"
         )
         .read()
         .split()
@@ -72,13 +70,13 @@ def test_just_search(config_server):
     # checking that slurm output is empty
     assert (
         os.popen(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'cat ~/DTAAS-TUI-TEST-just_search/slurm*'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'cat ~/DTAAS-TUI-TEST/slurm*'"
         ).read()
         == ""
     ), "Slurm output file is not empty."
 
 
-def test_return_first(config_server):
+def test_return_first(config_server: Config, setup_testfiles_HPC):
     """
     Search for two specific files and only return the first item
     """
@@ -87,7 +85,7 @@ def test_return_first(config_server):
     with open("input.json", "w") as f:
         json.dump(
             {
-                "id": "DTAAS-TUI-TEST-return_first",
+                "id": "DTAAS-TUI-TEST",
                 "sql_query": "SELECT * FROM metadata WHERE id = 1 OR id = 2",
                 "script": "user_script.py",
                 "config_server": {"walltime": "00:10:00", "ntasks_per_node": 1},
@@ -101,18 +99,13 @@ def test_return_first(config_server):
 
     while True:
         # checking that JOB_DONE file has been made
-        if (
-            os.system(
-                f"ssh -i {config.ssh_key} {config.user}@{config.host} 'ls ~/DTAAS-TUI-TEST-return_first/JOB_DONE'"
-            )
-            == 0
-        ):
+        if os.system(f"ssh -i {config.ssh_key} {config.user}@{config.host} 'ls ~/DTAAS-TUI-TEST/JOB_DONE'") == 0:
             break
 
     # checking that results file is present
     assert (
         os.system(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DTAAS-TUI-TEST-return_first/results_DTAAS-TUI-TEST-return_first.zip'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DTAAS-TUI-TEST/results_DTAAS-TUI-TEST.zip'"
         )
         == 0
     ), "Results file not found."
@@ -120,7 +113,7 @@ def test_return_first(config_server):
     # checking that the upload script is present
     assert (
         os.system(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DTAAS-TUI-TEST-return_first/upload_results_DTAAS-TUI-TEST-return_first.py'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DTAAS-TUI-TEST/upload_results_DTAAS-TUI-TEST.py'"
         )
         == 0
     ), "Upload script not found."
@@ -129,7 +122,7 @@ def test_return_first(config_server):
     assert (
         "test1.txt"
         in os.popen(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'unzip -l ~/DTAAS-TUI-TEST-return_first/results_DTAAS-TUI-TEST-return_first.zip'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'unzip -l ~/DTAAS-TUI-TEST/results_DTAAS-TUI-TEST.zip'"
         )
         .read()
         .split()
@@ -138,13 +131,13 @@ def test_return_first(config_server):
     # checking that slurm output is empty
     assert (
         os.popen(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'cat ~/DTAAS-TUI-TEST-return_first/slurm*'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'cat ~/DTAAS-TUI-TEST/slurm*'"
         ).read()
         == ""
     ), "Slurm output file is not empty."
 
 
-def test_invalid_script():
+def test_invalid_script(setup_testfiles_HPC):
     """
     Try breaking the job
     """
