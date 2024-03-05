@@ -179,7 +179,10 @@ def main():
                 for key in custom_config:
                     config_json[key].update(custom_config[key])
         except KeyError:
-            pass
+            logger.info("No custom configuration provided. Keeping defaults.")
+
+        logger.debug(f"config_client: {config_json['config_client']}")
+        logger.debug(f"config_server: {config_json['config_server']}")
 
         try:
             response = query(
