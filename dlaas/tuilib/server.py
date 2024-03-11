@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 from os.path import basename
 import subprocess
 from typing import Tuple
-from dtaas.tuilib.common import Config, UserInput
+from dlaas.tuilib.common import Config, UserInput
 
 
 def create_remote_directory(json_path: str) -> Tuple[str, str]:
@@ -193,7 +193,7 @@ def launch_job(json_path: str):
 
     # Creating wrap command to be passed to sbatch
     wrap_cmd = f"source {config.venv_path}/bin/activate; "
-    wrap_cmd += f"dtaas_tui_client {basename(json_path)}; "
+    wrap_cmd += f"dl_tui_hpc {basename(json_path)}; "
     wrap_cmd += "touch JOB_DONE"
 
     # Generating SSH command
@@ -232,7 +232,7 @@ def launch_job(json_path: str):
 
 
 def upload_results(json_path: str, slurm_job_id: int):
-    """Upload results of completed job to S3 via the Python script created by the client version.
+    """Upload results of completed job to S3 via the Python script created by the HPC version.
 
     Parameters
     ----------

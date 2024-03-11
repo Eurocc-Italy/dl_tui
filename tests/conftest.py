@@ -5,8 +5,8 @@ import shutil
 import json
 from glob import glob
 
-from dtaas.tuilib.common import Config
-from dtaas.tuilib.api import upload, delete
+from dlaas.tuilib.common import Config
+from dlaas.tuilib.api import upload, delete
 
 import mongomock
 from pymongo import MongoClient
@@ -32,7 +32,7 @@ def setup_testfiles_HPC():
         json.dump({"id": 2}, f)
 
     # loading IP and token for API
-    ip = Config("client").ip
+    ip = Config("hpc").ip
     with open(f"{os.environ['HOME']}/.config/dtaas-tui/api-token", "r") as f:
         token = f.read()
 
@@ -70,20 +70,20 @@ def cleanup(config_server):
         os.remove("user_script.py")
     if os.path.exists("input.json"):
         os.remove("input.json")
-    if os.path.exists("client.log"):
-        os.remove("client.log")
+    if os.path.exists("hpc.log"):
+        os.remove("hpc.log")
     if os.path.exists("server.log"):
         os.remove("server.log")
 
     # removing temporary folder on HPC
-    os.system(f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'rm -rf ~/DTAAS-TUI-TEST'")
+    os.system(f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'rm -rf ~/DLAAS-TUI-TEST'")
 
     # remove result files from datalake
-    ip = Config("client").ip
+    ip = Config("hpc").ip
     with open(f"{os.environ['HOME']}/.config/dtaas-tui/api-token", "r") as f:
         token = f.read()
 
-    delete(ip=ip, token=token, file="DTAAS-TUI-TEST")
+    delete(ip=ip, token=token, file="DLAAS-TUI-TEST")
 
 
 @pytest.fixture(scope="function")
@@ -127,8 +127,8 @@ def test_mongodb():
     Collection
         MongoDB Collection on which to run the tests
     """
-    client = MongoClient("mongodb://user:passwd@localhost:27017/")
-    collection = client["test_db"]["test_coll"]
+    mongo = MongoClient("mongodb://user:passwd@localhost:27017/")
+    collection = mongo["test_db"]["test_coll"]
 
     collection.insert_many(
         [
@@ -174,9 +174,9 @@ def config_server():
 
 
 @pytest.fixture(scope="module")
-def config_client():
-    config_client = Config("client")
-    config_client.load_custom_config(
+def config_hpc():
+    config_hpc = Config("hpc")
+    config_hpc.load_custom_config(
         {
             "user": "user",
             "password": "passwd",
@@ -189,4 +189,4 @@ def config_client():
             "pfs_prefix_path": "/g100_s3/DRES_s3poc",
         }
     )
-    return config_client
+    return config_hpc

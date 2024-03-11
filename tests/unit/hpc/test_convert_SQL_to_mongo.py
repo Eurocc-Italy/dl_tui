@@ -1,10 +1,10 @@
 import pytest
 
 #
-# Testing convert_SQL_to_mongo function in client.py library
+# Testing convert_SQL_to_mongo function in hpc.py library
 #
 
-from dtaas.tuilib.client import convert_SQL_to_mongo
+from dlaas.tuilib.hpc import convert_SQL_to_mongo
 
 
 def test_get_everything():

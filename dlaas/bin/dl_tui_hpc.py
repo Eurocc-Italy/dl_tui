@@ -14,7 +14,7 @@ The wrapper then does the following:
   2. Runs query on remote DB and retrieves the matching entries, generating a list with the paths to the files
   3. Takes the user-provided python script and runs it locally, feeding the input files list to the `main` function
   4. Retrieves the output files from the `main` function and saves the files (of any kind, user-defined) in a zipped 
-  archive which is then uploaded to the S3 bucket specified in the client config file.
+  archive which is then uploaded to the S3 bucket specified in the hpc config file.
 
 Author: @lbabetto
 """
@@ -24,7 +24,7 @@ import logging
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
-fh = logging.FileHandler("client.log", mode="w")
+fh = logging.FileHandler("hpc.log", mode="w")
 fh.setLevel(logging.DEBUG)
 formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 fh.setFormatter(formatter)
@@ -33,28 +33,28 @@ logger.addHandler(fh)
 from pymongo import MongoClient
 
 import sys
-from dtaas.tuilib.common import Config, UserInput
-from dtaas.tuilib.client import wrapper
+from dlaas.tuilib.common import Config, UserInput
+from dlaas.tuilib.hpc import wrapper
 
 
 def main():
-    """Client-side (HPC) version of the DTaaS TUI"""
+    """Executable intended to run on HPC"""
     json_path = sys.argv[1]
 
     # reading user input
     user_input = UserInput.from_json(json_path=json_path)
 
     # loading config and overwriting custom options
-    config = Config(version="client")
-    if user_input.config_client:
-        config.load_custom_config(user_input.config_client)
+    config = Config(version="hpc")
+    if user_input.config_hpc:
+        config.load_custom_config(user_input.config_hpc)
     logger.debug(config)
 
     # setting up MongoDB URI
     mongodb_uri = f"mongodb://{config.user}:{config.password}@{config.ip}:{config.port}/"
 
-    # connecting to client
-    logger.info(f"Connecting to client: {mongodb_uri}")
+    # connecting to MongoDB server
+    logger.info(f"Connecting to MongoDB client: {mongodb_uri}")
     client = MongoClient(mongodb_uri)
 
     # accessing collection

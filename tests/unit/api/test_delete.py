@@ -8,7 +8,7 @@ import requests
 import responses
 from responses import matchers
 
-from dtaas.tuilib.api import delete
+from dlaas.tuilib.api import delete
 
 
 @pytest.fixture(scope="function", autouse=True)

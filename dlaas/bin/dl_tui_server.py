@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 """
-Module to interface with HPC (G100) from the VM. The purpose of this module is to take the user query and script,
-send a HPC job on G100 which calls the client program on the compute nodes and runs the script on the query results.
+Module to interface with HPC from the VM running the metadata database. The purpose of this module is to take the 
+user query and script, send a HPC job which calls the HPC executable on the compute nodes and runs the script 
+on the query results.
 
 Author: @lbabetto
 """
@@ -18,11 +19,11 @@ fh.setFormatter(formatter)
 logger.addHandler(fh)
 
 import sys
-from dtaas.tuilib.server import create_remote_directory, copy_json_input, copy_user_script, launch_job, upload_results
+from dlaas.tuilib.server import create_remote_directory, copy_json_input, copy_user_script, launch_job, upload_results
 
 
 def main():
-    """Server-side (VM) version of the DTaaS TUI"""
+    """Executable intended to run on the server VM"""
     json_path = sys.argv[1]
 
     create_remote_directory(json_path=json_path)

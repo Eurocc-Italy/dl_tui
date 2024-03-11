@@ -9,7 +9,7 @@ import subprocess
 import json
 
 from conftest import ROOT_DIR
-from dtaas.tuilib.common import Config
+from dlaas.tuilib.common import Config
 
 
 def test_just_search(config_server: Config, setup_testfiles_HPC):
@@ -21,7 +21,7 @@ def test_just_search(config_server: Config, setup_testfiles_HPC):
     with open("input.json", "w") as f:
         json.dump(
             {
-                "id": "DTAAS-TUI-TEST",
+                "id": "DLAAS-TUI-TEST",
                 "sql_query": "SELECT * FROM metadata WHERE id = 1 OR id = 2",
                 "config_server": {"walltime": "00:10:00", "ntasks_per_node": 1},
             },
@@ -32,13 +32,13 @@ def test_just_search(config_server: Config, setup_testfiles_HPC):
 
     while True:
         # checking that JOB_DONE file has been made
-        if os.system(f"ssh -i {config.ssh_key} {config.user}@{config.host} 'ls ~/DTAAS-TUI-TEST/JOB_DONE'") == 0:
+        if os.system(f"ssh -i {config.ssh_key} {config.user}@{config.host} 'ls ~/DLAAS-TUI-TEST/JOB_DONE'") == 0:
             break
 
     # checking that results file is present
     assert (
         os.system(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DTAAS-TUI-TEST/results_DTAAS-TUI-TEST.zip'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DLAAS-TUI-TEST/results_DLAAS-TUI-TEST.zip'"
         )
         == 0
     ), "Results file not found."
@@ -46,7 +46,7 @@ def test_just_search(config_server: Config, setup_testfiles_HPC):
     # checking that the upload script is present
     assert (
         os.system(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DTAAS-TUI-TEST/upload_results_DTAAS-TUI-TEST.py'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DLAAS-TUI-TEST/upload_results_DLAAS-TUI-TEST.py'"
         )
         == 0
     ), "Upload script not found."
@@ -55,13 +55,13 @@ def test_just_search(config_server: Config, setup_testfiles_HPC):
     assert (
         "test1.txt"
         in os.popen(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'unzip -l ~/DTAAS-TUI-TEST/results_DTAAS-TUI-TEST.zip'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'unzip -l ~/DLAAS-TUI-TEST/results_DLAAS-TUI-TEST.zip'"
         )
         .read()
         .split()
         and "test2.txt"
         in os.popen(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'unzip -l ~/DTAAS-TUI-TEST/results_DTAAS-TUI-TEST.zip'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'unzip -l ~/DLAAS-TUI-TEST/results_DLAAS-TUI-TEST.zip'"
         )
         .read()
         .split()
@@ -70,7 +70,7 @@ def test_just_search(config_server: Config, setup_testfiles_HPC):
     # checking that slurm output is empty
     assert (
         os.popen(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'cat ~/DTAAS-TUI-TEST/slurm*'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'cat ~/DLAAS-TUI-TEST/slurm*'"
         ).read()
         == ""
     ), "Slurm output file is not empty."
@@ -85,7 +85,7 @@ def test_return_first(config_server: Config, setup_testfiles_HPC):
     with open("input.json", "w") as f:
         json.dump(
             {
-                "id": "DTAAS-TUI-TEST",
+                "id": "DLAAS-TUI-TEST",
                 "sql_query": "SELECT * FROM metadata WHERE id = 1 OR id = 2",
                 "script": "user_script.py",
                 "config_server": {"walltime": "00:10:00", "ntasks_per_node": 1},
@@ -99,13 +99,13 @@ def test_return_first(config_server: Config, setup_testfiles_HPC):
 
     while True:
         # checking that JOB_DONE file has been made
-        if os.system(f"ssh -i {config.ssh_key} {config.user}@{config.host} 'ls ~/DTAAS-TUI-TEST/JOB_DONE'") == 0:
+        if os.system(f"ssh -i {config.ssh_key} {config.user}@{config.host} 'ls ~/DLAAS-TUI-TEST/JOB_DONE'") == 0:
             break
 
     # checking that results file is present
     assert (
         os.system(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DTAAS-TUI-TEST/results_DTAAS-TUI-TEST.zip'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DLAAS-TUI-TEST/results_DLAAS-TUI-TEST.zip'"
         )
         == 0
     ), "Results file not found."
@@ -113,7 +113,7 @@ def test_return_first(config_server: Config, setup_testfiles_HPC):
     # checking that the upload script is present
     assert (
         os.system(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DTAAS-TUI-TEST/upload_results_DTAAS-TUI-TEST.py'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DLAAS-TUI-TEST/upload_results_DLAAS-TUI-TEST.py'"
         )
         == 0
     ), "Upload script not found."
@@ -122,7 +122,7 @@ def test_return_first(config_server: Config, setup_testfiles_HPC):
     assert (
         "test1.txt"
         in os.popen(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'unzip -l ~/DTAAS-TUI-TEST/results_DTAAS-TUI-TEST.zip'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'unzip -l ~/DLAAS-TUI-TEST/results_DLAAS-TUI-TEST.zip'"
         )
         .read()
         .split()
@@ -131,7 +131,7 @@ def test_return_first(config_server: Config, setup_testfiles_HPC):
     # checking that slurm output is empty
     assert (
         os.popen(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'cat ~/DTAAS-TUI-TEST/slurm*'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'cat ~/DLAAS-TUI-TEST/slurm*'"
         ).read()
         == ""
     ), "Slurm output file is not empty."
@@ -145,7 +145,7 @@ def test_invalid_script(setup_testfiles_HPC):
     with open("input.json", "w") as f:
         json.dump(
             {
-                "id": "DTAAS-TUI-TEST-invalid_job",
+                "id": "DLAAS-TUI-TEST-invalid_job",
                 "query": 'SELECT * FROM metadata WHERE id = "554625" OR id = 222564',
                 "config_server": {"walltime": "00:10:00", "ntasks_per_node": 1},
             },

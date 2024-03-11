@@ -1,10 +1,10 @@
 import pytest
 
 #
-# Testing retrieve_files function in client.py library
+# Testing retrieve_files function in hpc.py library
 #
 
-from dtaas.tuilib.client import retrieve_files
+from dlaas.tuilib.hpc import retrieve_files
 from conftest import ROOT_DIR
 
 

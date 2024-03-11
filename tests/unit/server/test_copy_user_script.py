@@ -6,8 +6,8 @@ import pytest
 
 import os
 import json
-from dtaas.tuilib.common import Config
-from dtaas.tuilib.server import create_remote_directory, copy_user_script
+from dlaas.tuilib.common import Config
+from dlaas.tuilib.server import create_remote_directory, copy_user_script
 
 
 def test_copy_user_script(config_server: Config):
@@ -19,7 +19,7 @@ def test_copy_user_script(config_server: Config):
     with open("input.json", "w") as f:
         json.dump(
             {
-                "id": "DTAAS-TUI-TEST",
+                "id": "DLAAS-TUI-TEST",
                 "sql_query": "SELECT * FROM metadata",
                 "script_path": "user_script.py",
             },
@@ -35,11 +35,11 @@ def test_copy_user_script(config_server: Config):
     assert stderr == ""
 
     assert (
-        os.system(f"ssh -i {config.ssh_key} {config.user}@{config.host} 'ls ~/DTAAS-TUI-TEST/user_script.py'") == 0
+        os.system(f"ssh -i {config.ssh_key} {config.user}@{config.host} 'ls ~/DLAAS-TUI-TEST/user_script.py'") == 0
     ), "File was not copied"
 
     assert (
-        os.popen(f"ssh -i {config.ssh_key} {config.user}@{config.host} 'cat ~/DTAAS-TUI-TEST/user_script.py'").read()
+        os.popen(f"ssh -i {config.ssh_key} {config.user}@{config.host} 'cat ~/DLAAS-TUI-TEST/user_script.py'").read()
         == "def main(files_in):\n files_out=files_in.copy()\n return [files_out[0]]"
     )
 
@@ -53,7 +53,7 @@ def test_copy_user_script_full_path(config_server: Config):
     with open(f"{os.getcwd()}/input.json", "w") as f:
         json.dump(
             {
-                "id": "DTAAS-TUI-TEST",
+                "id": "DLAAS-TUI-TEST",
                 "sql_query": "SELECT * FROM metadata",
                 "script_path": "user_script.py",
             },
@@ -69,11 +69,11 @@ def test_copy_user_script_full_path(config_server: Config):
     assert stderr == ""
 
     assert (
-        os.system(f"ssh -i {config.ssh_key} {config.user}@{config.host} 'ls ~/DTAAS-TUI-TEST/user_script.py'") == 0
+        os.system(f"ssh -i {config.ssh_key} {config.user}@{config.host} 'ls ~/DLAAS-TUI-TEST/user_script.py'") == 0
     ), "File was not copied"
 
     assert (
-        os.popen(f"ssh -i {config.ssh_key} {config.user}@{config.host} 'cat ~/DTAAS-TUI-TEST/user_script.py'").read()
+        os.popen(f"ssh -i {config.ssh_key} {config.user}@{config.host} 'cat ~/DLAAS-TUI-TEST/user_script.py'").read()
         == "def main(files_in):\n files_out=files_in.copy()\n return [files_out[0]]"
     )
 
@@ -87,7 +87,7 @@ def test_no_script(config_server: Config):
     with open("input.json", "w") as f:
         json.dump(
             {
-                "id": "DTAAS-TUI-TEST",
+                "id": "DLAAS-TUI-TEST",
                 "sql_query": "SELECT * FROM metadata",
             },
             f,
@@ -100,5 +100,5 @@ def test_no_script(config_server: Config):
     assert stderr == ""
 
     assert (
-        os.system(f"ssh -i {config.ssh_key} {config.user}@{config.host} 'ls ~/DTAAS-TUI-TEST/user_script.py'") == 512
+        os.system(f"ssh -i {config.ssh_key} {config.user}@{config.host} 'ls ~/DLAAS-TUI-TEST/user_script.py'") == 512
     ), "Something was not copied"

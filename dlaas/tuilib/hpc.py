@@ -1,5 +1,5 @@
 """
-Functions for client-side (HPC) operations
+Functions for HPC operations
 
 Author: @lbabetto
 """

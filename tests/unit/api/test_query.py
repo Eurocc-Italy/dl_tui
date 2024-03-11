@@ -9,7 +9,7 @@ import os
 import requests
 import responses
 
-from dtaas.tuilib.api import query
+from dlaas.tuilib.api import query
 
 
 @pytest.fixture(scope="function", autouse=True)

@@ -23,7 +23,7 @@ def upload(
     file: str,
     json_data: str,
 ) -> Response:
-    """Upload file to Data Lake using the DTaaS API.
+    """Upload file to Data Lake using the DLaaS API.
 
     Parameters
     ----------
@@ -65,7 +65,7 @@ def replace(
     file: str,
     json_data: str,
 ) -> Response:
-    """Replace file in Data Lake using the DTaaS API.
+    """Replace file in Data Lake using the DLaaS API.
 
     Parameters
     ----------
@@ -107,7 +107,7 @@ def update(
     file: str,
     json_data: str,
 ) -> Response:
-    """Update file metadata in Data Lake using the DTaaS API.
+    """Update file metadata in Data Lake using the DLaaS API.
 
     Parameters
     ----------
@@ -151,7 +151,7 @@ def download(
     token: str,
     file: str,
 ) -> Response:
-    """Download file from Data Lake using the DTaaS API.
+    """Download file from Data Lake using the DLaaS API.
 
     Parameters
     ----------
@@ -190,7 +190,7 @@ def delete(
     token: str,
     file: str,
 ) -> Response:
-    """Delete file in Data Lake using the DTaaS API.
+    """Delete file in Data Lake using the DLaaS API.
 
     Parameters
     ----------
@@ -226,7 +226,7 @@ def query(
     config_json: Dict[str, Dict[str, str]],
     python_file: str = None,
 ) -> Response:
-    """Upload file to Data Lake using the DTaaS API.
+    """Upload file to Data Lake using the DLaaS API.
 
     Parameters
     ----------
@@ -237,7 +237,7 @@ def query(
     query_file : str
         Path of the file containing the SQL query to be launched
     config_json: Dict[str, Dict[str, str]]
-        Dictionary containing the config_client and config_server configuration dictionaries
+        Dictionary containing the config_hpc and config_server configuration dictionaries
     python_file : str, optional
         Path of the Python analysis script to be ran on the query results
 

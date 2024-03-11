@@ -10,7 +10,7 @@ import requests
 import responses
 from responses import matchers
 
-from dtaas.tuilib.api import download
+from dlaas.tuilib.api import download
 
 
 @pytest.fixture(scope="function", autouse=True)

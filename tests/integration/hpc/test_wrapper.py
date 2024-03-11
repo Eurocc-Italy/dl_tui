@@ -4,7 +4,7 @@ import pytest
 # Testing wrapper function in wrapper.py
 #
 
-from dtaas.tuilib.client import wrapper
+from dlaas.tuilib.hpc import wrapper
 import os
 import shutil
 from zipfile import ZipFile

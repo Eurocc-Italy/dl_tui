@@ -25,8 +25,8 @@ class UserInput:
         SQL query
     script_path : str
         Path to the Python script with the analysis on the files returned by the SQL query
-    config_client : dict
-        dictionary with custom configuration options for client version
+    config_hpc : dict
+        dictionary with custom configuration options for hpc version
     config_server : dict
         dictionary with custom configuration options for server version
     """
@@ -48,11 +48,11 @@ class UserInput:
             self.script_path = None
 
         try:
-            self.config_client = json.loads(data["config_client"].replace("'", '"'))
+            self.config_hpc = json.loads(data["config_hpc"].replace("'", '"'))
         except KeyError:  # no custom config provided
-            self.config_client = None
+            self.config_hpc = None
         except AttributeError:  # config was initialized manually
-            self.config_client = data["config_client"]
+            self.config_hpc = data["config_hpc"]
 
         try:
             self.config_server = json.loads(data["config_server"].replace("'", '"'))
@@ -64,7 +64,7 @@ class UserInput:
         logger.debug(f"UserInput.id: {self.id}")
         logger.debug(f"UserInput.sql_query: {self.sql_query}")
         logger.debug(f"UserInput.script_path: {self.script_path}")
-        logger.debug(f"UserInput.config_client: {self.config_client}")
+        logger.debug(f"UserInput.config_hpc: {self.config_hpc}")
         logger.debug(f"UserInput.config_server: {self.config_server}")
 
     @classmethod
@@ -114,8 +114,8 @@ class UserInput:
 
 
 class Config:
-    """Class containing configuration info for client/server.
-    At initialization, it reads and loads the default etc/default/config_{client/server}.json file.
+    """Class containing configuration info for hpc/server.
+    At initialization, it reads and loads the default etc/default/config_{hpc/server}.json file.
     Settings can be overwritten by passing a dictionary to the load_custom_config method
     """
 
@@ -125,15 +125,15 @@ class Config:
         Parameters
         ----------
         version : str
-            specifies whether the config is relative to the client or server version
+            specifies whether the config is relative to the hpc or server version
 
         Raises
         ------
         NameError
-            If version is not 'client' or 'server' raises an error
+            If version is not 'hpc' or 'server' raises an error
         """
-        if version not in ["client", "server"]:
-            raise NameError("config file only available for 'client' or 'server'")
+        if version not in ["hpc", "server"]:
+            raise NameError("config file only available for 'hpc' or 'server'")
 
         self.version = version
 
@@ -146,12 +146,12 @@ class Config:
 
     def load_default_config(self, version: str) -> Dict[str, str]:
         """Load default configuration as found in /etc/default.
-        If present, overwrites these defaults with the contents of ~/.config/dtaas-tui/config_<version>.json.
+        If present, overwrites these defaults with the contents of ~/.config/dlaas/config_<version>.json.
 
         Parameters
         ----------
         version : str
-            specify whether the configuration is for client/server version
+            specify whether the configuration is for hpc/server version
 
         Returns
         -------
@@ -161,8 +161,8 @@ class Config:
         with open(f"{os.path.dirname(__file__)}/../etc/default/config_{version}.json", "r") as f:
             base_config: Dict[str, str] = json.load(f)
 
-        if os.path.exists(f"{os.environ['HOME']}/.config/dtaas-tui/config_{version}.json"):
-            with open(f"{os.environ['HOME']}/.config/dtaas-tui/config_{version}.json", "r") as f:
+        if os.path.exists(f"{os.environ['HOME']}/.config/dlaas/config_{version}.json"):
+            with open(f"{os.environ['HOME']}/.config/dlaas/config_{version}.json", "r") as f:
                 config: Dict[str, str] = json.load(f)
 
             for key in config:

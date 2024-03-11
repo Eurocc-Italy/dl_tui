@@ -1,21 +1,21 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="dtaas-tui",
-    version="0.3.5",
-    description="Query/Process interface for DTaaS",
-    packages=find_packages(include=["dtaas", "dtaas.*"]),
+    name="dlaas-tui",
+    version="0.3.6",
+    description="Text user interface for Cineca's Data Lake as a Service",
+    packages=find_packages(include=["dlaas", "dlaas.*"]),
     package_data={
-        "dtaas": [
+        "dlaas": [
             "etc/*",
             "etc/default/*",
         ],
     },
     entry_points={
         "console_scripts": [
-            "dtaas_api=dtaas.bin.dtaas_api:main",
-            "dtaas_tui_client=dtaas.bin.dtaas_tui_client:main",
-            "dtaas_tui_server=dtaas.bin.dtaas_tui_server:main",
+            "dl_tui=dlaas.bin.dl_tui:main",
+            "dl_tui_hpc=dlaas.bin.dl_tui_hpc:main",
+            "dl_tui_server=dlaas.bin.dl_tui_server:main",
         ],
     },
     install_requires=[

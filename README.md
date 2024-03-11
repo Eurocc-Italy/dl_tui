@@ -1,44 +1,42 @@
-# dtaas-tui
+# dlaas-tui
 
-This is the user guide for the Digital Twin as a Service Text User Interface (`dtaas-tui`) Python library. The TUI is used to query the data lake and run processing scripts on the files matching the query.
+This is the user guide for the Data Lake as a Service Text User Interface (`dlaas-tui`) Python library. The TUI is used to query the Data Lake and run processing scripts on the files matching the query.
 
 The service is composed of: 
 
-  - a Cloud-based infrastructure with a VM running a MongoDB database instance. This database contains the metadata for all the files in the data lake / digital twin, including the path to the actual corresponding file in the HPC parallel filesystem.
+  - a Cloud-based infrastructure with a VM running a MongoDB database instance. This database contains the metadata for all the files in the Data Lake, including the path to the actual corresponding file in the HPC parallel filesystem.
   - a HPC cluster which contains the actual files, stored in dual parallel filesystem/S3 mode. The HPC part runs the processing script sent by the user on the files matching the query.
 
-The library consists of two main executables, `dtaas_tui_client` and `dtaas_tui_server`. 
+The library consists of three executables: `dl_tui`, `dl_tui_hpc` and `dl_tui_server`. 
 
-The `client` version is intended to be run on the machine with direct access to the files of the data lake and runs the actual querying and processing.
-
-The `server` version is intended to be run on a cloud machine with access to an HPC infrastructure running Slurm. Its purpose is to parse the user input (query and processing script) and launch a Slurm job on HPC which calls the client version.
-
-A third executable, `dtaas_api` is provided and is used to launch commands to the service API to interact with the Data Lake portion of the service.
+  * `dl_tui` is used to launch commands to the service API for interacting with the Data Lake.
+  * `dl_tui_hpc` is intended to be run on the machine with direct access to the files of the Data Lake (HPC) and runs the actual querying and processing.
+  * `dl_tui_server` version is intended to be run on a cloud machine with access to the HPC infrastructure running Slurm. Its purpose is to parse the user input (query and processing script) and launch a Slurm job on HPC which calls the hpc version.
 
 ## Code structure
 
-The library code is found in the `dtaas` folder, with the following structure:
+The library code is found in the `dlaas` folder, with the following structure:
 
 ```
-dtaas
+dlaas
 ├── __init__.py
 ├── bin
 │   ├── __init__.py
-│   ├── dtaas_api.py
-│   ├── dtaas_tui_client.py
-│   └── dtaas_tui_server.py
+│   ├── dl_tui.py
+│   ├── dl_tui_hpc.py
+│   └── dl_tui_server.py
 ├── etc/default
-│   ├── config_client.json
+│   ├── config_hpc.json
 │   └── config_server.json
 └── tuilib
     ├── __init__.py
     ├── api.py
-    ├── client.py
+    ├── hpc.py
     ├── common.py
     └── server.py
 ```
 
-The `bin` directory contains the main executables, `dtaas_tui_client`, `dtaas_tui_server`, and `dtaas_api`. These executables utilize the various functions from the files present in the `tuilib` folder, according to the user request.
+The `bin` directory contains the main executables, `dl_tui`, `dl_tui_hpc`, and `dl_tui_server`. These executables utilize the various functions from the files present in the `tuilib` folder, according to the user request.
 
 The `etc/default` folder contains the default settings for the executables, and can be taken as a template for building custom configurations.
 
@@ -49,8 +47,8 @@ We highly recommend installing the software in a custom Python virtual environme
 After having set up and activated your virtual environment, follow these steps to install the DTaaS TUI:
   
   ```bash
-  git clone https://gitlab.hpc.cineca.it/lbabetto/dtaas-tui  
-  pip install dtaas-tui/
+  git clone https://gitlab.hpc.cineca.it/lbabetto/dlaas-tui  
+  pip install dlaas-tui/
   ```
 
 ## Preparing the input
@@ -58,15 +56,15 @@ After having set up and activated your virtual environment, follow these steps t
 The input argument of the executable should be a properly-formatted JSON document, whose content should be the following:
 
   - `id`: unique identifier characterizing the run. We recommend using the [UUID](https://docs.python.org/3/library/uuid.html) module to generate it, producing a UUID.hex string
-  - `sql_query`: SQL query to be run on the MongoDB database containing the metadata. Since the data lake is by definition a non-relational database, and the "return" of the query is the file itself, most queries will be of the type `SELECT * FROM metadata WHERE [...]`.
+  - `sql_query`: SQL query to be run on the MongoDB database containing the metadata. Since the Data Lake is by definition a non-relational database, and the "return" of the query is the file itself, most queries will be of the type `SELECT * FROM metadata WHERE [...]`.
   - `script_path` (optional): path to a Python script to analyse the files matching the query. This script must feature a `main` function taking as input a list of file paths, which will be populated by the interface with the files matching the query, and returning a list of paths as output, which will be saved in a compressed archive and made available to the user.
-  - `config_client` (optional): a dictionary containing options for client-side configuration
+  - `config_hpc` (optional): a dictionary containing options for hpc-side configuration
   - `config_server` (optional): a dictionary containing options for server-side configuration
 
 After you prepared the JSON file (for example, called `input.json`), the program can be called as such:
 
 ```
-dtaas_tui_<client/server> input.json
+dl_tui_<hpc/server> input.json
 ```
 
 If no script is provided, the program will simply return the files matching the query.
@@ -112,13 +110,13 @@ def main(files_in):  # main function, expecting a list of file paths as input
 
 ## Configuration
 
-The library first loads the default options written the JSON files located in the library's `dtaas/etc/default` folder (which can be taken as a template to understand the kind of options which can be configured).
+The library first loads the default options written the JSON files located in the library's `dlaas/etc/default` folder (which can be taken as a template to understand the kind of options which can be configured).
 
-If you wish to overwrite these defaults and customise your configuration, it is recommended to save a personalised version of the `client_config.json` and `server_config.json` files in the `~/.config/dtaas-tui` folder. The options indicated here will take precedence over the defaults. Missing keys will be left at the default values.
+If you wish to overwrite these defaults and customise your configuration, it is recommended to save a personalised version of the `config_hpc.json` and `config_server.json` files in the `~/.config/dlaas` folder. The options indicated here will take precedence over the defaults. Missing keys will be left at the default values.
 
-If you wish to send a custom configurazion on the fly, it is also possible to pass configuration options via the `config_client` and `config_server` keys in the input JSON file, also in JSON format. These will take precedence over both defaults and what is found in `~/.config/dtaas-tui/config_<client/server>.json`.
+If you wish to send a custom configurazion on the fly, it is also possible to pass configuration options via the `config_hpc` and `config_server` keys in the input JSON file, also in JSON format. These will take precedence over both defaults and what is found in `~/.config/dlaas/config_<hpc/server>.json`.
 
-For the client version, the configurable options are:
+For the hpc version, the configurable options are relative to the server VM:
 
   * `user`: the user name in the MongoDB server
   * `password`: the password of the MongoDB server
@@ -127,10 +125,10 @@ For the client version, the configurable options are:
   * `database`: the name of the MongoDB database
   * `collection`: the name of the MongoDB collection within the database
   * `s3_endpoint_url`: URL at which the S3 bucket can be found
-  * `s3_bucket`: name of the S3 bucket storing the data lake files 
-  * `pfs_prefix_path`: path at which the data lake files are stored on the parallel filesystem
+  * `s3_bucket`: name of the S3 bucket storing the Data Lake files 
+  * `pfs_prefix_path`: path at which the Data Lake files are stored on the parallel filesystem
 
-For the server version, the configurable options are:
+For the server version, the configurable options are relative to the HPC system:
 
   * `user`: username of the HPC account
   * `host`: address of the HPC login node
@@ -145,11 +143,14 @@ For the server version, the configurable options are:
   * `nodes`: number of nodes requested for HPC job
   * `ntasks_per_node`: number of CPU cores per node requested for the HPC job
 
+> **NOTE:**
+> The `config_<hpc/server>.json` file names reflect the executables which need them, not the system to which the information within pertains. *e.g.*, the `config_server.json` mostly contains HPC-related information, but is used by the `dl_tui_server` executable which is supposed to run on the server VM, hence the name.
+
 ## API Wrapper
 
 It is also possible to interact with the API server on the VM hosting the metadata database for uploading, downloading, replacing, and updating files, as well as launching queries for processing data.
 
-The wrapper can be called via a third executable, `dtaas_api`, with one of the following actions:
+The wrapper can be called via a third executable, `dl_tui`, with one of the following actions:
 
   * `upload`
   * `replace`
@@ -158,9 +159,9 @@ The wrapper can be called via a third executable, `dtaas_api`, with one of the f
   * `delete`
   * `query`
 
-The IP address of the API server will be taken by the `client_config.json` configuration file. Alternatively, it is possible to overwrite the default via the `ip=...` option.
+The IP address of the API server will be taken by the `config_hpc.json` configuration file. Alternatively, it is possible to overwrite the default via the `ip=...` option.
 
-A valid authentication token is required. If saved in the `~/.config/dtaas-tui/api-token` file, it will automatically be read by the wrapper. Otherwise, the token can be sent directly via the `token=...` option.
+A valid authentication token is required. If saved in the `~/.config/dlaas/api-token` file, it will automatically be read by the wrapper. Otherwise, the token can be sent directly via the `token=...` option.
 
 The `upload` and `replace` actions require the following additional options:
 
@@ -178,8 +179,8 @@ The `query` action requires the following additional options:
 
 Example commands:
 
-  * Upload: `dtaas_api upload file=/path/to/file.csv json_data=/path/to/metadata.json`
-  * Replace: `dtaas_api replace file=/path/to/updated/file.csv json_data=/path/to/updated_metadata.json`
-  * Update: `dtaas_api update file=file.csv json_data=/path/to/updated_metadata.json`
-  * Download: `dtaas_api download file=file.csv`
-  * Query: `dtaas_api upload query_file=/path/to/query.txt python_file=/path/to/script.py`
+  * Upload: `dl_tui upload file=/path/to/file.csv json_data=/path/to/metadata.json`
+  * Replace: `dl_tui replace file=/path/to/updated/file.csv json_data=/path/to/updated_metadata.json`
+  * Update: `dl_tui update file=file.csv json_data=/path/to/updated_metadata.json`
+  * Download: `dl_tui download file=file.csv`
+  * Query: `dl_tui upload query_file=/path/to/query.txt python_file=/path/to/script.py`

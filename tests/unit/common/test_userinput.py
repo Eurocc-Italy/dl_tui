@@ -5,7 +5,7 @@ import pytest
 #
 
 import os, json
-from dtaas.tuilib.common import UserInput
+from dlaas.tuilib.common import UserInput
 
 
 def test_sql_only():
@@ -72,7 +72,7 @@ def test_cli_input_sql(monkeypatch):
     monkeypatch.setattr(
         "sys.argv",
         [
-            f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client.py",
+            f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dl_tui_hpc.py",
             '{"id": "42", "sql_query": "SELECT * FROM metadata WHERE ID = 123456"}',
         ],
     )
@@ -93,7 +93,7 @@ def test_cli_input_sql_double_quotes(monkeypatch):
     monkeypatch.setattr(
         "sys.argv",
         [
-            f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client.py",
+            f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dl_tui_hpc.py",
             '{"id": "42", "sql_query": "SELECT * FROM metadata WHERE category = "motorcycle""}',
         ],
     )
@@ -113,7 +113,7 @@ def test_cli_input_sql_single_quotes(monkeypatch):
     monkeypatch.setattr(
         "sys.argv",
         [
-            f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client.py",
+            f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dl_tui_hpc.py",
             """{"id": "42", "sql_query": "SELECT * FROM metadata WHERE category = 'motorcycle'"}""",
         ],
     )
@@ -136,7 +136,7 @@ def test_cli_input_script(monkeypatch):
     monkeypatch.setattr(
         "sys.argv",
         [
-            f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client.py",
+            f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dl_tui_hpc.py",
             '{"id": "42", "sql_query": "SELECT * FROM metadata WHERE ID = 123456", "script_path": "user_script.py"}',
         ],
     )
@@ -164,7 +164,7 @@ def test_cli_input_script_double_quotes(monkeypatch):
     monkeypatch.setattr(
         "sys.argv",
         [
-            f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client.py",
+            f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dl_tui_hpc.py",
             '{"id": 42, "sql_query": "SELECT * FROM metadata WHERE ID = 123456", "script_path": "user_script.py"}',
         ],
     )
@@ -189,14 +189,14 @@ def test_config():
     data = {
         "id": 42,
         "sql_query": "SELECT * FROM metadata WHERE category = 'motorcycle'",
-        "config_client": {"ip": "localhost"},
+        "config_hpc": {"ip": "localhost"},
     }
     user_input = UserInput(data)
 
     assert user_input.id == 42
     assert user_input.sql_query == "SELECT * FROM metadata WHERE category = 'motorcycle'"
     assert user_input.script_path == None
-    assert user_input.config_client == {"ip": "localhost"}
+    assert user_input.config_hpc == {"ip": "localhost"}
 
 
 def test_json_input_sql(monkeypatch):
@@ -216,7 +216,7 @@ def test_json_input_sql(monkeypatch):
     monkeypatch.setattr(
         "sys.argv",
         [
-            f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client.py",
+            f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dl_tui_hpc.py",
             "input.json",
         ],
     )
@@ -249,7 +249,7 @@ def test_json_input_sql_and_script(monkeypatch):
     monkeypatch.setattr(
         "sys.argv",
         [
-            f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client.py",
+            f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dl_tui_hpc.py",
             "input.json",
         ],
     )
@@ -286,7 +286,7 @@ def test_json_input_with_single_quotes(monkeypatch):
     monkeypatch.setattr(
         "sys.argv",
         [
-            f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client.py",
+            f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dl_tui_hpc.py",
             "input.json",
         ],
     )
@@ -326,7 +326,7 @@ def test_json_input_with_double_quotes(monkeypatch):
     monkeypatch.setattr(
         "sys.argv",
         [
-            f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client.py",
+            f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dl_tui_hpc.py",
             "input.json",
         ],
     )
@@ -366,7 +366,7 @@ def test_json_input_with_multiple_quotes(monkeypatch):
     monkeypatch.setattr(
         "sys.argv",
         [
-            f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client.py",
+            f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dl_tui_hpc.py",
             "input.json",
         ],
     )
@@ -401,7 +401,7 @@ def test_json_input_config(monkeypatch):
     monkeypatch.setattr(
         "sys.argv",
         [
-            f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dtaas_tui_client.py",
+            f"{os.path.dirname(os.path.abspath(__file__))}/../../../dtaas/bin/dl_tui_hpc.py",
             "input.json",
         ],
     )

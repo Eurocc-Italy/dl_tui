@@ -2,7 +2,7 @@ import pytest
 
 import os
 import json
-from dtaas.tuilib.common import Config
+from dlaas.tuilib.common import Config
 from zipfile import ZipFile
 
 from conftest import ROOT_DIR
@@ -37,9 +37,9 @@ NOTE: to be able to run correctly, a MongoDB database must be running, it must h
 
 
 @pytest.fixture(scope="function")
-def config_client():
-    config_client = Config("client")
-    config_client.load_custom_config(
+def config_hpc():
+    config_hpc = Config("hpc")
+    config_hpc.load_custom_config(
         {
             "user": "user",
             "password": "passwd",
@@ -52,10 +52,10 @@ def config_client():
             "pfs_prefix_path": ROOT_DIR,
         }
     )
-    return config_client
+    return config_hpc
 
 
-def test_search_only(test_mongodb, config_client):
+def test_search_only(test_mongodb, config_hpc):
     """
     Search for two specific files
     """
@@ -65,12 +65,12 @@ def test_search_only(test_mongodb, config_client):
             {
                 "id": 1,
                 "sql_query": "SELECT * FROM test_coll WHERE id = 1 OR id = 2",
-                "config_client": config_client.__dict__,
+                "config_hpc": config_hpc.__dict__,
             },
             f,
         )
 
-    os.system(f"{ROOT_DIR}/dtaas/bin/dtaas_tui_client.py input.json")
+    os.system(f"{ROOT_DIR}/dtaas/bin/dl_tui_hpc.py input.json")
 
     assert os.path.exists(f"results_1.zip"), "Zipped archive was not created."
 
@@ -95,7 +95,7 @@ def test_search_only(test_mongodb, config_client):
     assert test_mongodb.find_one({"job_id": 1})["s3_key"] == "results_1.zip"
 
 
-def test_return_first(test_mongodb, config_client):
+def test_return_first(test_mongodb, config_hpc):
     """
     Search for two specific files and only return the first item
     """
@@ -106,14 +106,14 @@ def test_return_first(test_mongodb, config_client):
                 "id": 2,
                 "sql_query": "SELECT * FROM test_coll WHERE id = 1 OR id = 2",
                 "script_path": "user_script.py",
-                "config_client": config_client.__dict__,
+                "config_hpc": config_hpc.__dict__,
             },
             f,
         )
     with open("user_script.py", "w") as f:
         f.write("def main(files_in):\n files_out=files_in.copy()\n return [files_out[0]]")
 
-    os.system(f"{ROOT_DIR}/dtaas/bin/dtaas_tui_client.py input.json")
+    os.system(f"{ROOT_DIR}/dtaas/bin/dl_tui_hpc.py input.json")
 
     assert os.path.exists(f"results_2.zip"), "Zipped archive was not created."
 
@@ -135,7 +135,7 @@ def test_return_first(test_mongodb, config_client):
     assert test_mongodb.find_one({"job_id": 2})["s3_key"] == "results_2.zip"
 
 
-def test_double_quotes_in_SQL(test_mongodb, config_client):
+def test_double_quotes_in_SQL(test_mongodb, config_hpc):
     """
     Search for a specific file using double quotes in SQL query
     """
@@ -145,12 +145,12 @@ def test_double_quotes_in_SQL(test_mongodb, config_client):
             {
                 "id": 3,
                 "sql_query": 'SELECT * FROM test_coll WHERE s3_key = "test1.txt"',
-                "config_client": config_client.__dict__,
+                "config_hpc": config_hpc.__dict__,
             },
             f,
         )
 
-    os.system(f"{ROOT_DIR}/dtaas/bin/dtaas_tui_client.py input.json")
+    os.system(f"{ROOT_DIR}/dtaas/bin/dl_tui_hpc.py input.json")
 
     assert os.path.exists(f"results_3.zip"), "Zipped archive was not created."
 
@@ -172,7 +172,7 @@ def test_double_quotes_in_SQL(test_mongodb, config_client):
     assert test_mongodb.find_one({"job_id": 3})["s3_key"] == "results_3.zip"
 
 
-def test_single_quotes_in_SQL(test_mongodb, config_client):
+def test_single_quotes_in_SQL(test_mongodb, config_hpc):
     """
     Search for a specific file using single quotes in SQL query.
     """
@@ -182,12 +182,12 @@ def test_single_quotes_in_SQL(test_mongodb, config_client):
             {
                 "id": 4,
                 "sql_query": "SELECT * FROM test_coll WHERE s3_key = 'test1.txt'",
-                "config_client": config_client.__dict__,
+                "config_hpc": config_hpc.__dict__,
             },
             f,
         )
 
-    os.system(f"{ROOT_DIR}/dtaas/bin/dtaas_tui_client.py input.json")
+    os.system(f"{ROOT_DIR}/dtaas/bin/dl_tui_hpc.py input.json")
 
     assert os.path.exists(f"results_4.zip"), "Zipped archive was not created."
 
@@ -209,7 +209,7 @@ def test_single_quotes_in_SQL(test_mongodb, config_client):
     assert test_mongodb.find_one({"job_id": 4})["s3_key"] == "results_4.zip"
 
 
-def test_double_quotes_in_script(test_mongodb, config_client):
+def test_double_quotes_in_script(test_mongodb, config_hpc):
     """
     Search for a specific file using double quotes in user script
     """
@@ -220,14 +220,14 @@ def test_double_quotes_in_script(test_mongodb, config_client):
                 "id": 5,
                 "sql_query": "SELECT * FROM test_coll WHERE id = 1 OR id = 2",
                 "script_path": "user_script.py",
-                "config_client": config_client.__dict__,
+                "config_hpc": config_hpc.__dict__,
             },
             f,
         )
     with open("user_script.py", "w") as f:
         f.write('def main(files_in):\n files_out=files_in.copy()\n print("HELLO!")\n return [files_out[0]]')
 
-    os.system(f"{ROOT_DIR}/dtaas/bin/dtaas_tui_client.py input.json")
+    os.system(f"{ROOT_DIR}/dtaas/bin/dl_tui_hpc.py input.json")
 
     assert os.path.exists(f"results_5.zip"), "Zipped archive was not created."
 
@@ -249,7 +249,7 @@ def test_double_quotes_in_script(test_mongodb, config_client):
     assert test_mongodb.find_one({"job_id": 5})["s3_key"] == "results_5.zip"
 
 
-def test_single_quotes_in_script(test_mongodb, config_client):
+def test_single_quotes_in_script(test_mongodb, config_hpc):
     """
     Search for a specific file using single quotes in user script
     """
@@ -260,14 +260,14 @@ def test_single_quotes_in_script(test_mongodb, config_client):
                 "id": 6,
                 "sql_query": "SELECT * FROM test_coll WHERE id = 1 OR id = 2",
                 "script_path": "user_script.py",
-                "config_client": config_client.__dict__,
+                "config_hpc": config_hpc.__dict__,
             },
             f,
         )
     with open("user_script.py", "w") as f:
         f.write("def main(files_in):\n files_out=files_in.copy()\n print('HELLO!')\n return [files_out[0]]")
 
-    os.system(f"{ROOT_DIR}/dtaas/bin/dtaas_tui_client.py input.json")
+    os.system(f"{ROOT_DIR}/dtaas/bin/dl_tui_hpc.py input.json")
 
     assert os.path.exists(f"results_6.zip"), "Zipped archive was not created."
 

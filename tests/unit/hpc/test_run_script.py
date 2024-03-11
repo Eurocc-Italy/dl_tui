@@ -1,10 +1,10 @@
 import pytest
 
 #
-# Testing run_script function in client.py library
+# Testing run_script function in hpc.py library
 #
 
-from dtaas.tuilib.client import run_script
+from dlaas.tuilib.hpc import run_script
 import os
 import shutil
 from sh import pushd

@@ -9,7 +9,7 @@ import os
 import requests
 import responses
 
-from dtaas.tuilib.api import upload
+from dlaas.tuilib.api import upload
 
 
 @pytest.fixture(scope="function", autouse=True)

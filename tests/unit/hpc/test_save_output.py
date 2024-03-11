@@ -1,10 +1,10 @@
 import pytest
 
 #
-# Testing save_output function in client.py library
+# Testing save_output function in hpc.py library
 #
 
-from dtaas.tuilib.client import save_output
+from dlaas.tuilib.hpc import save_output
 import os
 
 from zipfile import ZipFile

@@ -6,8 +6,8 @@ import pytest
 
 import os
 import json
-from dtaas.tuilib.common import Config
-from dtaas.tuilib.server import create_remote_directory
+from dlaas.tuilib.common import Config
+from dlaas.tuilib.server import create_remote_directory
 
 
 def test_create_remote_directory(config_server: Config):
@@ -19,7 +19,7 @@ def test_create_remote_directory(config_server: Config):
     with open("input.json", "w") as f:
         json.dump(
             {
-                "id": "DTAAS-TUI-TEST",
+                "id": "DLAAS-TUI-TEST",
                 "sql_query": "SELECT * FROM metadata",
             },
             f,
@@ -30,7 +30,7 @@ def test_create_remote_directory(config_server: Config):
     assert stderr == ""
 
     assert (
-        os.system(f"ssh -i {config.ssh_key} {config.user}@{config.host} 'ls ~/DTAAS-TUI-TEST'") == 0
+        os.system(f"ssh -i {config.ssh_key} {config.user}@{config.host} 'ls ~/DLAAS-TUI-TEST'") == 0
     ), "Folder was not created"
 
 
@@ -43,7 +43,7 @@ def test_create_remote_directory_full_path(config_server: Config):
     with open(f"{os.getcwd()}/input.json", "w") as f:
         json.dump(
             {
-                "id": "DTAAS-TUI-TEST",
+                "id": "DLAAS-TUI-TEST",
                 "sql_query": "SELECT * FROM metadata",
             },
             f,
@@ -54,7 +54,7 @@ def test_create_remote_directory_full_path(config_server: Config):
     assert stderr == ""
 
     assert (
-        os.system(f"ssh -i {config.ssh_key} {config.user}@{config.host} 'ls ~/DTAAS-TUI-TEST'") == 0
+        os.system(f"ssh -i {config.ssh_key} {config.user}@{config.host} 'ls ~/DLAAS-TUI-TEST'") == 0
     ), "Folder was not created"
 
 
@@ -66,7 +66,7 @@ def test_create_existing_directory():
     with open("input.json", "w") as f:
         json.dump(
             {
-                "id": "DTAAS-TUI-TEST",
+                "id": "DLAAS-TUI-TEST",
                 "sql_query": "SELECT * FROM metadata",
             },
             f,

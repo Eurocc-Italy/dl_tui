@@ -1,6 +1,6 @@
 import pytest
 
-from dtaas.tuilib.common import Config
+from dlaas.tuilib.common import Config
 
 #
 # Testing the launch_job function in module server.py
@@ -21,10 +21,10 @@ NOTE: for these tests to work, the following requirements must be met:
 
 import os
 import json
-from dtaas.tuilib.server import create_remote_directory, copy_json_input, copy_user_script, launch_job
+from dlaas.tuilib.server import create_remote_directory, copy_json_input, copy_user_script, launch_job
 
 
-def test_just_search(config_server: Config, config_client: Config, setup_testfiles_HPC):
+def test_just_search(config_server: Config, config_hpc: Config, setup_testfiles_HPC):
     """
     Search for two specific files
     """
@@ -32,10 +32,10 @@ def test_just_search(config_server: Config, config_client: Config, setup_testfil
     with open("input.json", "w") as f:
         json.dump(
             {
-                "id": "DTAAS-TUI-TEST",
+                "id": "DLAAS-TUI-TEST",
                 "sql_query": "SELECT * FROM metadata WHERE id = 1 OR id = 2",
                 "config_server": config_server.__dict__,
-                "config_client": config_client.__dict__,
+                "config_hpc": config_hpc.__dict__,
             },
             f,
         )
@@ -53,7 +53,7 @@ def test_just_search(config_server: Config, config_client: Config, setup_testfil
         # checking that JOB_DONE file has been made
         if (
             os.system(
-                f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DTAAS-TUI-TEST/JOB_DONE'"
+                f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DLAAS-TUI-TEST/JOB_DONE'"
             )
             == 0
         ):
@@ -62,7 +62,7 @@ def test_just_search(config_server: Config, config_client: Config, setup_testfil
     # checking that results file is present
     assert (
         os.system(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DTAAS-TUI-TEST/results_DTAAS-TUI-TEST.zip'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DLAAS-TUI-TEST/results_DLAAS-TUI-TEST.zip'"
         )
         == 0
     ), "Results file not found."
@@ -70,7 +70,7 @@ def test_just_search(config_server: Config, config_client: Config, setup_testfil
     # checking that the upload script is present
     assert (
         os.system(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DTAAS-TUI-TEST/upload_results_DTAAS-TUI-TEST.py'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DLAAS-TUI-TEST/upload_results_DLAAS-TUI-TEST.py'"
         )
         == 0
     ), "Upload script not found."
@@ -79,13 +79,13 @@ def test_just_search(config_server: Config, config_client: Config, setup_testfil
     assert (
         "test1.txt"
         in os.popen(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'unzip -l ~/DTAAS-TUI-TEST/results_DTAAS-TUI-TEST.zip'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'unzip -l ~/DLAAS-TUI-TEST/results_DLAAS-TUI-TEST.zip'"
         )
         .read()
         .split()
         and "test2.txt"
         in os.popen(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'unzip -l ~/DTAAS-TUI-TEST/results_DTAAS-TUI-TEST.zip'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'unzip -l ~/DLAAS-TUI-TEST/results_DLAAS-TUI-TEST.zip'"
         )
         .read()
         .split()
@@ -94,13 +94,13 @@ def test_just_search(config_server: Config, config_client: Config, setup_testfil
     # checking that slurm output is empty
     assert (
         os.popen(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'cat ~/DTAAS-TUI-TEST/slurm*'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'cat ~/DLAAS-TUI-TEST/slurm*'"
         ).read()
         == ""
     ), "Slurm output file is not empty."
 
 
-def test_full_path(config_server: Config, config_client: Config, setup_testfiles_HPC):
+def test_full_path(config_server: Config, config_hpc: Config, setup_testfiles_HPC):
     """
     Search for two specific files using full path for input.json
     """
@@ -108,10 +108,10 @@ def test_full_path(config_server: Config, config_client: Config, setup_testfiles
     with open(f"{os.getcwd()}/input.json", "w") as f:
         json.dump(
             {
-                "id": "DTAAS-TUI-TEST",
+                "id": "DLAAS-TUI-TEST",
                 "sql_query": "SELECT * FROM metadata WHERE id = 1 OR id = 2",
                 "config_server": config_server.__dict__,
-                "config_client": config_client.__dict__,
+                "config_hpc": config_hpc.__dict__,
             },
             f,
         )
@@ -129,7 +129,7 @@ def test_full_path(config_server: Config, config_client: Config, setup_testfiles
         # checking that JOB_DONE file has been made
         if (
             os.system(
-                f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DTAAS-TUI-TEST/JOB_DONE'"
+                f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DLAAS-TUI-TEST/JOB_DONE'"
             )
             == 0
         ):
@@ -138,7 +138,7 @@ def test_full_path(config_server: Config, config_client: Config, setup_testfiles
     # checking that results file is present
     assert (
         os.system(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DTAAS-TUI-TEST/results_DTAAS-TUI-TEST.zip'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DLAAS-TUI-TEST/results_DLAAS-TUI-TEST.zip'"
         )
         == 0
     ), "Results file not found."
@@ -146,7 +146,7 @@ def test_full_path(config_server: Config, config_client: Config, setup_testfiles
     # checking that the upload script is present
     assert (
         os.system(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DTAAS-TUI-TEST/upload_results_DTAAS-TUI-TEST.py'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DLAAS-TUI-TEST/upload_results_DLAAS-TUI-TEST.py'"
         )
         == 0
     ), "Upload script not found."
@@ -155,13 +155,13 @@ def test_full_path(config_server: Config, config_client: Config, setup_testfiles
     assert (
         "test1.txt"
         in os.popen(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'unzip -l ~/DTAAS-TUI-TEST/results_DTAAS-TUI-TEST.zip'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'unzip -l ~/DLAAS-TUI-TEST/results_DLAAS-TUI-TEST.zip'"
         )
         .read()
         .split()
         and "test2.txt"
         in os.popen(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'unzip -l ~/DTAAS-TUI-TEST/results_DTAAS-TUI-TEST.zip'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'unzip -l ~/DLAAS-TUI-TEST/results_DLAAS-TUI-TEST.zip'"
         )
         .read()
         .split()
@@ -170,13 +170,13 @@ def test_full_path(config_server: Config, config_client: Config, setup_testfiles
     # checking that slurm output is empty
     assert (
         os.popen(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'cat ~/DTAAS-TUI-TEST/slurm*'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'cat ~/DLAAS-TUI-TEST/slurm*'"
         ).read()
         == ""
     ), "Slurm output file is not empty."
 
 
-def test_return_first(config_server: Config, config_client: Config, setup_testfiles_HPC):
+def test_return_first(config_server: Config, config_hpc: Config, setup_testfiles_HPC):
     """
     Search for two specific files and only return the first item
     """
@@ -184,11 +184,11 @@ def test_return_first(config_server: Config, config_client: Config, setup_testfi
     with open("input.json", "w") as f:
         json.dump(
             {
-                "id": "DTAAS-TUI-TEST",
+                "id": "DLAAS-TUI-TEST",
                 "sql_query": "SELECT * FROM metadata WHERE id = 1 OR id = 2",
                 "script": "user_script.py",
                 "config_server": config_server.__dict__,
-                "config_client": config_client.__dict__,
+                "config_hpc": config_hpc.__dict__,
             },
             f,
         )
@@ -208,7 +208,7 @@ def test_return_first(config_server: Config, config_client: Config, setup_testfi
         # checking that JOB_DONE file has been made
         if (
             os.system(
-                f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DTAAS-TUI-TEST/JOB_DONE'"
+                f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DLAAS-TUI-TEST/JOB_DONE'"
             )
             == 0
         ):
@@ -217,7 +217,7 @@ def test_return_first(config_server: Config, config_client: Config, setup_testfi
     # checking that results file is present
     assert (
         os.system(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DTAAS-TUI-TEST/results_DTAAS-TUI-TEST.zip'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DLAAS-TUI-TEST/results_DLAAS-TUI-TEST.zip'"
         )
         == 0
     ), "Results file not found."
@@ -225,7 +225,7 @@ def test_return_first(config_server: Config, config_client: Config, setup_testfi
     # checking that the upload script is present
     assert (
         os.system(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DTAAS-TUI-TEST/upload_results_DTAAS-TUI-TEST.py'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DLAAS-TUI-TEST/upload_results_DLAAS-TUI-TEST.py'"
         )
         == 0
     ), "Upload script not found."
@@ -234,7 +234,7 @@ def test_return_first(config_server: Config, config_client: Config, setup_testfi
     assert (
         "test1.txt"
         in os.popen(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'unzip -l ~/DTAAS-TUI-TEST/results_DTAAS-TUI-TEST.zip'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'unzip -l ~/DLAAS-TUI-TEST/results_DLAAS-TUI-TEST.zip'"
         )
         .read()
         .split()
@@ -243,13 +243,13 @@ def test_return_first(config_server: Config, config_client: Config, setup_testfi
     # checking that slurm output is empty
     assert (
         os.popen(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'cat ~/DTAAS-TUI-TEST/slurm*'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'cat ~/DLAAS-TUI-TEST/slurm*'"
         ).read()
         == ""
     ), "Slurm output file is not empty."
 
 
-def test_invalid_script(config_server: Config, config_client: Config, setup_testfiles_HPC):
+def test_invalid_script(config_server: Config, config_hpc: Config, setup_testfiles_HPC):
     """
     Try breaking the job
     """
@@ -257,10 +257,10 @@ def test_invalid_script(config_server: Config, config_client: Config, setup_test
     with open("input.json", "w") as f:
         json.dump(
             {
-                "id": "DTAAS-TUI-TEST",
+                "id": "DLAAS-TUI-TEST",
                 "sql_query": "blablabla",
                 "config_server": config_server.__dict__,
-                "config_client": config_client.__dict__,
+                "config_hpc": config_hpc.__dict__,
             },
             f,
         )
@@ -277,7 +277,7 @@ def test_invalid_script(config_server: Config, config_client: Config, setup_test
         # checking that JOB_DONE file has been made
         if (
             os.system(
-                f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DTAAS-TUI-TEST/JOB_DONE'"
+                f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DLAAS-TUI-TEST/JOB_DONE'"
             )
             == 0
         ):
@@ -286,7 +286,7 @@ def test_invalid_script(config_server: Config, config_client: Config, setup_test
     # checking that results file is present
     assert (
         os.system(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DTAAS-TUI-TEST/results_DTAAS-TUI-TEST.zip'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DLAAS-TUI-TEST/results_DLAAS-TUI-TEST.zip'"
         )
         == 512
     ), "Results file found, should not have worked."
@@ -294,7 +294,7 @@ def test_invalid_script(config_server: Config, config_client: Config, setup_test
     # checking that the upload script is NOT present
     assert (
         os.system(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DTAAS-TUI-TEST/upload_results_DTAAS-TUI-TEST.py'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DLAAS-TUI-TEST/upload_results_DLAAS-TUI-TEST.py'"
         )
         == 512
     ), "Upload script found, should not have been present."
@@ -302,7 +302,7 @@ def test_invalid_script(config_server: Config, config_client: Config, setup_test
     # checking that slurm output contains an error
     assert (
         os.popen(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'cat ~/DTAAS-TUI-TEST/slurm*'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'cat ~/DLAAS-TUI-TEST/slurm*'"
         ).read()[:35]
         == "Traceback (most recent call last):\n"
     ), "Unexpected output in Slurm file."

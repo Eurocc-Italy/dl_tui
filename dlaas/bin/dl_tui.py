@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Wrapper for the API calls, used to convert user input to CURL commands to be sent to the API
+Wrapper for the DLaaS API calls, used to convert user input to CURL commands to be sent to the API
 
 Author: @lbabetto
 """
@@ -20,12 +20,12 @@ import os
 import sys
 import json
 
-from dtaas.tuilib.common import Config
-from dtaas.tuilib.api import upload, replace, update, download, delete, query
+from dlaas.tuilib.common import Config
+from dlaas.tuilib.api import upload, replace, update, download, delete, query
 
 
 def main():
-    """API wrapper for the DTaaS TUI"""
+    """API wrapper for the DLaaS TUI"""
 
     allowed_requests = ["upload", "download", "delete", "replace", "update", "query"]
 
@@ -33,7 +33,7 @@ def main():
         request = sys.argv[1]
         user_input = sys.argv[2:]
     except IndexError:
-        print("Empty request. Please consult the manual for how to use the DTaaS API wrapper.")
+        print("Empty request. Please consult the manual for how to use the DLaaS TUI.")
         return
 
     logger.info(f"User input for API call: {sys.argv[1:]}")
@@ -58,7 +58,7 @@ def main():
 
     # Loading default token
     try:
-        with open(f"{os.environ['HOME']}/.config/dtaas-tui/api-token", "r") as f:
+        with open(f"{os.environ['HOME']}/.config/dlaas/api-token", "r") as f:
             input_dict["token"] = f.read()
     except FileNotFoundError:
         logger.info("Token not found. Unless provided explicitly via the token=... option, the commands will not work.")

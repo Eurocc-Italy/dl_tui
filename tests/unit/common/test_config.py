@@ -6,12 +6,12 @@ import pytest
 
 import os
 import json
-from dtaas.tuilib.common import Config
+from dlaas.tuilib.common import Config
 
 
 @pytest.fixture(scope="function")
-def default_client():
-    with open(f"{os.path.dirname(__file__)}/../../../dtaas/etc/default/config_client.json", "r") as f:
+def default_hpc():
+    with open(f"{os.path.dirname(__file__)}/../../../dtaas/etc/default/config_hpc.json", "r") as f:
         config = json.load(f)
     return config
 
@@ -24,8 +24,8 @@ def default_server():
 
 
 @pytest.fixture(scope="function")
-def custom_client():
-    with open(f"{os.path.dirname(__file__)}/../../../dtaas/etc/default/config_client.json", "r") as f:
+def custom_hpc():
+    with open(f"{os.path.dirname(__file__)}/../../../dtaas/etc/default/config_hpc.json", "r") as f:
         config = json.load(f)
         config.update({"ip": "localhost"})
     return config
@@ -39,13 +39,13 @@ def custom_server():
     return config
 
 
-def test_default_client(default_client):
+def test_default_hpc(default_hpc):
     """
-    Test that the default config file for the client is correctly loaded.
+    Test that the default config file for the hpc is correctly loaded.
     """
 
-    config_true = default_client
-    config_test = Config(version="client")
+    config_true = default_hpc
+    config_test = Config(version="hpc")
 
     for key, val in config_true.items():
         assert getattr(config_test, key) == val
@@ -63,13 +63,13 @@ def test_default_server(default_server):
         assert getattr(config_test, key) == val
 
 
-def test_custom_client(custom_client):
+def test_custom_hpc(custom_hpc):
     """
-    Test that the custom config file for the client is correctly loaded, if present.
+    Test that the custom config file for the hpc is correctly loaded, if present.
     """
 
-    config_true = custom_client
-    config_test = Config(version="client")
+    config_true = custom_hpc
+    config_test = Config(version="hpc")
     config_test.load_custom_config({"ip": "localhost"})
 
     for key, val in config_true.items():
@@ -89,15 +89,15 @@ def test_custom_server(custom_server):
         assert getattr(config_test, key) == val
 
 
-def test_manual_custom(default_client):
+def test_manual_custom(default_hpc):
     """
     Test that manually changing values works.
     """
 
-    config_true = default_client
-    default_client["ip"] = "localhost"
+    config_true = default_hpc
+    default_hpc["ip"] = "localhost"
 
-    config_test = Config(version="client")
+    config_test = Config(version="hpc")
     config_test.ip = "localhost"
 
     for key, val in config_true.items():
@@ -112,10 +112,10 @@ def test_wrong_version():
         Config(version="test")
 
 
-def test_wrong_key(custom_client):
+def test_wrong_key(custom_hpc):
     """
     Test that the program crashes if an unknown configuration option is provided.
     """
     with pytest.raises(KeyError):
-        config_test = Config(version="client")
+        config_test = Config(version="hpc")
         config_test.load_custom_config({"account": "EUCC_staff"})
