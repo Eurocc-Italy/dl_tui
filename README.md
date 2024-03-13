@@ -2,15 +2,15 @@
 
 This is the user guide for the Data Lake as a Service Text User Interface (`dlaas-tui`) Python library. The TUI is used to query the Data Lake and run processing scripts on the files matching the query.
 
-The service is composed of: 
+The Data Lake service is composed of: 
 
-  - a Cloud-based infrastructure with a VM running a MongoDB database instance. This database contains the metadata for all the files in the Data Lake, including the path to the actual corresponding file in the HPC parallel filesystem.
-  - a HPC cluster which contains the actual files, stored in dual parallel filesystem/S3 mode. The HPC part runs the processing script sent by the user on the files matching the query.
+  - a Cloud-based infrastructure with a VM running a MongoDB database instance. This database contains the metadata for all the files in the Data Lake, including the path to the corresponding file in the HPC parallel filesystem.
+  - a HPC cluster which contains the files, stored in dual parallel filesystem/object storage (S3) mode. The HPC part runs the processing script sent by the user on the files matching the query.
 
 The library consists of three executables: `dl_tui`, `dl_tui_hpc` and `dl_tui_server`. 
 
   * `dl_tui` is used to launch commands to the service API for interacting with the Data Lake.
-  * `dl_tui_hpc` is intended to be run on the machine with direct access to the files of the Data Lake (HPC) and runs the actual querying and processing.
+  * `dl_tui_hpc` is intended to be run on the machine with direct access to the files of the Data Lake (HPC) and runs the querying and processing.
   * `dl_tui_server` version is intended to be run on a cloud machine with access to the HPC infrastructure running Slurm. Its purpose is to parse the user input (query and processing script) and launch a Slurm job on HPC which calls the hpc version.
 
 ## Code structure
@@ -175,7 +175,9 @@ The `download` and `delete` actions require a `file=...` option, which similarly
 The `query` action requires the following additional options:
 
   * `query_file=...`: path to the text file containing the SQL query to be ran on the Data Lake.
-  * `python_file=...`: path to the Python file containing the processing to be ran on the files matching the query.
+  * `python_file=...` (optional): path to the Python file containing the processing to be ran on the files matching the query.
+
+If no Python file is provided, the job will match the files of the query and copy them to the results archive for download.
 
 Example commands:
 
@@ -183,4 +185,4 @@ Example commands:
   * Replace: `dl_tui replace file=/path/to/updated/file.csv json_data=/path/to/updated_metadata.json`
   * Update: `dl_tui update file=file.csv json_data=/path/to/updated_metadata.json`
   * Download: `dl_tui download file=file.csv`
-  * Query: `dl_tui upload query_file=/path/to/query.txt python_file=/path/to/script.py`
+  * Query: `dl_tui query query_file=/path/to/query.txt python_file=/path/to/script.py`
