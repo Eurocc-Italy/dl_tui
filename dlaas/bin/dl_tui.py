@@ -10,7 +10,7 @@ import logging
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
-fh = logging.FileHandler("client.log", mode="w")
+fh = logging.FileHandler("tui.log", mode="w")
 fh.setLevel(logging.DEBUG)
 formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 fh.setFormatter(formatter)
@@ -54,7 +54,7 @@ def main():
     ]
 
     # Loading default IP
-    input_dict["ip"] = Config("client").ip
+    input_dict["ip"] = Config("hpc").ip
 
     # Loading default token
     try:
@@ -169,7 +169,7 @@ def main():
     if request.lower() == "query":
 
         config_json = {
-            "config_client": Config("client").__dict__,
+            "config_hpc": Config("hpc").__dict__,
             "config_server": Config("server").__dict__,
         }
 
@@ -181,7 +181,7 @@ def main():
         except KeyError:
             logger.info("No custom configuration provided. Keeping defaults.")
 
-        logger.debug(f"config_client: {config_json['config_client']}")
+        logger.debug(f"config_hpc: {config_json['config_hpc']}")
         logger.debug(f"config_server: {config_json['config_server']}")
 
         try:
