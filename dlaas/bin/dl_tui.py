@@ -21,13 +21,21 @@ import sys
 import json
 
 from dlaas.tuilib.common import Config
-from dlaas.tuilib.api import upload, replace, update, download, delete, query
+from dlaas.tuilib.api import upload, replace, update, download, delete, query, browse
 
 
 def main():
     """API wrapper for the DLaaS TUI"""
 
-    allowed_requests = ["upload", "download", "delete", "replace", "update", "query"]
+    allowed_requests = [
+        "upload",
+        "download",
+        "delete",
+        "replace",
+        "update",
+        "query",
+        "browse",
+    ]
 
     try:
         request = sys.argv[1]
@@ -51,6 +59,7 @@ def main():
         "query_file",
         "python_file",
         "config_json",
+        "filter",
     ]
 
     # Loading default IP
@@ -198,6 +207,34 @@ def main():
                 print(msg)
 
                 msg = f"Job ID: {response.text.replace('Files processed successfully, ID: ', '')}"
+                logger.info(msg)
+                print(msg)
+            else:
+                print(response.text)
+                response.raise_for_status()
+        except KeyError as key:
+            print(f"Required key is missing: {key}")
+
+    # Browse files
+    elif request.lower() == "browse":
+
+        # Reading optional filter keyword
+        try:
+            filter = input_dict["filter"]
+        except KeyError:
+            filter = None
+
+        try:
+            response = browse(
+                ip=input_dict["ip"],
+                token=input_dict["token"],
+                filter=filter,
+            )
+            if response.status_code == 200:
+                files = eval(response.text)
+                msg = f"Filter: {filter}\n"
+                msg += f"Files:\n  - "
+                msg += ("\n  - ").join(files)
                 logger.info(msg)
                 print(msg)
             else:

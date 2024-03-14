@@ -277,3 +277,37 @@ def query(
         logger.info(f"Running query {query_file}. Response: {response.status_code}")
 
     return response
+
+
+def browse(
+    ip: str,
+    token: str,
+    filter: str = None,
+) -> Response:
+    """Browse files in Data Lake, optionally setting SQL-like filters
+
+    Parameters
+    ----------
+    ip : str
+        IP address of the machine running the API
+    token : str
+        Authorization token for running commands via the API
+    filter : str, optional
+        SQL query to filter the files
+
+    Returns
+    -------
+    Response
+        Response of the server request
+    """
+
+    token = token.rstrip("\n")
+    headers = {
+        "Authorization": f"Bearer {token}",
+    }
+
+    response = requests.get(f"http://{ip}:8080/v1/browse_files", headers=headers, params={"filter": filter})
+
+    logger.info(f"Bwowsing files in from Data Lake. Filter: {filter}. Response: {response.status_code}")
+
+    return response
