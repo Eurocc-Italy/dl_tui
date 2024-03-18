@@ -24,7 +24,7 @@ def test_search_specific_files(mock_mongodb):
     """
     Search for two specific files
     """
-    query = "SELECT * FROM metadata WHERE id = 1 OR id = 2"
+    query = "SELECT * FROM metadata WHERE id = '1' OR id = '2'"
 
     wrapper(
         collection=mock_mongodb,
@@ -62,7 +62,7 @@ def test_search_specific_files_return_only_first(mock_mongodb):
     """
     Search for two specific files and return just the first item
     """
-    query = "SELECT * FROM metadata WHERE id = 1 OR id = 2"
+    query = "SELECT * FROM metadata WHERE id = '1' OR id = '2'"
     script = "def main(files_in):\n files_out=files_in.copy()\n return [files_out[0]]"
 
     wrapper(

@@ -64,7 +64,7 @@ def test_search_only(test_mongodb, config_hpc):
         json.dump(
             {
                 "id": 1,
-                "sql_query": "SELECT * FROM test_coll WHERE id = 1 OR id = 2",
+                "sql_query": "SELECT * FROM test_coll WHERE id = '1' OR id = '2'",
                 "config_hpc": config_hpc.__dict__,
             },
             f,
@@ -104,7 +104,7 @@ def test_return_first(test_mongodb, config_hpc):
         json.dump(
             {
                 "id": 2,
-                "sql_query": "SELECT * FROM test_coll WHERE id = 1 OR id = 2",
+                "sql_query": "SELECT * FROM test_coll WHERE id = '1' OR id = '2'",
                 "script_path": "user_script.py",
                 "config_hpc": config_hpc.__dict__,
             },
@@ -218,7 +218,7 @@ def test_double_quotes_in_script(test_mongodb, config_hpc):
         json.dump(
             {
                 "id": 5,
-                "sql_query": "SELECT * FROM test_coll WHERE id = 1 OR id = 2",
+                "sql_query": "SELECT * FROM test_coll WHERE id = '1' OR id = '2'",
                 "script_path": "user_script.py",
                 "config_hpc": config_hpc.__dict__,
             },
@@ -258,7 +258,7 @@ def test_single_quotes_in_script(test_mongodb, config_hpc):
         json.dump(
             {
                 "id": 6,
-                "sql_query": "SELECT * FROM test_coll WHERE id = 1 OR id = 2",
+                "sql_query": "SELECT * FROM test_coll WHERE id = '1' OR id = '2'",
                 "script_path": "user_script.py",
                 "config_hpc": config_hpc.__dict__,
             },

@@ -13,7 +13,7 @@ def test_search_specific_files(mock_mongodb):
     Search for two specific files
     """
 
-    mongo_filters = {"$or": [{"id": 1}, {"id": 2}]}
+    mongo_filters = {"$or": [{"id": "1"}, {"id": "2"}]}
     mongo_fields = {}
 
     files_in = retrieve_files(

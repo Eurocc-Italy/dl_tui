@@ -22,7 +22,7 @@ def test_just_search(config_server: Config, setup_testfiles_HPC):
         json.dump(
             {
                 "id": "DLAAS-TUI-TEST",
-                "sql_query": "SELECT * FROM metadata WHERE id = 1 OR id = 2",
+                "sql_query": "SELECT * FROM metadata WHERE id = '1' OR id = '2'",
                 "config_server": {"walltime": "00:10:00", "ntasks_per_node": 1},
             },
             f,
@@ -86,7 +86,7 @@ def test_return_first(config_server: Config, setup_testfiles_HPC):
         json.dump(
             {
                 "id": "DLAAS-TUI-TEST",
-                "sql_query": "SELECT * FROM metadata WHERE id = 1 OR id = 2",
+                "sql_query": "SELECT * FROM metadata WHERE id = '1' OR id = '2'",
                 "script": "user_script.py",
                 "config_server": {"walltime": "00:10:00", "ntasks_per_node": 1},
             },
@@ -146,7 +146,7 @@ def test_invalid_script(setup_testfiles_HPC):
         json.dump(
             {
                 "id": "DLAAS-TUI-TEST-invalid_job",
-                "query": 'SELECT * FROM metadata WHERE id = "554625" OR id = 222564',
+                "query": 'SELECT * FROM metadata WHERE id = "1" OR id = "2"',
                 "config_server": {"walltime": "00:10:00", "ntasks_per_node": 1},
             },
             f,

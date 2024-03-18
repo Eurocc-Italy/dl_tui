@@ -102,12 +102,12 @@ def mock_mongodb():
     collection.insert_many(
         [
             {
-                "id": 1,
+                "id": "1",
                 "s3_key": "test1.txt",
                 "path": f"{ROOT_DIR}/tests/utils/sample_files/test1.txt",
             },
             {
-                "id": 2,
+                "id": "2",
                 "s3_key": "test2.txt",
                 "path": f"{ROOT_DIR}/tests/utils/sample_files/test2.txt",
             },
@@ -135,12 +135,12 @@ def test_mongodb():
     collection.insert_many(
         [
             {
-                "id": 1,
+                "id": "1",
                 "s3_key": "test1.txt",
                 "path": f"{ROOT_DIR}/tests/utils/sample_files/test1.txt",
             },
             {
-                "id": 2,
+                "id": "2",
                 "s3_key": "test2.txt",
                 "path": f"{ROOT_DIR}/tests/utils/sample_files/test2.txt",
             },

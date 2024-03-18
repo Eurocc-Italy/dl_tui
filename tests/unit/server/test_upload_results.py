@@ -32,7 +32,7 @@ def test_just_search(config_server: Config, config_hpc: Config, setup_testfiles_
         json.dump(
             {
                 "id": "DLAAS-TUI-TEST",
-                "sql_query": "SELECT * FROM metadata WHERE id = 1 OR id = 2",
+                "sql_query": "SELECT * FROM metadata WHERE id = '1' OR id = '2'",
                 "config_server": config_server.__dict__,
                 "config_hpc": config_hpc.__dict__,
             },
@@ -71,7 +71,7 @@ def test_full_path(config_server: Config, config_hpc: Config, setup_testfiles_HP
         json.dump(
             {
                 "id": "DLAAS-TUI-TEST",
-                "sql_query": "SELECT * FROM metadata WHERE id = 1 OR id = 2",
+                "sql_query": "SELECT * FROM metadata WHERE id = '1' OR id = '2'",
                 "config_server": config_server.__dict__,
                 "config": config_hpc.__dict__,
             },
