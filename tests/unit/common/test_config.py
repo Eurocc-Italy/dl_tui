@@ -11,21 +11,21 @@ from dlaas.tuilib.common import Config
 
 @pytest.fixture(scope="function")
 def default_hpc():
-    with open(f"{os.path.dirname(__file__)}/../../../dtaas/etc/default/config_hpc.json", "r") as f:
+    with open(f"{os.path.dirname(__file__)}/../../../dlaas/etc/default/config_hpc.json", "r") as f:
         config = json.load(f)
     return config
 
 
 @pytest.fixture(scope="function")
 def default_server():
-    with open(f"{os.path.dirname(__file__)}/../../../dtaas/etc/default/config_server.json", "r") as f:
+    with open(f"{os.path.dirname(__file__)}/../../../dlaas/etc/default/config_server.json", "r") as f:
         config = json.load(f)
     return config
 
 
 @pytest.fixture(scope="function")
 def custom_hpc():
-    with open(f"{os.path.dirname(__file__)}/../../../dtaas/etc/default/config_hpc.json", "r") as f:
+    with open(f"{os.path.dirname(__file__)}/../../../dlaas/etc/default/config_hpc.json", "r") as f:
         config = json.load(f)
         config.update({"ip": "localhost"})
     return config
@@ -33,7 +33,7 @@ def custom_hpc():
 
 @pytest.fixture(scope="function")
 def custom_server():
-    with open(f"{os.path.dirname(__file__)}/../../../dtaas/etc/default/config_server.json", "r") as f:
+    with open(f"{os.path.dirname(__file__)}/../../../dlaas/etc/default/config_server.json", "r") as f:
         config = json.load(f)
         config.update({"account": "EUCC_staff"})
     return config
