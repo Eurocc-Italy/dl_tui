@@ -16,7 +16,7 @@ from os.path import dirname, abspath
 ROOT_DIR = dirname(dirname(abspath(__file__)))  # points to the dlaas-tui repo directory
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def setup_testfiles_HPC():
 
     # creating test files
@@ -27,9 +27,9 @@ def setup_testfiles_HPC():
 
     # creating metadata for test files
     with open("test1.json", "w") as f:
-        json.dump({"id": 1}, f)
+        json.dump({"id": "1"}, f)
     with open("test2.json", "w") as f:
-        json.dump({"id": 2}, f)
+        json.dump({"id": "2"}, f)
 
     # loading IP and token for API
     ip = Config("hpc").ip
@@ -74,6 +74,8 @@ def cleanup(config_server):
         os.remove("hpc.log")
     if os.path.exists("server.log"):
         os.remove("server.log")
+    if os.path.exists("tui.log"):
+        os.remove("tui.log")
 
     # removing temporary folder on HPC
     os.system(f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'rm -rf ~/DLAAS-TUI-TEST'")
@@ -83,7 +85,7 @@ def cleanup(config_server):
     with open(f"{os.environ['HOME']}/.config/dlaas/api-token", "r") as f:
         token = f.read()
 
-    delete(ip=ip, token=token, file="DLAAS-TUI-TEST")
+    delete(ip=ip, token=token, file="results_DLAAS-TUI-TEST.zip")
 
 
 @pytest.fixture(scope="function")

@@ -113,7 +113,7 @@ def test_query_without_file(mocked_response):
 
 def test_query_nonexistent(mocked_response):
     """
-    Replace using a non-existent file
+    Query using a non-existent file
     """
 
     with pytest.raises(FileNotFoundError):
@@ -128,7 +128,7 @@ def test_query_nonexistent(mocked_response):
 
 def test_wrong_ip(mocked_response):
     """
-    Replace using the wrong IP
+    Query using the wrong IP
     """
 
     with pytest.raises(requests.exceptions.ConnectionError):

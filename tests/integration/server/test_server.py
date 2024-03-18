@@ -28,7 +28,7 @@ def test_just_search(config_server: Config, setup_testfiles_HPC):
             f,
         )
 
-    os.system(f"{ROOT_DIR}/dtaas/bin/dl_tui_server.py input.json")
+    os.system(f"{ROOT_DIR}/dlaas/bin/dl_tui_server.py input.json")
 
     while True:
         # checking that JOB_DONE file has been made
@@ -95,7 +95,7 @@ def test_return_first(config_server: Config, setup_testfiles_HPC):
     with open("user_script.py", "w") as f:
         f.write("def main(files_in):\n files_out=files_in.copy()\n return [files_out[0]]")
 
-    os.system(f"{ROOT_DIR}/dtaas/bin/dl_tui_server.py input.json")
+    os.system(f"{ROOT_DIR}/dlaas/bin/dl_tui_server.py input.json")
 
     while True:
         # checking that JOB_DONE file has been made
@@ -153,7 +153,7 @@ def test_invalid_script(setup_testfiles_HPC):
         )
 
     stdout, stderr = subprocess.Popen(
-        f"{ROOT_DIR}/dtaas/bin/dl_tui_server.py input.json",
+        f"{ROOT_DIR}/dlaas/bin/dl_tui_server.py input.json",
         shell=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,

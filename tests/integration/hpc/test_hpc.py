@@ -70,7 +70,7 @@ def test_search_only(test_mongodb, config_hpc):
             f,
         )
 
-    os.system(f"{ROOT_DIR}/dtaas/bin/dl_tui_hpc.py input.json")
+    os.system(f"{ROOT_DIR}/dlaas/bin/dl_tui_hpc.py input.json")
 
     assert os.path.exists(f"results_1.zip"), "Zipped archive was not created."
 
@@ -113,7 +113,7 @@ def test_return_first(test_mongodb, config_hpc):
     with open("user_script.py", "w") as f:
         f.write("def main(files_in):\n files_out=files_in.copy()\n return [files_out[0]]")
 
-    os.system(f"{ROOT_DIR}/dtaas/bin/dl_tui_hpc.py input.json")
+    os.system(f"{ROOT_DIR}/dlaas/bin/dl_tui_hpc.py input.json")
 
     assert os.path.exists(f"results_2.zip"), "Zipped archive was not created."
 
@@ -150,7 +150,7 @@ def test_double_quotes_in_SQL(test_mongodb, config_hpc):
             f,
         )
 
-    os.system(f"{ROOT_DIR}/dtaas/bin/dl_tui_hpc.py input.json")
+    os.system(f"{ROOT_DIR}/dlaas/bin/dl_tui_hpc.py input.json")
 
     assert os.path.exists(f"results_3.zip"), "Zipped archive was not created."
 
@@ -187,7 +187,7 @@ def test_single_quotes_in_SQL(test_mongodb, config_hpc):
             f,
         )
 
-    os.system(f"{ROOT_DIR}/dtaas/bin/dl_tui_hpc.py input.json")
+    os.system(f"{ROOT_DIR}/dlaas/bin/dl_tui_hpc.py input.json")
 
     assert os.path.exists(f"results_4.zip"), "Zipped archive was not created."
 
@@ -227,7 +227,7 @@ def test_double_quotes_in_script(test_mongodb, config_hpc):
     with open("user_script.py", "w") as f:
         f.write('def main(files_in):\n files_out=files_in.copy()\n print("HELLO!")\n return [files_out[0]]')
 
-    os.system(f"{ROOT_DIR}/dtaas/bin/dl_tui_hpc.py input.json")
+    os.system(f"{ROOT_DIR}/dlaas/bin/dl_tui_hpc.py input.json")
 
     assert os.path.exists(f"results_5.zip"), "Zipped archive was not created."
 
@@ -267,7 +267,7 @@ def test_single_quotes_in_script(test_mongodb, config_hpc):
     with open("user_script.py", "w") as f:
         f.write("def main(files_in):\n files_out=files_in.copy()\n print('HELLO!')\n return [files_out[0]]")
 
-    os.system(f"{ROOT_DIR}/dtaas/bin/dl_tui_hpc.py input.json")
+    os.system(f"{ROOT_DIR}/dlaas/bin/dl_tui_hpc.py input.json")
 
     assert os.path.exists(f"results_6.zip"), "Zipped archive was not created."
 
