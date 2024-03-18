@@ -13,7 +13,7 @@ from pymongo import MongoClient
 
 from os.path import dirname, abspath
 
-ROOT_DIR = dirname(dirname(abspath(__file__)))  # points to the dtaas-tui directory
+ROOT_DIR = dirname(dirname(abspath(__file__)))  # points to the dlaas-tui repo directory
 
 
 @pytest.fixture(scope="session")
@@ -33,7 +33,7 @@ def setup_testfiles_HPC():
 
     # loading IP and token for API
     ip = Config("hpc").ip
-    with open(f"{os.environ['HOME']}/.config/dtaas-tui/api-token", "r") as f:
+    with open(f"{os.environ['HOME']}/.config/dlaas/api-token", "r") as f:
         token = f.read()
 
     # uploading test files to datalake via API
@@ -80,7 +80,7 @@ def cleanup(config_server):
 
     # remove result files from datalake
     ip = Config("hpc").ip
-    with open(f"{os.environ['HOME']}/.config/dtaas-tui/api-token", "r") as f:
+    with open(f"{os.environ['HOME']}/.config/dlaas/api-token", "r") as f:
         token = f.read()
 
     delete(ip=ip, token=token, file="DLAAS-TUI-TEST")
