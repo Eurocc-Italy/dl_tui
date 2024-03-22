@@ -158,6 +158,7 @@ The wrapper can be called via a third executable, `dl_tui`, with one of the foll
   * `download`
   * `delete`
   * `query`
+  * `browse`
 
 The IP address of the API server will be taken by the `config_hpc.json` configuration file. Alternatively, it is possible to overwrite the default via the `ip=...` option.
 
@@ -179,6 +180,8 @@ The `query` action requires the following additional options:
 
 If no Python file is provided, the job will match the files of the query and copy them to the results archive for download.
 
+The `browse` action allows for an optional flag `filter=...` which accepts an SQL-like query string for listing the requested files, removing the `SELECT * FROM metadata WHERE` part of the query itself and only leaving the filters. For example, `SELECT * FROM metadata WHERE category = dog or category = cat` becomes `filter="category = dog or category = cat`.
+
 Example commands:
 
   * Upload: `dl_tui upload file=/path/to/file.csv json_data=/path/to/metadata.json`
@@ -186,3 +189,4 @@ Example commands:
   * Update: `dl_tui update file=file.csv json_data=/path/to/updated_metadata.json`
   * Download: `dl_tui download file=file.csv`
   * Query: `dl_tui query query_file=/path/to/query.txt python_file=/path/to/script.py`
+  * Browse: `dl_tui browse filter="category = dog"`
