@@ -139,8 +139,8 @@ For the server version, the configurable options are relative to the HPC system:
   * `account`: SLURM account for the HPC job
   * `qos`: SLURM QoS for the HPC job
   * `mail`: email address to which the notifications for job start/end are sent
-  * `walltime`: maximum walltime for HPC job
-  * `nodes`: number of nodes requested for HPC job
+  * `walltime`: maximum walltime for the HPC job
+  * `nodes`: number of nodes requested for the HPC job
   * `ntasks_per_node`: number of CPU cores per node requested for the HPC job
 
 > **NOTE:**
