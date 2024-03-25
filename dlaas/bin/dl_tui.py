@@ -27,7 +27,7 @@ from dlaas.tuilib.api import upload, replace, update, download, delete, query, b
 def main():
     """API wrapper for the DLaaS TUI"""
 
-    allowed_requests = [
+    allowed_actions = [
         "upload",
         "download",
         "delete",
@@ -37,8 +37,9 @@ def main():
         "browse",
     ]
 
+    # Reading user input
     try:
-        request = sys.argv[1]
+        action = sys.argv[1]
         user_input = sys.argv[2:]
     except IndexError:
         print("Empty request. Please consult the manual for how to use the DLaaS TUI.")
@@ -46,8 +47,8 @@ def main():
 
     logger.info(f"User input for API call: {sys.argv[1:]}")
 
-    if request.lower() not in allowed_requests:
-        raise SyntaxError(f"Request '{request}' not allowed. Please use one of the following: {allowed_requests}")
+    if action.lower() not in allowed_actions:
+        raise SyntaxError(f"Action '{action}' not allowed. Please use one of the following: {allowed_actions}")
 
     # Initializing options
     input_dict = {}
@@ -82,7 +83,7 @@ def main():
     logger.debug(f"Options dictionary: {input_dict}")
 
     # Upload file
-    if request.lower() == "upload":
+    if action.lower() == "upload":
         try:
             response = upload(
                 ip=input_dict["ip"],
@@ -101,7 +102,7 @@ def main():
             print(f"Required key is missing: {key}")
 
     # Replace file
-    if request.lower() == "replace":
+    if action.lower() == "replace":
         try:
             response = replace(
                 ip=input_dict["ip"],
@@ -120,7 +121,7 @@ def main():
             print(f"Required key is missing: {key}")
 
     # Update file
-    if request.lower() == "update":
+    if action.lower() == "update":
         try:
             response = update(
                 ip=input_dict["ip"],
@@ -139,7 +140,7 @@ def main():
             print(f"Required key is missing: {key}")
 
     # Download file
-    elif request.lower() == "download":
+    elif action.lower() == "download":
         try:
             response = download(
                 ip=input_dict["ip"],
@@ -157,7 +158,7 @@ def main():
             print(f"Required key is missing: {key}")
 
     # Delete file
-    elif request.lower() == "delete":
+    elif action.lower() == "delete":
         try:
             response = delete(
                 ip=input_dict["ip"],
@@ -175,7 +176,7 @@ def main():
             print(f"Required key is missing: {key}")
 
     # Run query
-    if request.lower() == "query":
+    if action.lower() == "query":
 
         config_json = {
             "config_hpc": Config("hpc").__dict__,
@@ -216,7 +217,7 @@ def main():
             print(f"Required key is missing: {key}")
 
     # Browse files
-    elif request.lower() == "browse":
+    elif action.lower() == "browse":
 
         # Reading optional filter keyword
         try:
