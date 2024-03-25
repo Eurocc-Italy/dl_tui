@@ -148,7 +148,7 @@ For the server version, the configurable options are relative to the HPC system:
 
 ## API Wrapper
 
-It is also possible to use the TUI to interact with the API server on the VM hosting the metadata database for uploading, downloading, replacing, and updating files, as well as launching queries for processing data.
+It is also possible to use the TUI to interact with the API server on the VM hosting the metadata database for uploading, downloading, replacing, and updating files, as well as launching queries for processing data and browsing the contents of the Data Lake.
 
 The wrapper can be called via a third executable, `dl_tui`, with one of the following actions:
 
