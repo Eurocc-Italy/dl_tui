@@ -57,7 +57,7 @@ The input argument of the executable should be a properly-formatted JSON documen
 
   - `id`: unique identifier characterizing the run. We recommend using the [UUID](https://docs.python.org/3/library/uuid.html) module to generate it, producing a UUID.hex string
   - `sql_query`: SQL query to be run on the MongoDB database containing the metadata. Since the Data Lake is by definition a non-relational database, and the "return" of the query is the file itself, most queries will be of the type `SELECT * FROM metadata WHERE [...]`.
-  - `script_path` (optional): path to a Python script to analyse the files matching the query. This script must feature a `main` function taking as input a list of file paths, which will be populated by the interface with the files matching the query, and returning a list of paths as output, which will be saved in a compressed archive and made available to the user.
+  - `script_path` (optional): path to a Python script to analyse the files matching the query. This script must feature a `main` function taking as input a list of file paths, which will be populated by the interface with the files matching the query, and returning a list of file paths as output, which will be saved in a compressed archive and made available to the user.
   - `config_hpc` (optional): a dictionary containing options for hpc-side configuration
   - `config_server` (optional): a dictionary containing options for server-side configuration
 
@@ -73,7 +73,7 @@ If no script is provided, the program will simply return the files matching the 
 
 Let's say you want to fetch a certain set of files from the database and run a Python analysis script on them.
 
-The Python script must have a `main` function, which will be what is actually run by the executable. This function should take a list as input, which will be populated by the interface with the paths of the files matching the SQL query. The function should also return a list as output, which contains the paths of the files which the user wants to save from the analysis. The interface will then take this list of paths, save the corresponding files (generated _in situ_ on HPC) in an archive which is uploaded to S3 and made available to the user for download via the API.
+The Python script must have a `main` function, which will be what is actually run by the executable. This function should take a list as input, which will be populated by the interface with the paths of the files matching the SQL query. The function should also return a list as output, which contains the paths of the files which the user wants to save from the analysis. The interface will then take this list of paths, save the corresponding files (generated _in situ_ on HPC) in an archive which is uploaded to the S3 bucket and made available to the user for download via the API.
 
 This is an example of a valid Python script to be passed to the interface, with a `main` function taking a list of paths as input and returning a list of paths as output. 
 
@@ -110,7 +110,7 @@ def main(files_in):  # main function, expecting a list of file paths as input
 
 ## Configuration
 
-The library first loads the default options written the JSON files located in the library's `dlaas/etc/default` folder (which can be taken as a template to understand the kind of options which can be configured).
+The library first loads the default options written in the JSON files located in the library's `dlaas/etc/default` folder (which can be taken as a template to understand the kind of options which can be configured).
 
 If you wish to overwrite these defaults and customise your configuration, it is recommended to save a personalised version of the `config_hpc.json` and `config_server.json` files in the `~/.config/dlaas` folder. The options indicated here will take precedence over the defaults. Missing keys will be left at the default values.
 
