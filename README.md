@@ -114,7 +114,7 @@ The library first loads the default options written in the JSON files located in
 
 If you wish to overwrite these defaults and customise your configuration, it is recommended to save a personalised version of the `config_hpc.json` and `config_server.json` files in the `~/.config/dlaas` folder. The options indicated here will take precedence over the defaults. Missing keys will be left at the default values.
 
-If you wish to send a custom configurazion on the fly, it is also possible to pass configuration options via the `config_hpc` and `config_server` keys in the input JSON file, also in JSON format. These will take precedence over both defaults and what is found in `~/.config/dlaas/config_<hpc/server>.json`.
+If you wish to send custom configuration keys on the fly, it is also possible to pass configuration options via the `config_hpc` and `config_server` keys in the input JSON file, also in JSON format. These will take precedence over both defaults and what is found in `~/.config/dlaas/config_<hpc/server>.json`.
 
 For the hpc version, the configurable options are relative to the server VM:
 
