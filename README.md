@@ -150,7 +150,13 @@ For the server version, the configurable options are relative to the HPC system:
 
 It is also possible to use the TUI to interact with the API server on the VM hosting the metadata database for uploading, downloading, replacing, and updating files, as well as launching queries for processing data and browsing the contents of the Data Lake.
 
-The wrapper can be called via a third executable, `dl_tui`, with one of the following actions:
+The general syntax for command-line calls is:
+
+```
+dl_tui action option1=value1 option2=value2 ...
+```
+
+The wrapper can be called via the `dl_tui` executable, with one of the following _actions_:
 
   * `upload`
   * `replace`
@@ -160,27 +166,27 @@ The wrapper can be called via a third executable, `dl_tui`, with one of the foll
   * `query`
   * `browse`
 
-The IP address of the API server will be taken by the `config_hpc.json` configuration file. Alternatively, it is possible to overwrite the default via the `ip=...` option.
+The IP address of the API server will be taken by the `config_hpc.json` configuration file. Alternatively, it is possible to overwrite the default via the `ip=...` _option_.
 
-A valid authentication token is required. If saved in the `~/.config/dlaas/api-token` file, it will automatically be read by the wrapper. Otherwise, the token can be sent directly via the `token=...` option.
+A valid authentication token is required. If saved in the `~/.config/dlaas/api-token` file, it will automatically be read by the wrapper. Otherwise, the token can be sent directly via the `token=...` _option_.
 
-The `upload` and `replace` actions require the following additional options:
+The `upload` and `replace` _actions_ require the following additional (mandatory) _options_:
 
   * `file=...`: path to the file to be uploaded to the Data Lake
   * `json_data=...`: path to the .json file containing the metadata of the file to be uploaded to the Data Lake
 
-The `update` action also requires the `file=...` and `json_data=...` options, but in this case the `file=...` should be the S3 key corresponding to the file (i.e., the filename).
+The `update` _action_ also requires the `file=...` and `json_data=...` (mandatory) _options_, but in this case the `file=...` should be the S3 key corresponding to the file (i.e., the filename).
 
-The `download` and `delete` actions require a `file=...` option, which similarly to the `update` action should be the S3 key corresponding to the file to be downloaded/deleted.
+The `download` and `delete` _actions_ require a `file=...` (mandatory) _option_, which similarly to the `update` _action_ should be the S3 key corresponding to the file to be downloaded/deleted.
 
-The `query` action requires the following additional options:
+The `query` _action_ requires the following additional _options_:
 
-  * `query_file=...`: path to the text file containing the SQL query to be ran on the Data Lake.
+  * `query_file=...` (mandatory): path to the text file containing the SQL query to be ran on the Data Lake.
   * `python_file=...` (optional): path to the Python file containing the processing to be ran on the files matching the query.
 
 If no Python file is provided, the job will match the files of the query and copy them to the results archive for download.
 
-The `browse` action allows for an optional flag `filter=...` which accepts an SQL-like query string for listing the requested files, removing the `SELECT * FROM metadata WHERE` part of the query itself and only leaving the filters. For example, `SELECT * FROM metadata WHERE category = dog or category = cat` becomes `filter="category = dog or category = cat`.
+The `browse` _action_ allows for an additional _option_ `filter=...` which accepts an SQL-like query string for listing the requested files, removing the `SELECT * FROM metadata WHERE` part of the query itself and only leaving the filters. For example, `SELECT * FROM metadata WHERE category = dog OR category = cat` becomes `filter="category = dog OR category = cat`.
 
 Example commands:
 
