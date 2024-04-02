@@ -25,7 +25,7 @@ This library consists of three executables: `dl_tui`, `dl_tui_hpc` and `dl_tui_s
   * `dl_tui_hpc` is intended to be run on the machine with direct access to the files of the Data Lake (HPC) and runs the querying and processing.
   * `dl_tui_server` version is intended to be run on the VM. Its purpose is to parse the user input (query and processing script) and launch a Slurm job on HPC with the user request.
 
-The `dl_tui` executable is intended to be used by the users themselves (see the [API Wrapper](#api-wrapper) section), while the `dl_tui_hpc` and `dl_tui_hpc` executables are intended to be used by the API server.
+The `dl_tui` executable is intended to be used by the users themselves (see the [API Wrapper](#api-interface-dl_tui) section), while the `dl_tui_hpc` and `dl_tui_hpc` executables are intended to be used by the API server.
 
 ### Code structure
 
