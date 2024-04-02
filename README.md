@@ -77,7 +77,7 @@ The general syntax for command-line calls is:
 dl_tui action option1=value1 option2=value2 ...
 ```
 
-The wrapper can be called via the `dl_tui` executable, with one of the following _actions_:
+The API interface can be called via the `dl_tui` executable, with one of the following _actions_:
 
   * `upload`
   * `replace`
