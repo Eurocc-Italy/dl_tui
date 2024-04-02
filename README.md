@@ -17,7 +17,7 @@ The software stack is composed of three main components:
   - An [API](https://gitlab.hpc.cineca.it/igentile/dtaas_test_api) server, which accepts the user requests and carries out operations on the Data Lake (file upload/download, querying, etc.);
   - The TUI (this library), which is utilized by the end users to interface with the API, as well as by the API itself to interface with the HPC system.
 
-## Text User Interface (dlaas-tui)
+## Text User Interface (`dlaas-tui`)
 
 This library consists of three executables: `dl_tui`, `dl_tui_hpc` and `dl_tui_server`. 
 
