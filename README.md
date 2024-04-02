@@ -14,7 +14,7 @@ The service provides for two hardware endpoints:
 The software stack is composed of three main components:
 
   - A [repository](https://gitlab.hpc.cineca.it/igentile/dtaas-digitaltwinasaservice) containing the Ansible deployment scripts for setting up the infrastructure;
-  - An [API](https://gitlab.hpc.cineca.it/igentile/dtaas-digitaltwinasaservice) server, which accepts the user requests and carries out operations on the Data Lake (file upload/download, querying, etc.);
+  - An [API](https://gitlab.hpc.cineca.it/igentile/dtaas_test_api) server, which accepts the user requests and carries out operations on the Data Lake (file upload/download, querying, etc.);
   - The TUI (this library), which is utilized by the end users to interface with the API, as well as by the API itself to interface with the HPC system.
 
 ## Text User Interface (dlaas-tui)
