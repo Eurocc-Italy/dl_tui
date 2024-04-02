@@ -96,7 +96,7 @@ The `upload` and `replace` _actions_ require the following additional (mandatory
   * `file=...`: path to the file to be uploaded to the Data Lake
   * `json_data=...`: path to the .json file containing the metadata of the file to be uploaded to the Data Lake
 
-The `update` _action_ also requires the `file=...` and `json_data=...` (mandatory) _options_, but in this case the `file=...` should be the S3 key corresponding to the file (i.e., the filename).
+The `update` _action_ also requires the `file=...` and `json_data=...` (mandatory) _options_, but in this case the `file=...` should be the S3 key corresponding to the file (_i.e._, the filename).
 
 The `download` and `delete` _actions_ require a `file=...` (mandatory) _option_, which similarly to the `update` _action_ should be the S3 key corresponding to the file to be downloaded/deleted.
 
@@ -107,7 +107,7 @@ The `query` _action_ requires the following additional _options_:
 
 If no Python file is provided, the job will match the files of the query and copy them to the results archive for download.
 
-The `browse` _action_ allows for an additional _option_ `filter=...` which accepts an SQL-like query string for listing the requested files, removing the `SELECT * FROM metadata WHERE` part of the query itself and only leaving the filters. For example, `SELECT * FROM metadata WHERE category = dog OR category = cat` becomes `filter="category = dog OR category = cat`.
+The `browse` _action_ allows for an additional _option_ `filter=...` which accepts an SQL-like query string for listing the requested files, removing the `SELECT * FROM metadata WHERE` part of the query itself and only leaving the filters. For example, `SELECT * FROM metadata WHERE category = dog OR category = cat` becomes `filter="category = dog OR category = cat"`.
 
 Example commands:
 
@@ -128,7 +128,7 @@ The Python script must satisfy the following requirements:
   * The `main` function must accept a list of file paths as input, which will be populated with the matches of the SQL query;
   * The `main` function should return a list of file paths as output, corresponding to the files which the user wants to save from the analysis. The interface will then take this list of paths, save the corresponding files (generated _in situ_ on HPC) in an archive which is uploaded to the S3 bucket and made available to the user for download via the API.
 
-This is an example of a valid Python script to be passed to the interface, with a `main` function taking a list of paths as input and returning a list of paths as output. 
+Below is an example of a valid Python script to be passed to the interface, with a `main` function taking a list of paths as input and returning a list of paths as output. 
 
 The script uses the [scikit-image](https://scikit-image.org/) library to rotate the images given in input and save them alongside the original, using [matplotlib](https://matplotlib.org/) to generate the comparison "graphs" and [imageio](https://imageio.readthedocs.io/en/stable/) to open the actual image files. The comparison images are saved in a temporary folder (`rotated`) whose contents are returned by the main function in form of file paths. The script also uses the Python multiprocessing libary to run the job in parallel, exploiting the HPC performance for the analysis.
 
