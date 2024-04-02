@@ -69,7 +69,7 @@ After having set up and activated your virtual environment, follow these steps t
 
 ### API interface (`dl_tui`)
 
-It is possible to use the `dl_tui` executable to interact with the API server on the VM for uploading, downloading, replacing, and updating files, as well as launching queries for processing data and browsing the contents of the Data Lake. For running high-performance analytics on the Data Lake files, see the [corresponding](#running-analysis-scripts) section.
+It is possible to use the `dl_tui` executable to interact with the API server on the VM for uploading, downloading, replacing, and updating files, as well as launching queries for processing data and browsing the contents of the Data Lake. For running high-performance analytics on the Data Lake files, see the [corresponding](#high-performance-analytics) section.
 
 The general syntax for command-line calls is:
 
