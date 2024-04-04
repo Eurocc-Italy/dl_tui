@@ -195,7 +195,8 @@ def launch_job(json_path: str):
     # NOTE: it is probably not necessary to source the environment as the executable can be ran safely via the
     # `{config.venv_path}/bin/dl_tui_hpc` call. Still, it is safer to do so if a custom python script is provided,
     # since we are sure the correct libraries will be available to the executable
-    wrap_cmd = f"source {config.venv_path}/bin/activate; "
+    wrap_cmd = f"module load python; "  # TODO: placeholder for G100, as Python is not available by default.
+    wrap_cmd += f"source {config.venv_path}/bin/activate; "
     wrap_cmd += f"dl_tui_hpc {basename(json_path)}; "
     wrap_cmd += "touch JOB_DONE"
 
