@@ -299,12 +299,12 @@ Example commands [arguments within parentheses are optional]:
         response = query(
             ip=args.ip,
             token=args.token,
-            query_file=args["query_file"],
-            python_file=args["python_file"],
+            query_file=args.query_file,
+            python_file=args.python_file,
             config_json=config_json,
         )
         if response.status_code == 200:
-            msg = f"Successfully launched analysis script {args['python_file']} on query {args['query_file']}."
+            msg = f"Successfully launched analysis script {args.python_file} on query {args.query_file}."
             logger.info(msg)
             print(msg)
 
