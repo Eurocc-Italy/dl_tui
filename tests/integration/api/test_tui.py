@@ -41,7 +41,7 @@ def test_upload():
     """
 
     stdout, stderr = subprocess.Popen(
-        f"{ROOT_DIR}/dlaas/bin/dl_tui.py upload file=test.txt json_data=test.json",
+        f"{ROOT_DIR}/dlaas/bin/dl_tui.py --upload --file=test.txt --metadata=test.json",
         shell=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
@@ -57,7 +57,7 @@ def test_upload_again():
     """
 
     stdout, stderr = subprocess.Popen(
-        f"{ROOT_DIR}/dlaas/bin/dl_tui.py upload file=test.txt json_data=test.json",
+        f"{ROOT_DIR}/dlaas/bin/dl_tui.py --upload --file=test.txt --metadata=test.json",
         shell=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
@@ -73,7 +73,7 @@ def test_download():
     """
 
     stdout, stderr = subprocess.Popen(
-        f"{ROOT_DIR}/dlaas/bin/dl_tui.py download file=test.txt",
+        f"{ROOT_DIR}/dlaas/bin/dl_tui.py --download --key=test.txt",
         shell=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
@@ -89,7 +89,7 @@ def test_download_nonexistent():
     """
 
     stdout, stderr = subprocess.Popen(
-        f"{ROOT_DIR}/dlaas/bin/dl_tui.py download file=test-nonexistent.txt",
+        f"{ROOT_DIR}/dlaas/bin/dl_tui.py --download --key=test-nonexistent.txt",
         shell=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
@@ -108,7 +108,7 @@ def test_replace():
     """
 
     stdout, stderr = subprocess.Popen(
-        f"{ROOT_DIR}/dlaas/bin/dl_tui.py replace file=test.txt json_data=test.json",
+        f"{ROOT_DIR}/dlaas/bin/dl_tui.py --replace --file=test.txt --metadata=test.json",
         shell=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
@@ -124,7 +124,7 @@ def test_replace_nonexistent():
     """
 
     stdout, stderr = subprocess.Popen(
-        f"{ROOT_DIR}/dlaas/bin/dl_tui.py replace file=test2.txt json_data=test2.json",
+        f"{ROOT_DIR}/dlaas/bin/dl_tui.py --replace --file=test2.txt --metadata=test2.json",
         shell=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
@@ -140,7 +140,7 @@ def test_update():
     """
 
     stdout, stderr = subprocess.Popen(
-        f"{ROOT_DIR}/dlaas/bin/dl_tui.py update file=test.txt json_data=test2.json",
+        f"{ROOT_DIR}/dlaas/bin/dl_tui.py --update --key=test.txt --metadata=test2.json",
         shell=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
@@ -156,7 +156,7 @@ def test_update_nonexistent():
     """
 
     stdout, stderr = subprocess.Popen(
-        f"{ROOT_DIR}/dlaas/bin/dl_tui.py update file=test2.txt json_data=test2.json",
+        f"{ROOT_DIR}/dlaas/bin/dl_tui.py --update --key=test2.txt --metadata=test2.json",
         shell=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
@@ -172,7 +172,7 @@ def test_browse_all():
     """
 
     stdout, stderr = subprocess.Popen(
-        f"{ROOT_DIR}/dlaas/bin/dl_tui.py browse",
+        f"{ROOT_DIR}/dlaas/bin/dl_tui.py --browse",
         shell=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
@@ -188,7 +188,7 @@ def test_browse_filter():
     """
 
     stdout, stderr = subprocess.Popen(
-        f"{ROOT_DIR}/dlaas/bin/dl_tui.py browse filter='category = cat'",
+        f"{ROOT_DIR}/dlaas/bin/dl_tui.py --browse --filter='category = cat'",
         shell=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
@@ -204,7 +204,7 @@ def test_delete():
     """
 
     stdout, stderr = subprocess.Popen(
-        f"{ROOT_DIR}/dlaas/bin/dl_tui.py delete file=test.txt",
+        f"{ROOT_DIR}/dlaas/bin/dl_tui.py --delete --key=test.txt",
         shell=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
@@ -220,7 +220,7 @@ def test_delete_nonexistent():
     """
 
     stdout, stderr = subprocess.Popen(
-        f"{ROOT_DIR}/dlaas/bin/dl_tui.py delete file=test2.txt",
+        f"{ROOT_DIR}/dlaas/bin/dl_tui.py --delete --key=test2.txt",
         shell=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
@@ -237,7 +237,7 @@ def test_wrong_ip():
 
     with pytest.raises(subprocess.TimeoutExpired):
         stdout, stderr = subprocess.Popen(
-            f"{ROOT_DIR}/dlaas/bin/dl_tui.py browse ip=wrong.ip.com",
+            f"{ROOT_DIR}/dlaas/bin/dl_tui.py --browse --ip=wrong.ip.com",
             shell=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,

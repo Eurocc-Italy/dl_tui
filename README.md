@@ -74,49 +74,52 @@ It is possible to use the `dl_tui` executable to interact with the API server on
 The general syntax for command-line calls is:
 
 ```
-dl_tui action option1=value1 option2=value2 ...
+dl_tui --action --option1=value1 --option2=value2 ...
 ```
 
 The API interface can be called via the `dl_tui` executable, with one of the following _actions_:
 
-  * `upload`
-  * `replace`
-  * `update`
-  * `download`
-  * `delete`
-  * `query`
-  * `browse`
+  * `--upload`
+  * `--replace`
+  * `--update`
+  * `--download`
+  * `--delete`
+  * `--query`
+  * `--browse`
 
-The IP address of the API server will be taken by the `config_hpc.json` configuration file (see the [configuration](#configuration) section for more details). Alternatively, it is possible to overwrite the default via the `ip=...` _option_.
+The IP address of the API server will be taken by the `config_hpc.json` configuration file (see the [configuration](#configuration) section for more details). Alternatively, it is possible to overwrite the default via the `--ip=...` _option_.
 
-A valid authentication token is required. If saved in the `~/.config/dlaas/api-token` file, it will automatically be read by the executable. Otherwise, the token can be sent directly via the `token=...` _option_.
+A valid authentication token is required. If saved in the `~/.config/dlaas/api-token` file, it will automatically be read by the executable. Otherwise, the token can be sent directly via the `--token=...` _option_.
 
-The `upload` and `replace` _actions_ require the following additional (mandatory) _options_:
+The `--upload` and `--replace` _actions_ require the following additional (mandatory) _options_:
 
-  * `file=...`: path to the file to be uploaded to the Data Lake
-  * `json_data=...`: path to the .json file containing the metadata of the file to be uploaded to the Data Lake
+  * `--file=...`: path to the file to be uploaded to the Data Lake
+  * `--metadata=...`: path to the .json file containing the metadata of the file to be uploaded to the Data Lake
 
-The `update` _action_ also requires the `file=...` and `json_data=...` (mandatory) _options_, but in this case the `file=...` should be the S3 key corresponding to the file (_i.e._, the filename).
+The `--update` _action_ require the following additional (mandatory) _options_:
 
-The `download` and `delete` _actions_ require a `file=...` (mandatory) _option_, which similarly to the `update` _action_ should be the S3 key corresponding to the file to be downloaded/deleted.
+  * `--key=...`: S3 key of the file which needs to be updated
+  * `--metadata=...`: path to the .json file containing the metadata of the file to be uploaded to the Data Lake
 
-The `query` _action_ requires the following additional _options_:
+The `--download` and `--delete` _actions_ require a `--key=...` (mandatory) _option_, which similarly to the `update` _action_ should be the S3 key corresponding to the file to be downloaded/deleted.
 
-  * `query_file=...` (mandatory): path to the text file containing the SQL query to be ran on the Data Lake.
-  * `python_file=...` (optional): path to the Python file containing the processing to be ran on the files matching the query.
+The `--query` _action_ requires the following additional _options_:
+
+  * `--query_file=...` (mandatory): path to the text file containing the SQL query to be ran on the Data Lake.
+  * `--python_file=...` (optional): path to the Python file containing the processing to be ran on the files matching the query.
 
 If no Python file is provided, the job will match the files of the query and copy them to the results archive for download.
 
-The `browse` _action_ allows for an additional _option_ `filter=...` which accepts an SQL-like query string for listing the requested files, removing the `SELECT * FROM metadata WHERE` part of the query itself and only leaving the filters. For example, `SELECT * FROM metadata WHERE category = dog OR category = cat` becomes `filter="category = dog OR category = cat"`.
+The `--browse` _action_ allows for an additional _option_ `--filter=...` which accepts an SQL-like query string for listing the requested files, removing the `SELECT * FROM metadata WHERE` part of the query itself and only leaving the filters. For example, `SELECT * FROM metadata WHERE category = dog OR category = cat` becomes `filter="category = dog OR category = cat"`.
 
 Example commands:
 
-  * Upload: `dl_tui upload file=/path/to/file.csv json_data=/path/to/metadata.json`
-  * Replace: `dl_tui replace file=/path/to/updated/file.csv json_data=/path/to/updated_metadata.json`
-  * Update: `dl_tui update file=file.csv json_data=/path/to/updated_metadata.json`
-  * Download: `dl_tui download file=file.csv`
-  * Query: `dl_tui query query_file=/path/to/query.txt python_file=/path/to/script.py`
-  * Browse: `dl_tui browse filter="category = dog"`
+  * Upload: `dl_tui --upload --file=/path/to/file.csv --json_data=/path/to/metadata.json`
+  * Replace: `dl_tui --replace file=/path/to/updated/file.csv --json_data=/path/to/updated_metadata.json`
+  * Update: `dl_tui --update --file=file.csv --json_data=/path/to/updated_metadata.json`
+  * Download: `dl_tui --download --file=file.csv`
+  * Query: `dl_tui --query --query_file=/path/to/query.txt --python_file=/path/to/script.py`
+  * Browse: `dl_tui --browse --filter="category = dog"`
 
 ### High-performance analytics
 

@@ -1,8 +1,8 @@
 {
   "user": "lbabetto",
   "host": "login02-ext.g100.cineca.it",
-  "venv_path": "~/virtualenvs/dtaas",
-  "ssh_key": "~/.ssh/luca-g100",
+  "venv_path": "~/dtaas_venv",
+  "ssh_key": "~/.ssh/luca-hpc",
   "compute_partition": "g100_usr_prod",
   "upload_partition": "g100_all_serial",
   "account": "EUCC_staff_2",
