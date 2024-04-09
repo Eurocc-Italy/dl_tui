@@ -185,7 +185,7 @@ Example commands [arguments within parentheses are optional]:
             response.raise_for_status()
 
     # Replace file
-    if args.replace:
+    elif args.replace:
 
         # checking for missing options
         if not args.file:
@@ -208,7 +208,7 @@ Example commands [arguments within parentheses are optional]:
             response.raise_for_status()
 
     # Update file
-    if args.update:
+    elif args.update:
 
         # checking for missing options
         if not args.key:
@@ -271,7 +271,7 @@ Example commands [arguments within parentheses are optional]:
             response.raise_for_status()
 
     # Run query
-    if args.query:
+    elif args.query:
 
         # checking for missing options
         if not args.query_file:
@@ -289,7 +289,7 @@ Example commands [arguments within parentheses are optional]:
                 custom_config = json.load(f)
                 for key in custom_config:
                     config_json[key].update(custom_config[key])
-        except KeyError:
+        except TypeError:
             logger.info("No custom configuration provided. Keeping defaults.")
 
         logger.debug(f"config_hpc: {config_json['config_hpc']}")
@@ -302,8 +302,14 @@ Example commands [arguments within parentheses are optional]:
             python_file=args.python_file,
             config_json=config_json,
         )
+
         if response.status_code == 200:
-            msg = f"Successfully launched analysis script {args.python_file} on query {args.query_file}."
+            if args.python_file:
+                msg = (
+                    f"Successfully launched analysis script {args.python_file} on query {open(args.query_file).read()}."
+                )
+            else:
+                msg = f"Successfully launched query {open(args.query_file).read()}."
             logger.info(msg)
             print(msg)
 
