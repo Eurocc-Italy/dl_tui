@@ -32,14 +32,26 @@ logger.addHandler(fh)
 
 from pymongo import MongoClient
 
-import sys
+import argparse
 from dlaas.tuilib.common import Config, UserInput
 from dlaas.tuilib.hpc import wrapper
 
 
 def main():
     """Executable intended to run on HPC"""
-    json_path = sys.argv[1]
+
+    parser = argparse.ArgumentParser(
+        description="HPC-side executable for Cineca's Data Lake as a Service.",
+        epilog="For further information, please consult the code repository (https://gitlab.hpc.cineca.it/lbabetto/dlaas-tui)",
+    )
+
+    parser.add_argument(
+        "json_path",
+        help="path to the JSON file containing the HPC job information",
+    )
+
+    args = parser.parse_args()
+    json_path = args.json_path
 
     # reading user input
     user_input = UserInput.from_json(json_path=json_path)

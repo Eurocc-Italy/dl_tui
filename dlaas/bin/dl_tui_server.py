@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """
-Module to interface with HPC from the VM running the metadata database. The purpose of this module is to take the 
-user query and script, send a HPC job which calls the HPC executable on the compute nodes and runs the script 
-on the query results.
+Module to interface with HPC from the VM running the API server. The purpose of this module is to take the 
+user query and script, launch a HPC job which calls the `dl_tui_hpc` executable on the compute nodes and 
+runs the script on the query results.
 
 Author: @lbabetto
 """
@@ -18,13 +18,25 @@ formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(messag
 fh.setFormatter(formatter)
 logger.addHandler(fh)
 
-import sys
+import argparse
 from dlaas.tuilib.server import create_remote_directory, copy_json_input, copy_user_script, launch_job, upload_results
 
 
 def main():
     """Executable intended to run on the server VM"""
-    json_path = sys.argv[1]
+
+    parser = argparse.ArgumentParser(
+        description="Server-side executable for Cineca's Data Lake as a Service.",
+        epilog="For further information, please consult the code repository (https://gitlab.hpc.cineca.it/lbabetto/dlaas-tui)",
+    )
+
+    parser.add_argument(
+        "json_path",
+        help="path to the JSON file containing the HPC job information",
+    )
+
+    args = parser.parse_args()
+    json_path = args.json_path
 
     create_remote_directory(json_path=json_path)
     copy_json_input(json_path=json_path)
