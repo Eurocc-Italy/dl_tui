@@ -142,6 +142,7 @@ def run_script(script: str, files_in: List[str]) -> List[str]:
 
 
 def save_output(
+    sql_query: str,
     files_out: List[str],
     pfs_prefix_path: str,
     s3_endpoint_url: str,
@@ -156,6 +157,8 @@ def save_output(
 
     Parameters
     ----------
+    sql_query : str
+        SQL query (for saving in results folder)
     files_out : List[str]
         list containing the paths to the files to be saved
     pfs_prefix_path : str
@@ -173,6 +176,11 @@ def save_output(
     logger.debug(f"Processed results: {files_out}")
 
     os.makedirs(f"results", exist_ok=True)
+
+    # copying query and processing script to results folder
+    with open(f"results/query_{job_id}.txt", "w") as f:
+        f.write(sql_query)
+    shutil.copy("user_script.py", f"results/user_script_{job_id}.py")
 
     for file in files_out:
         try:
