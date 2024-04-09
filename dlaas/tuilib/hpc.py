@@ -143,6 +143,7 @@ def run_script(script: str, files_in: List[str]) -> List[str]:
 
 def save_output(
     sql_query: str,
+    script: str,
     files_out: List[str],
     pfs_prefix_path: str,
     s3_endpoint_url: str,
@@ -159,6 +160,8 @@ def save_output(
     ----------
     sql_query : str
         SQL query (for saving in results folder)
+    script : str
+        content of the Python script provided by the user (for saving in results folder)
     files_out : List[str]
         list containing the paths to the files to be saved
     pfs_prefix_path : str
@@ -180,7 +183,9 @@ def save_output(
     # copying query and processing script to results folder
     with open(f"results/query_{job_id}.txt", "w") as f:
         f.write(sql_query)
-    shutil.copy("user_script.py", f"results/user_script_{job_id}.py")
+    if script:
+        with open(f"results/user_script_{job_id}.py", "w") as f:
+            f.write(script)
 
     for file in files_out:
         try:
@@ -258,25 +263,16 @@ def wrapper(
         # moving to temporary directory and working within the context manager
         with pushd(tdir):
             files_out = run_script(script=script, files_in=files_in)
-        save_output(
-            sql_query=sql_query,
-            files_out=files_out,
-            pfs_prefix_path=pfs_prefix_path,
-            s3_endpoint_url=s3_endpoint_url,
-            s3_bucket=s3_bucket,
-            job_id=job_id,
-            collection=collection,
-        )
+    else:  # if no script is provided, return the query matches
+        files_out = files_in
 
-        shutil.rmtree(tdir)
-
-    else:
-        save_output(
-            sql_query=sql_query,
-            files_out=files_in,
-            pfs_prefix_path=pfs_prefix_path,
-            s3_endpoint_url=s3_endpoint_url,
-            s3_bucket=s3_bucket,
-            job_id=job_id,
-            collection=collection,
-        )
+    save_output(
+        sql_query=sql_query,
+        script=script,
+        files_out=files_out,
+        pfs_prefix_path=pfs_prefix_path,
+        s3_endpoint_url=s3_endpoint_url,
+        s3_bucket=s3_bucket,
+        job_id=job_id,
+        collection=collection,
+    )
