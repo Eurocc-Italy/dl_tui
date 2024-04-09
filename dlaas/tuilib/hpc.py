@@ -259,6 +259,7 @@ def wrapper(
         with pushd(tdir):
             files_out = run_script(script=script, files_in=files_in)
         save_output(
+            sql_query=sql_query,
             files_out=files_out,
             pfs_prefix_path=pfs_prefix_path,
             s3_endpoint_url=s3_endpoint_url,
@@ -271,6 +272,7 @@ def wrapper(
 
     else:
         save_output(
+            sql_query=sql_query,
             files_out=files_in,
             pfs_prefix_path=pfs_prefix_path,
             s3_endpoint_url=s3_endpoint_url,
