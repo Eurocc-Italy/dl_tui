@@ -226,11 +226,13 @@ def launch_job(json_path: str):
     logger.debug(f"stdout: {stdout}")
     logger.debug(f"stderr: {stderr}")
 
-    slurm_job_id = int(stdout.lstrip("Submitted batch job "))
-    logger.info(f"Launched job on HPC with ID: {slurm_job_id}")
-
-    if "Submitted batch job" not in stdout:
+    try:
+        slurm_job_id = int(stdout.lstrip("Submitted batch job "))
+        logger.info(f"Launched job on HPC with ID: {slurm_job_id}")
+    except ValueError:  # exception is raised during conversion of empty string to int
         raise RuntimeError(f"Something gone wrong, job was not launched.\nstdout: {stdout}\nstderr: {stderr}")
+
+    print(stdout)
 
     return stdout, stderr, slurm_job_id
 
@@ -278,7 +280,8 @@ def upload_results(json_path: str, slurm_job_id: int):
     wrap_cmd = f"module load python; "  # TODO: placeholder for G100, as Python is not available by default.
     wrap_cmd += f"source {config.venv_path}/bin/activate; "
     wrap_cmd += f"python upload_results_{user_input.id}.py; "
-    wrap_cmd += "touch RESULTS_UPLOADED"
+    wrap_cmd += "touch RESULTS_UPLOADED; "
+    wrap_cmd += f"rm -rf ../{user_input.id}"  # remove temporary directory from HPC. Comment this line for debugging
 
     # Generating SSH command
     ssh_cmd = f"cd {user_input.id}; "
