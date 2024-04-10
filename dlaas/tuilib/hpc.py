@@ -263,16 +263,24 @@ def wrapper(
         # moving to temporary directory and working within the context manager
         with pushd(tdir):
             files_out = run_script(script=script, files_in=files_in)
+            save_output(
+                sql_query=sql_query,
+                script=script,
+                files_out=files_out,
+                pfs_prefix_path=pfs_prefix_path,
+                s3_endpoint_url=s3_endpoint_url,
+                s3_bucket=s3_bucket,
+                job_id=job_id,
+                collection=collection,
+            )
     else:  # if no script is provided, return the query matches
-        files_out = files_in
-
-    save_output(
-        sql_query=sql_query,
-        script=script,
-        files_out=files_out,
-        pfs_prefix_path=pfs_prefix_path,
-        s3_endpoint_url=s3_endpoint_url,
-        s3_bucket=s3_bucket,
-        job_id=job_id,
-        collection=collection,
-    )
+        save_output(
+            sql_query=sql_query,
+            script=script,
+            files_out=files_in,
+            pfs_prefix_path=pfs_prefix_path,
+            s3_endpoint_url=s3_endpoint_url,
+            s3_bucket=s3_bucket,
+            job_id=job_id,
+            collection=collection,
+        )
