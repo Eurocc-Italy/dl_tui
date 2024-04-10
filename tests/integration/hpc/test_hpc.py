@@ -4,6 +4,7 @@ import os
 import json
 from dlaas.tuilib.common import Config
 from zipfile import ZipFile
+from glob import glob
 
 from conftest import ROOT_DIR
 
@@ -72,17 +73,20 @@ def test_search_only(test_mongodb, config_hpc):
 
     os.system(f"{ROOT_DIR}/dlaas/bin/dl_tui_hpc.py input.json")
 
-    assert os.path.exists(f"results_1.zip"), "Zipped archive was not created."
+    assert len(glob("results_1.zip")) == 1, "Zipped archive was not created."
 
     with ZipFile("results_1.zip", "r") as archive:
-        assert archive.namelist() == [
+        archive = archive.namelist()
+        archive.sort()
+        assert archive == [
+            "query_1.txt",
             "test1.txt",
             "test2.txt",
         ], "Results archive does not contain the expected files."
 
-    assert os.path.exists("upload_results_1.py"), "Upload script was not created."
+    assert len(glob("upload_results_1.py")) == 1, "Upload script was not created."
 
-    with open("upload_results_1.py", "r") as f:
+    with open(glob("upload_results_1.py")[0], "r") as f:
         expected = "import boto3\n"
         expected += 's3 = boto3.client(service_name="s3", endpoint_url="https://testurl.com/")\n'
         expected += 's3.upload_file(Filename="results_1.zip", Bucket="test", Key="results_1.zip")'
@@ -115,14 +119,20 @@ def test_return_first(test_mongodb, config_hpc):
 
     os.system(f"{ROOT_DIR}/dlaas/bin/dl_tui_hpc.py input.json")
 
-    assert os.path.exists(f"results_2.zip"), "Zipped archive was not created."
+    assert len(glob("*/results_2.zip")) == 1, "Zipped archive was not created."
 
-    with ZipFile("results_2.zip", "r") as archive:
-        assert archive.namelist() == ["test1.txt"], "Results archive does not contain the expected files."
+    with ZipFile(glob("*/results_2.zip")[0], "r") as archive:
+        archive = archive.namelist()
+        archive.sort()
+        assert archive == [
+            "query_2.txt",
+            "test1.txt",
+            "user_script_2.py",
+        ], "Results archive does not contain the expected files."
 
-    assert os.path.exists("upload_results_2.py"), "Upload script was not created."
+    assert len(glob("*/upload_results_2.py")) == 1, "Upload script was not created."
 
-    with open("upload_results_2.py", "r") as f:
+    with open(glob("*/upload_results_2.py")[0], "r") as f:
         expected = "import boto3\n"
         expected += 's3 = boto3.client(service_name="s3", endpoint_url="https://testurl.com/")\n'
         expected += 's3.upload_file(Filename="results_2.zip", Bucket="test", Key="results_2.zip")'
@@ -152,14 +162,19 @@ def test_double_quotes_in_SQL(test_mongodb, config_hpc):
 
     os.system(f"{ROOT_DIR}/dlaas/bin/dl_tui_hpc.py input.json")
 
-    assert os.path.exists(f"results_3.zip"), "Zipped archive was not created."
+    assert len(glob("results_3.zip")) == 1, "Zipped archive was not created."
 
-    with ZipFile("results_3.zip", "r") as archive:
-        assert archive.namelist() == ["test1.txt"], "Results archive does not contain the expected files."
+    with ZipFile(glob("results_3.zip")[0], "r") as archive:
+        archive = archive.namelist()
+        archive.sort()
+        assert archive == [
+            "query_3.txt",
+            "test1.txt",
+        ], "Results archive does not contain the expected files."
 
-    assert os.path.exists("upload_results_3.py"), "Upload script was not created."
+    assert len(glob("upload_results_3.py")) == 1, "Upload script was not created."
 
-    with open("upload_results_3.py", "r") as f:
+    with open(glob("upload_results_3.py")[0], "r") as f:
         expected = "import boto3\n"
         expected += 's3 = boto3.client(service_name="s3", endpoint_url="https://testurl.com/")\n'
         expected += 's3.upload_file(Filename="results_3.zip", Bucket="test", Key="results_3.zip")'
@@ -189,14 +204,19 @@ def test_single_quotes_in_SQL(test_mongodb, config_hpc):
 
     os.system(f"{ROOT_DIR}/dlaas/bin/dl_tui_hpc.py input.json")
 
-    assert os.path.exists(f"results_4.zip"), "Zipped archive was not created."
+    assert len(glob("results_4.zip")) == 1, "Zipped archive was not created."
 
-    with ZipFile("results_4.zip", "r") as archive:
-        assert archive.namelist() == ["test1.txt"], "Results archive does not contain the expected files."
+    with ZipFile(glob("results_4.zip")[0], "r") as archive:
+        archive = archive.namelist()
+        archive.sort()
+        assert archive == [
+            "query_4.txt",
+            "test1.txt",
+        ], "Results archive does not contain the expected files."
 
-    assert os.path.exists("upload_results_4.py"), "Upload script was not created."
+    assert len(glob("upload_results_4.py")) == 1, "Upload script was not created."
 
-    with open("upload_results_4.py", "r") as f:
+    with open(glob("upload_results_4.py")[0], "r") as f:
         expected = "import boto3\n"
         expected += 's3 = boto3.client(service_name="s3", endpoint_url="https://testurl.com/")\n'
         expected += 's3.upload_file(Filename="results_4.zip", Bucket="test", Key="results_4.zip")'
@@ -229,14 +249,20 @@ def test_double_quotes_in_script(test_mongodb, config_hpc):
 
     os.system(f"{ROOT_DIR}/dlaas/bin/dl_tui_hpc.py input.json")
 
-    assert os.path.exists(f"results_5.zip"), "Zipped archive was not created."
+    assert len(glob("*/results_5.zip")) == 1, "Zipped archive was not created."
 
-    with ZipFile("results_5.zip", "r") as archive:
-        assert archive.namelist() == ["test1.txt"], "Results archive does not contain the expected files."
+    with ZipFile(glob("*/results_5.zip")[0], "r") as archive:
+        archive = archive.namelist()
+        archive.sort()
+        assert archive == [
+            "query_5.txt",
+            "test1.txt",
+            "user_script_5.py",
+        ], "Results archive does not contain the expected files."
 
-    assert os.path.exists("upload_results_5.py"), "Upload script was not created."
+    assert len(glob("*/upload_results_5.py")) == 1, "Upload script was not created."
 
-    with open("upload_results_5.py", "r") as f:
+    with open(glob("*/upload_results_5.py")[0], "r") as f:
         expected = "import boto3\n"
         expected += 's3 = boto3.client(service_name="s3", endpoint_url="https://testurl.com/")\n'
         expected += 's3.upload_file(Filename="results_5.zip", Bucket="test", Key="results_5.zip")'
@@ -269,14 +295,20 @@ def test_single_quotes_in_script(test_mongodb, config_hpc):
 
     os.system(f"{ROOT_DIR}/dlaas/bin/dl_tui_hpc.py input.json")
 
-    assert os.path.exists(f"results_6.zip"), "Zipped archive was not created."
+    assert len(glob("*/results_6.zip")) == 1, "Zipped archive was not created."
 
-    with ZipFile("results_6.zip", "r") as archive:
-        assert archive.namelist() == ["test1.txt"], "Results archive does not contain the expected files."
+    with ZipFile(glob("*/results_6.zip")[0], "r") as archive:
+        archive = archive.namelist()
+        archive.sort()
+        assert archive == [
+            "query_6.txt",
+            "test1.txt",
+            "user_script_6.py",
+        ], "Results archive does not contain the expected files."
 
-    assert os.path.exists("upload_results_6.py"), "Upload script was not created."
+    assert len(glob("*/upload_results_6.py")) == 1, "Upload script was not created."
 
-    with open("upload_results_6.py", "r") as f:
+    with open(glob("*/upload_results_6.py")[0], "r") as f:
         expected = "import boto3\n"
         expected += 's3 = boto3.client(service_name="s3", endpoint_url="https://testurl.com/")\n'
         expected += 's3.upload_file(Filename="results_6.zip", Bucket="test", Key="results_6.zip")'

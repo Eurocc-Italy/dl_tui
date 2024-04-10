@@ -112,7 +112,7 @@ def test_wrong_version():
         Config(version="test")
 
 
-def test_wrong_key(custom_hpc):
+def test_wrong_key():
     """
     Test that the program crashes if an unknown configuration option is provided.
     """

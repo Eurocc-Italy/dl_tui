@@ -412,3 +412,12 @@ def test_json_input_config(monkeypatch):
     assert user_input.sql_query == """SELECT * FROM metadata WHERE category = "motorcycle" OR category = 'hotdog'"""
     assert user_input.script_path == None
     assert user_input.config_server == {"walltime": "01:00:00", "ntasks_per_node": 48}
+
+
+def test_not_a_json():
+    """
+    Test that an exception is thrown if something other than a JSON file is provided.
+    """
+
+    with pytest.raises(TypeError):
+        UserInput(version="hpc").from_json("test.notajson")

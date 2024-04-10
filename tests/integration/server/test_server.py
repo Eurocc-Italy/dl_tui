@@ -7,9 +7,32 @@ import pytest
 import os
 import subprocess
 import json
+from time import sleep
+from zipfile import ZipFile
 
 from conftest import ROOT_DIR
 from dlaas.tuilib.common import Config
+
+
+def check_status():
+    """Checks that results have been uploaded to the data lake, and then download the results archive"""
+    while True:
+        # checking that results file has been uploaded
+        stdout, stderr = subprocess.Popen(
+            f"{ROOT_DIR}/dlaas/bin/dl_tui.py --browse --filter='job_id = DLAAS-TUI-TEST'",
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        ).communicate()
+
+        if f"results_DLAAS-TUI-TEST.zip" in stdout.decode("utf-8"):
+            # download results archive
+            sleep(5)  # wait for the download to be available
+            subprocess.Popen(
+                f"{ROOT_DIR}/dlaas/bin/dl_tui.py --download --key=results_DLAAS-TUI-TEST.zip", shell=True
+            ).communicate()
+            sleep(5)  # wait for the download to be completed
+            break
 
 
 def test_just_search(config_server: Config, setup_testfiles_HPC):
@@ -30,50 +53,17 @@ def test_just_search(config_server: Config, setup_testfiles_HPC):
 
     os.system(f"{ROOT_DIR}/dlaas/bin/dl_tui_server.py input.json")
 
-    while True:
-        # checking that JOB_DONE file has been made
-        if os.system(f"ssh -i {config.ssh_key} {config.user}@{config.host} 'ls ~/DLAAS-TUI-TEST/JOB_DONE'") == 0:
-            break
-
-    # checking that results file is present
-    assert (
-        os.system(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DLAAS-TUI-TEST/results_DLAAS-TUI-TEST.zip'"
-        )
-        == 0
-    ), "Results file not found."
-
-    # checking that the upload script is present
-    assert (
-        os.system(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DLAAS-TUI-TEST/upload_results_DLAAS-TUI-TEST.py'"
-        )
-        == 0
-    ), "Upload script not found."
+    check_status()
 
     # checking zip content
-    assert (
-        "test1.txt"
-        in os.popen(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'unzip -l ~/DLAAS-TUI-TEST/results_DLAAS-TUI-TEST.zip'"
-        )
-        .read()
-        .split()
-        and "test2.txt"
-        in os.popen(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'unzip -l ~/DLAAS-TUI-TEST/results_DLAAS-TUI-TEST.zip'"
-        )
-        .read()
-        .split()
-    ), "Missing output file."
-
-    # checking that slurm output is empty
-    assert (
-        os.popen(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'cat ~/DLAAS-TUI-TEST/slurm*'"
-        ).read()
-        == ""
-    ), "Slurm output file is not empty."
+    with ZipFile(f"results_DLAAS-TUI-TEST.zip", "r") as archive:
+        archive = archive.namelist()
+        archive.sort()
+        assert archive == [
+            "query_DLAAS-TUI-TEST.txt",
+            "test1.txt",
+            "test2.txt",
+        ], "Results archive does not contain the expected files."
 
 
 def test_return_first(config_server: Config, setup_testfiles_HPC):
@@ -87,7 +77,7 @@ def test_return_first(config_server: Config, setup_testfiles_HPC):
             {
                 "id": "DLAAS-TUI-TEST",
                 "sql_query": "SELECT * FROM metadata WHERE id = '1' OR id = '2'",
-                "script": "user_script.py",
+                "script_path": "user_script.py",
                 "config_server": {"walltime": "00:10:00", "ntasks_per_node": 1},
             },
             f,
@@ -97,44 +87,17 @@ def test_return_first(config_server: Config, setup_testfiles_HPC):
 
     os.system(f"{ROOT_DIR}/dlaas/bin/dl_tui_server.py input.json")
 
-    while True:
-        # checking that JOB_DONE file has been made
-        if os.system(f"ssh -i {config.ssh_key} {config.user}@{config.host} 'ls ~/DLAAS-TUI-TEST/JOB_DONE'") == 0:
-            break
-
-    # checking that results file is present
-    assert (
-        os.system(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DLAAS-TUI-TEST/results_DLAAS-TUI-TEST.zip'"
-        )
-        == 0
-    ), "Results file not found."
-
-    # checking that the upload script is present
-    assert (
-        os.system(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DLAAS-TUI-TEST/upload_results_DLAAS-TUI-TEST.py'"
-        )
-        == 0
-    ), "Upload script not found."
+    check_status()
 
     # checking zip content
-    assert (
-        "test1.txt"
-        in os.popen(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'unzip -l ~/DLAAS-TUI-TEST/results_DLAAS-TUI-TEST.zip'"
-        )
-        .read()
-        .split()
-    ), "Missing output file."
-
-    # checking that slurm output is empty
-    assert (
-        os.popen(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'cat ~/DLAAS-TUI-TEST/slurm*'"
-        ).read()
-        == ""
-    ), "Slurm output file is not empty."
+    with ZipFile(f"results_DLAAS-TUI-TEST.zip", "r") as archive:
+        archive = archive.namelist()
+        archive.sort()
+        assert archive == [
+            "query_DLAAS-TUI-TEST.txt",
+            "test1.txt",
+            "user_script_DLAAS-TUI-TEST.py",
+        ], "Results archive does not contain the expected files."
 
 
 def test_invalid_script(setup_testfiles_HPC):

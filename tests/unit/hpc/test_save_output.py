@@ -18,6 +18,8 @@ def test_save_output(mock_mongodb):
     """
 
     save_output(
+        sql_query="QUERY",
+        script="SCRIPT",
         files_out=[
             f"{ROOT_DIR}/tests/utils/sample_files/test1.txt",
             f"{ROOT_DIR}/tests/utils/sample_files/test2.txt",
@@ -32,9 +34,13 @@ def test_save_output(mock_mongodb):
     assert os.path.exists("results_1.zip"), "Zipped archive was not created."
 
     with ZipFile(f"results_1.zip", "r") as archive:
-        assert archive.namelist() == [
+        archive = archive.namelist()
+        archive.sort()
+        assert archive == [
+            "query_1.txt",
             "test1.txt",
             "test2.txt",
+            "user_script_1.py",
         ], "Results archive does not contain the expected files."
 
     assert os.path.exists("upload_results_1.py"), "Upload script was not created."
@@ -56,10 +62,11 @@ def test_save_output(mock_mongodb):
 def test_nonexistent_files(mock_mongodb):
     """
     Test the function with nonexistent files (e.g., from incorrect return in user_script `main`).
-    UPDATED: code no longer raises the exception,
     """
 
     save_output(
+        sql_query="QUERY",
+        script=None,
         files_out=[
             f"{ROOT_DIR}/tests/utils/sample_files/notafile.txt",
         ],
@@ -73,7 +80,7 @@ def test_nonexistent_files(mock_mongodb):
     assert os.path.exists("results_2.zip"), "Zipped archive was not created."
 
     with ZipFile(f"results_2.zip", "r") as archive:
-        assert archive.namelist() == [], "Results archive is not empty."
+        assert archive.namelist() == ["query_2.txt"], "Results archive contains unexpected items."
 
     assert os.path.exists("upload_results_2.py"), "Upload script was not created."
 

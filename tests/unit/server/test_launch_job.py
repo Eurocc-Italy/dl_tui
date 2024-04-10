@@ -306,3 +306,26 @@ def test_invalid_script(config_server: Config, config_hpc: Config, setup_testfil
         ).read()[:35]
         == "Traceback (most recent call last):\n"
     ), "Unexpected output in Slurm file."
+
+
+def test_job_not_launched(config_server: Config, config_hpc: Config, setup_testfiles_HPC):
+    """
+    Make sure exception is raised if job is not actually launched
+    """
+
+    config_server_broken = config_server.__dict__
+    config_server_broken["host"] = "wrong_host"
+
+    with open("input.json", "w") as f:
+        json.dump(
+            {
+                "id": "DLAAS-TUI-TEST",
+                "sql_query": "blablabla",
+                "config_server": config_server_broken,
+                "config_hpc": config_hpc.__dict__,
+            },
+            f,
+        )
+
+    with pytest.raises(RuntimeError):
+        stdout, stderr, slurm_job_id = launch_job(json_path="input.json")

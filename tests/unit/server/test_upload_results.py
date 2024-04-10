@@ -21,6 +21,31 @@ NOTE: for these tests to work, the following requirements must be met:
 import os
 import json
 from dlaas.tuilib.server import create_remote_directory, copy_json_input, copy_user_script, launch_job, upload_results
+from conftest import ROOT_DIR
+import subprocess
+from time import sleep
+from zipfile import ZipFile
+
+
+def check_status():
+    """Checks that results have been uploaded to the data lake, and then download the results archive"""
+    while True:
+        # checking that results file has been uploaded
+        stdout, stderr = subprocess.Popen(
+            f"{ROOT_DIR}/dlaas/bin/dl_tui.py --browse --filter='job_id = DLAAS-TUI-TEST'",
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        ).communicate()
+
+        if f"results_DLAAS-TUI-TEST.zip" in stdout.decode("utf-8"):
+            # download results archive
+            sleep(2)  # wait for the download to be available
+            subprocess.Popen(
+                f"{ROOT_DIR}/dlaas/bin/dl_tui.py --download --key=results_DLAAS-TUI-TEST.zip", shell=True
+            ).communicate()
+            sleep(2)  # wait for the download to be completed
+            break
 
 
 def test_just_search(config_server: Config, config_hpc: Config, setup_testfiles_HPC):
@@ -49,17 +74,19 @@ def test_just_search(config_server: Config, config_hpc: Config, setup_testfiles_
     assert stdout[:19] == "Submitted batch job"
     assert stderr == ""
 
-    while True:
-        # checking that RESULTS_UPLOADED file has been made
-        if (
-            os.system(
-                f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DLAAS-TUI-TEST/RESULTS_UPLOADED'"
-            )
-            == 0
-        ):
-            break
+    check_status()
 
-    assert True
+    # checking results archive
+    assert os.path.exists(f"results_DLAAS-TUI-TEST.zip"), "Zipped archive was not created."
+
+    with ZipFile(f"results_DLAAS-TUI-TEST.zip", "r") as archive:
+        archive = archive.namelist()
+        archive.sort()
+        assert archive == [
+            "query_DLAAS-TUI-TEST.txt",
+            "test1.txt",
+            "test2.txt",
+        ], "Results archive does not contain the expected files."
 
 
 def test_full_path(config_server: Config, config_hpc: Config, setup_testfiles_HPC):
@@ -88,14 +115,39 @@ def test_full_path(config_server: Config, config_hpc: Config, setup_testfiles_HP
     assert stdout[:19] == "Submitted batch job"
     assert stderr == ""
 
-    while True:
-        # checking that RESULTS_UPLOADED file has been made
-        if (
-            os.system(
-                f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DLAAS-TUI-TEST/RESULTS_UPLOADED'"
-            )
-            == 0
-        ):
-            break
+    check_status()
 
-    assert True
+    # checking results archive
+    assert os.path.exists(f"results_DLAAS-TUI-TEST.zip"), "Zipped archive was not created."
+
+    with ZipFile(f"results_DLAAS-TUI-TEST.zip", "r") as archive:
+        archive = archive.namelist()
+        archive.sort()
+        assert archive == [
+            "query_DLAAS-TUI-TEST.txt",
+            "test1.txt",
+            "test2.txt",
+        ], "Results archive does not contain the expected files."
+
+
+def test_job_not_launched(config_server: Config, config_hpc: Config, setup_testfiles_HPC):
+    """
+    Make sure exception is raised if job is not actually launched
+    """
+
+    config_server_broken = config_server.__dict__
+    config_server_broken["host"] = "wrong_host"
+
+    with open("input.json", "w") as f:
+        json.dump(
+            {
+                "id": "DLAAS-TUI-TEST",
+                "sql_query": "blablabla",
+                "config_server": config_server_broken,
+                "config_hpc": config_hpc.__dict__,
+            },
+            f,
+        )
+
+    with pytest.raises(RuntimeError):
+        stdout, stderr = upload_results(json_path="input.json", slurm_job_id=123)
