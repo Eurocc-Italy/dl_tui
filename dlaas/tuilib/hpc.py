@@ -255,9 +255,13 @@ def wrapper(
 
     if script:
         # creating unique temporary directory
-        os.makedirs("run_script")
+        tdir = mkdtemp(
+            prefix="run_script_",
+            suffix=None,
+            dir=os.getcwd(),
+        )
         # moving to temporary directory and working within the context manager
-        with pushd("run_script"):
+        with pushd(tdir):
             files_out = run_script(script=script, files_in=files_in)
             save_output(
                 sql_query=sql_query,

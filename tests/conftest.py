@@ -60,7 +60,7 @@ def cleanup(config_server):
     yield
 
     # cleanup temporary files and folders
-    for match in glob("run_script"):
+    for match in glob("run_script*"):
         shutil.rmtree(match)
     for match in glob("results_*.zip"):
         os.remove(match)
