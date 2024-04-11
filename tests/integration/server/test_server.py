@@ -12,25 +12,30 @@ from zipfile import ZipFile
 
 from conftest import ROOT_DIR
 from dlaas.tuilib.common import Config
+from dlaas.tuilib.api import browse, download
+
+# loading IP and token from defaults
+ip = Config("hpc").ip
+with open(f"{os.environ['HOME']}/.config/dlaas/api-token", "r") as f:
+    token = f.read()
 
 
 def check_status():
-    """Checks that results have been uploaded to the data lake, and then download the results archive"""
+    """Checks that results have been uploaded to the data lake, and then download the results archive
+
+    Parameters
+    ----------
+    job_id : str
+        job identifier for file downloads
+    """
     while True:
         # checking that results file has been uploaded
-        stdout, stderr = subprocess.Popen(
-            f"{ROOT_DIR}/dlaas/bin/dl_tui.py --browse --filter='job_id = DLAAS-TUI-TEST'",
-            shell=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        ).communicate()
+        response = browse(ip=ip, token=token, filter="job_id = DLAAS-TUI-TEST").text
 
-        if f"results_DLAAS-TUI-TEST.zip" in stdout.decode("utf-8"):
+        if "results_DLAAS-TUI-TEST.zip" in response:
             # download results archive
             sleep(5)  # wait for the download to be available
-            subprocess.Popen(
-                f"{ROOT_DIR}/dlaas/bin/dl_tui.py --download --key=results_DLAAS-TUI-TEST.zip", shell=True
-            ).communicate()
+            download(ip=ip, token=token, file="results_DLAAS-TUI-TEST.zip")
             sleep(5)  # wait for the download to be completed
             break
 

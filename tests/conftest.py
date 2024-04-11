@@ -4,9 +4,10 @@ import os
 import shutil
 import json
 from glob import glob
+from ast import literal_eval
 
 from dlaas.tuilib.common import Config
-from dlaas.tuilib.api import upload, delete
+from dlaas.tuilib.api import upload, delete, browse
 
 import mongomock
 from pymongo import MongoClient
@@ -80,12 +81,16 @@ def cleanup(config_server):
     # removing temporary folder on HPC
     os.system(f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'rm -rf ~/DLAAS-TUI-TEST'")
 
-    # remove result files from datalake
+    # setting IP and token for cleanup
     ip = Config("hpc").ip
     with open(f"{os.environ['HOME']}/.config/dlaas/api-token", "r") as f:
         token = f.read()
 
+    # remove result files from datalake
     delete(ip=ip, token=token, file="results_DLAAS-TUI-TEST.zip")
+    results = [entry for entry in literal_eval(browse(ip=ip, token=token).text) if "results" in entry]
+    for result in results:
+        delete(ip=ip, token=token, file=result)
 
 
 @pytest.fixture(scope="function")

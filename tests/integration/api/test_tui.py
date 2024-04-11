@@ -11,6 +11,14 @@ from time import sleep
 from zipfile import ZipFile
 from conftest import ROOT_DIR
 
+from dlaas.tuilib.common import Config
+from dlaas.tuilib.api import upload, delete, download, browse
+
+# loading IP and token from defaults
+ip = Config("hpc").ip
+with open(f"{os.environ['HOME']}/.config/dlaas/api-token", "r") as f:
+    token = f.read()
+
 
 def check_status(job_id):
     """Checks that results have been uploaded to the data lake, and then download the results archive
@@ -22,19 +30,12 @@ def check_status(job_id):
     """
     while True:
         # checking that results file has been uploaded
-        stdout, stderr = subprocess.Popen(
-            f"{ROOT_DIR}/dlaas/bin/dl_tui.py --browse --filter='job_id = {job_id}'",
-            shell=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        ).communicate()
+        response = browse(ip=ip, token=token, filter=f"job_id = {job_id}").text
 
-        if f"results_{job_id}.zip" in stdout.decode("utf-8"):
+        if f"results_{job_id}.zip" in response:
             # download results archive
             sleep(5)  # wait for the download to be available
-            subprocess.Popen(
-                f"{ROOT_DIR}/dlaas/bin/dl_tui.py --download --key=results_{job_id}.zip", shell=True
-            ).communicate()
+            download(ip=ip, token=token, file=f"results_{job_id}.zip")
             sleep(5)  # wait for the download to be completed
             break
 
@@ -69,13 +70,8 @@ def setup_testfiles():
     os.remove("query.txt")
 
     # delete files on data lake
-    subprocess.Popen(f"{ROOT_DIR}/dlaas/bin/dl_tui.py --delete --key=test.txt", shell=True).communicate()
-    subprocess.Popen(f"{ROOT_DIR}/dlaas/bin/dl_tui.py --delete --key=test2.txt", shell=True).communicate()
-
-    cleanup_results = f"for i in $({ROOT_DIR}/dlaas/bin/dl_tui.py --browse); do "
-    cleanup_results += 'if [[ $i == "results_"*".zip" ]]; then '
-    cleanup_results += "dl_tui --delete --key $i; fi; done'"
-    subprocess.Popen(cleanup_results, shell=True).communicate()
+    delete(ip=ip, token=token, file="test.txt")
+    delete(ip=ip, token=token, file="test2.txt")
 
 
 def test_upload():
@@ -100,9 +96,7 @@ def test_upload_again():
     """
 
     # Upload file preemptively
-    subprocess.Popen(
-        f"{ROOT_DIR}/dlaas/bin/dl_tui.py --upload --file=test.txt --metadata=test.json", shell=True
-    ).communicate()
+    upload(ip=ip, token=token, file="test.txt", json_data="test.json")
 
     stdout, stderr = subprocess.Popen(
         f"{ROOT_DIR}/dlaas/bin/dl_tui.py --upload --file=test.txt --metadata=test.json",
@@ -121,9 +115,7 @@ def test_download():
     """
 
     # Upload file for download
-    subprocess.Popen(
-        f"{ROOT_DIR}/dlaas/bin/dl_tui.py --upload --file=test.txt --metadata=test.json", shell=True
-    ).communicate()
+    upload(ip=ip, token=token, file="test.txt", json_data="test.json")
 
     stdout, stderr = subprocess.Popen(
         f"{ROOT_DIR}/dlaas/bin/dl_tui.py --download --key=test.txt",
@@ -161,12 +153,8 @@ def test_query_search_only():
     """
 
     # upload test files if not present
-    subprocess.Popen(
-        f"{ROOT_DIR}/dlaas/bin/dl_tui.py --upload --file=test.txt --metadata=test.json", shell=True
-    ).communicate()
-    subprocess.Popen(
-        f"{ROOT_DIR}/dlaas/bin/dl_tui.py --upload --file=test2.txt --metadata=test2.json", shell=True
-    ).communicate()
+    upload(ip=ip, token=token, file="test.txt", json_data="test.json")
+    upload(ip=ip, token=token, file="test2.txt", json_data="test2.json")
 
     stdout, stderr = subprocess.Popen(
         f"{ROOT_DIR}/dlaas/bin/dl_tui.py --query --query_file=query.txt",
@@ -202,12 +190,8 @@ def test_query_with_script():
     """
 
     # upload test files if not present
-    subprocess.Popen(
-        f"{ROOT_DIR}/dlaas/bin/dl_tui.py --upload --file=test.txt --metadata=test.json", shell=True
-    ).communicate()
-    subprocess.Popen(
-        f"{ROOT_DIR}/dlaas/bin/dl_tui.py --upload --file=test2.txt --metadata=test2.json", shell=True
-    ).communicate()
+    upload(ip=ip, token=token, file="test.txt", json_data="test.json")
+    upload(ip=ip, token=token, file="test2.txt", json_data="test2.json")
 
     stdout, stderr = subprocess.Popen(
         f"{ROOT_DIR}/dlaas/bin/dl_tui.py --query --query_file=query.txt --python_file=user_script.py",
@@ -246,9 +230,7 @@ def test_replace():
     """
 
     # Upload file for replacement
-    subprocess.Popen(
-        f"{ROOT_DIR}/dlaas/bin/dl_tui.py --upload --file=test.txt --metadata=test.json", shell=True
-    ).communicate()
+    upload(ip=ip, token=token, file="test.txt", json_data="test.json")
 
     stdout, stderr = subprocess.Popen(
         f"{ROOT_DIR}/dlaas/bin/dl_tui.py --replace --file=test.txt --metadata=test.json",
@@ -267,9 +249,7 @@ def test_replace_nonexistent():
     """
 
     # Delete file if existing
-    subprocess.Popen(
-        f"{ROOT_DIR}/dlaas/bin/dl_tui.py --delete --file=test2.txt --metadata=test2.json", shell=True
-    ).communicate()
+    delete(ip=ip, token=token, file="test2.txt")
 
     stdout, stderr = subprocess.Popen(
         f"{ROOT_DIR}/dlaas/bin/dl_tui.py --replace --file=test2.txt --metadata=test2.json",
@@ -288,9 +268,7 @@ def test_update():
     """
 
     # Upload file for update
-    subprocess.Popen(
-        f"{ROOT_DIR}/dlaas/bin/dl_tui.py --upload --file=test.txt --metadata=test.json", shell=True
-    ).communicate()
+    upload(ip=ip, token=token, file="test.txt", json_data="test.json")
 
     stdout, stderr = subprocess.Popen(
         f"{ROOT_DIR}/dlaas/bin/dl_tui.py --update --key=test.txt --metadata=test2.json",
@@ -309,9 +287,7 @@ def test_update_nonexistent():
     """
 
     # Delete file if existing
-    subprocess.Popen(
-        f"{ROOT_DIR}/dlaas/bin/dl_tui.py --delete --file=test2.txt --metadata=test2.json", shell=True
-    ).communicate()
+    delete(ip=ip, token=token, file="test2.txt")
 
     stdout, stderr = subprocess.Popen(
         f"{ROOT_DIR}/dlaas/bin/dl_tui.py --update --key=test2.txt --metadata=test2.json",
@@ -330,9 +306,7 @@ def test_browse_all():
     """
 
     # Upload files for browsing
-    subprocess.Popen(
-        f"{ROOT_DIR}/dlaas/bin/dl_tui.py --upload --file=test.txt --metadata=test.json", shell=True
-    ).communicate()
+    upload(ip=ip, token=token, file="test.txt", json_data="test.json")
 
     stdout, stderr = subprocess.Popen(
         f"{ROOT_DIR}/dlaas/bin/dl_tui.py --browse",
@@ -351,9 +325,7 @@ def test_browse_filter():
     """
 
     # Upload files for browsing
-    subprocess.Popen(
-        f"{ROOT_DIR}/dlaas/bin/dl_tui.py --upload --file=test.txt --metadata=test.json", shell=True
-    ).communicate()
+    upload(ip=ip, token=token, file="test.txt", json_data="test.json")
 
     stdout, stderr = subprocess.Popen(
         f"{ROOT_DIR}/dlaas/bin/dl_tui.py --browse --filter='category = dog'",
@@ -372,9 +344,7 @@ def test_delete():
     """
 
     # Upload files for deletion
-    subprocess.Popen(
-        f"{ROOT_DIR}/dlaas/bin/dl_tui.py --upload --file=test.txt --metadata=test.json", shell=True
-    ).communicate()
+    upload(ip=ip, token=token, file="test.txt", json_data="test.json")
 
     stdout, stderr = subprocess.Popen(
         f"{ROOT_DIR}/dlaas/bin/dl_tui.py --delete --key=test.txt",
