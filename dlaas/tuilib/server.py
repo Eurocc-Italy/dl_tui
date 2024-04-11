@@ -285,6 +285,7 @@ def upload_results(json_path: str, slurm_job_id: int):
 
     # Generating SSH command
     ssh_cmd = f"cd {user_input.id}; "
+    ssh_cmd += "ls; "
     ssh_cmd += f"cd run_script; "  # if a script was also provided
     ssh_cmd += f"sbatch -p {partition} -A {account} "
     ssh_cmd += f"--mail-type ALL --mail-user {mail} "
