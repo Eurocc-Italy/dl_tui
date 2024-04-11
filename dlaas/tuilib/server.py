@@ -281,7 +281,7 @@ def upload_results(json_path: str, slurm_job_id: int):
     wrap_cmd += f"source {config.venv_path}/bin/activate; "
     wrap_cmd += f"python upload_results_{user_input.id}.py; "
     wrap_cmd += "touch RESULTS_UPLOADED; "
-    wrap_cmd += f"rm -rf ../{user_input.id}"  # remove temporary directory from HPC. Comment this line for debugging
+    # wrap_cmd += f"rm -rf ../{user_input.id}"  # remove temporary directory from HPC. Comment this line for debugging
 
     # Generating SSH command
     ssh_cmd = f"cd {user_input.id}; "
