@@ -279,14 +279,13 @@ def upload_results(json_path: str, slurm_job_id: int):
     # Creating wrap command to be passed to sbatch
     wrap_cmd = f"module load python; "  # TODO: placeholder for G100, as Python is not available by default.
     wrap_cmd += f"source {config.venv_path}/bin/activate; "
+    wrap_cmd += f"cd run_script; "  # if a script was also provided
     wrap_cmd += f"python upload_results_{user_input.id}.py; "
     wrap_cmd += "touch RESULTS_UPLOADED; "
     # wrap_cmd += f"rm -rf ../{user_input.id}"  # remove temporary directory from HPC. Comment this line for debugging
 
     # Generating SSH command
     ssh_cmd = f"cd {user_input.id}; "
-    ssh_cmd += "ls; "
-    ssh_cmd += f"cd run_script; "  # if a script was also provided
     ssh_cmd += f"sbatch -p {partition} -A {account} "
     ssh_cmd += f"--mail-type ALL --mail-user {mail} "
     ssh_cmd += f"-t 00:10:00 "
