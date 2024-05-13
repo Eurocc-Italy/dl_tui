@@ -1,5 +1,3 @@
-# TEST COMMIT
-
 # dlaas-tui
 
 This is the user guide for Cineca's Data Lake as a Service Text User Interface (`dlaas-tui`) Python library. This TUI is used to run queries and processing scripts on the Data Lake files, as well as interacting with the API server administering the Data Lake infrastructure.
