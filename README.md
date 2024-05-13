@@ -1,6 +1,6 @@
-# dlaas-tui
+# dl-tui
 
-This is the user guide for Cineca's Data Lake as a Service Text User Interface (`dlaas-tui`) Python library. This TUI is used to run queries and processing scripts on the Data Lake files, as well as interacting with the API server administering the Data Lake infrastructure.
+This is the user guide for Cineca's Data Lake as a Service Text User Interface (`dl-tui`) Python library. This TUI is used to run queries and processing scripts on the Data Lake files, as well as interacting with the API server administering the Data Lake infrastructure.
 
 ## Data Lake as a Service
 
@@ -13,8 +13,8 @@ The service provides for two hardware endpoints:
 
 The software stack is composed of three main components:
 
-- A [repository](https://gitlab.hpc.cineca.it/igentile/dtaas-digitaltwinasaservice) containing the Ansible deployment scripts for setting up the infrastructure;
-- An [API](https://gitlab.hpc.cineca.it/igentile/dtaas_test_api) server, which accepts the user requests and carries out operations on the Data Lake (file upload/download, querying, etc.);
+- A [repository](https://gitlab.hpc.cineca.it/eurocc/dl-deploy) containing the Ansible deployment scripts for setting up the infrastructure;
+- An [API](https://gitlab.hpc.cineca.it/eurocc/dl-api) server, which accepts the user requests and carries out operations on the Data Lake (file upload/download, querying, etc.);
 - The TUI (this library), which is utilized by the end users to interface with the API, as well as by the API itself to interface with the HPC system.
 
 ## Text User Interface (`dlaas-tui`)
@@ -63,8 +63,8 @@ We highly recommend installing the software in a custom Python virtual environme
 After having set up and activated your virtual environment, follow these steps to install the DTaaS TUI:
   
   ```bash
-  git clone https://gitlab.hpc.cineca.it/lbabetto/dlaas-tui  
-  pip install dlaas-tui/
+  git clone https://gitlab.hpc.cineca.it/eurocc/dl-tui  
+  pip install dl-tui/
   ```
 
 ### API interface (`dl_tui`)
