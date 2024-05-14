@@ -1,8 +1,8 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="dlaas-tui",
-    version="0.3.9",
+    name="dl-tui",
+    version="0.4.0",
     description="Text user interface for Cineca's Data Lake as a Service",
     packages=find_packages(include=["dlaas", "dlaas.*"]),
     package_data={
