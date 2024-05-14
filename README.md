@@ -89,7 +89,7 @@ The API interface can be called via the `dl_tui` executable, with one of the fol
 
 The IP address of the API server will be taken by the `config_hpc.json` configuration file (see the [configuration](#configuration) section for more details). Alternatively, it is possible to overwrite the default via the `--ip=...` _option_.
 
-A valid authentication token is required. If saved in the `~/.config/dlaas/api-token` file, it will automatically be read by the executable. Otherwise, the token can be sent directly via the `--token=...` _option_.
+A valid authentication token is required. If saved in the `~/.config/dlaas/api-token.txt` file, it will automatically be read by the executable. Otherwise, the token can be sent directly via the `--token=...` _option_.
 
 The `--upload` and `--replace` _actions_ require the following additional (mandatory) _options_:
 

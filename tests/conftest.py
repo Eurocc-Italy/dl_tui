@@ -34,7 +34,7 @@ def setup_testfiles_HPC():
 
     # loading IP and token for API
     ip = Config("hpc").ip
-    with open(f"{os.environ['HOME']}/.config/dlaas/api-token", "r") as f:
+    with open(f"{os.environ['HOME']}/.config/dlaas/api-token.txt", "r") as f:
         token = f.read()
 
     # uploading test files to datalake via API
@@ -83,7 +83,7 @@ def cleanup(config_server):
 
     # setting IP and token for cleanup
     ip = Config("hpc").ip
-    with open(f"{os.environ['HOME']}/.config/dlaas/api-token", "r") as f:
+    with open(f"{os.environ['HOME']}/.config/dlaas/api-token.txt", "r") as f:
         token = f.read()
 
     # remove result files from datalake

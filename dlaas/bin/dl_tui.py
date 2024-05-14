@@ -104,7 +104,7 @@ Example commands [arguments within parentheses are optional]:
     parser.add_argument(
         "--token",
         help="authentication token for launching commands to the Data Lake API",
-        default=open(f"{os.environ['HOME']}/.config/dlaas/api-token", "r").read(),
+        default=open(f"{os.environ['HOME']}/.config/dlaas/api-token.txt", "r").read(),
     )
 
     parser.add_argument(

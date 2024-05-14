@@ -16,7 +16,7 @@ from dlaas.tuilib.api import browse, download
 
 # loading IP and token from defaults
 ip = Config("hpc").ip
-with open(f"{os.environ['HOME']}/.config/dlaas/api-token", "r") as f:
+with open(f"{os.environ['HOME']}/.config/dlaas/api-token.txt", "r") as f:
     token = f.read()
 
 
