@@ -280,6 +280,9 @@ def upload_results(json_path: str, slurm_job_id: int):
     wrap_cmd = f"module load python; "  # TODO: placeholder for G100, as Python is not available by default.
     wrap_cmd += f"source {config.venv_path}/bin/activate; "
     wrap_cmd += f"cd run_script_*; "  # if a script was also provided
+    wrap_cmd += f"unzip results_{user_input.id}.zip; "
+    wrap_cmd += f"cp slurm* ../slurm* results/; "
+    wrap_cmd += f"zip -r results_{user_input.id}.zip results_{user_input.id}; "
     wrap_cmd += f"python upload_results_{user_input.id}.py; "
     wrap_cmd += "touch RESULTS_UPLOADED; "
     wrap_cmd += f"rm -rf ../../{user_input.id}"  # remove temporary directory from HPC. Comment this line for debugging

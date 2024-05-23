@@ -188,11 +188,6 @@ def save_output(
         with open(f"results/user_script_{job_id}.py", "w") as f:
             f.write(script)
 
-    # copying Slurm .out and .err files to results folder
-    # NOTE: this only works if a script is provided and we are currently in the temporary run directory
-    for match in glob("../slurm-*"):
-        shutil.copy(match, f"results/{os.path.basename(match)}")
-
     for file in files_out:
         try:
             # consider using shutil.move to save space, here and when copying the results
