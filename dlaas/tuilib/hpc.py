@@ -197,8 +197,8 @@ def save_output(
 
     with open(f"upload_results_{job_id}.py", "w") as f:
         content = "import os, boto3, shutil, glob\n"
-        content += 'for match in glob("../slurm-*"):\n'
-        content += '    shutil.copy(match, f"results/{os.path.basename(match)}")\n'
+        content += 'for match in glob.glob("../slurm-*"):\n'
+        content += ' shutil.copy(match, f"results/{os.path.basename(match)}")\n'
         content += f'shutil.make_archive("results_{job_id}", "zip", "results")\n'
         content += 'shutil.rmtree("results")\n'
         content += f's3 = boto3.client(service_name="s3", endpoint_url="{s3_endpoint_url}")\n'
