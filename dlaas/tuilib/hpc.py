@@ -189,8 +189,6 @@ def save_output(
             f.write(script)
 
     # copying Slurm .out and .err files to results folder
-    for match in glob("slurm-*"):
-        shutil.copy(match, f"results/{match}")
     for match in glob("../slurm-*"):
         shutil.copy(match, f"results/{os.path.basename(match)}")
 
