@@ -13,6 +13,7 @@ import sys
 import shutil
 from sh import pushd
 from tempfile import mkdtemp
+from glob import glob
 
 from typing import List, Dict, Tuple
 from pymongo.collection import Collection
@@ -186,6 +187,12 @@ def save_output(
     if script:
         with open(f"results/user_script_{job_id}.py", "w") as f:
             f.write(script)
+
+    # copying Slurm .out and .err files to results folder
+    for match in glob("slurm-*"):
+        shutil.copy(match, f"results/{match}")
+    for match in glob("../slurm-*"):
+        shutil.copy(match, f"results/{os.path.basename(match)}")
 
     for file in files_out:
         try:
