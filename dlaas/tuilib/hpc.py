@@ -195,11 +195,12 @@ def save_output(
         except FileNotFoundError:
             logger.error(f"No such file or directory: '{file}'")
 
-    shutil.make_archive(f"results_{job_id}", "zip", "results")
-    shutil.rmtree(f"results")
-
     with open(f"upload_results_{job_id}.py", "w") as f:
-        content = "import boto3\n"
+        content = "import os, boto3, shutil, glob\n"
+        content += 'for match in glob("../slurm-*"):\n'
+        content += '    shutil.copy(match, f"results/{os.path.basename(match)}")\n'
+        content += f'shutil.make_archive("results_{job_id}", "zip", "results")\n'
+        content += 'shutil.rmtree("results")\n'
         content += f's3 = boto3.client(service_name="s3", endpoint_url="{s3_endpoint_url}")\n'
         content += f's3.upload_file(Filename="results_{job_id}.zip", Bucket="{s3_bucket}", Key="results_{job_id}.zip")'
         f.write(content)
