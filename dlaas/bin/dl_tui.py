@@ -18,6 +18,7 @@ logger.addHandler(fh)
 
 import os
 import json
+from ast import literal_eval
 
 import argparse
 
@@ -329,7 +330,7 @@ Example commands [arguments within parentheses are optional]:
             filter=args.filter,
         )
         if response.status_code == 200:
-            files = eval(response.text)
+            files = literal_eval(response.text)
             msg = f"Filter: {args.filter}\n"
             msg += f"Files:\n  - "
             msg += ("\n  - ").join(files)
