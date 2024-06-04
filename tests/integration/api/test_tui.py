@@ -217,8 +217,11 @@ def test_query_with_script():
     with ZipFile(f"results_{job_id}.zip", "r") as archive:
         archive = archive.namelist()
         archive.sort()
+        slurm_job = int(archive[1].replace("slurm-", "").replace(".out", ""))
         assert archive == [
             f"query_{job_id}.txt",
+            f"slurm-{slurm_job}.out",
+            f"slurm-{slurm_job+1}.out",
             "test.txt",
             f"user_script_{job_id}.py",
         ], "Results archive does not contain the expected files."

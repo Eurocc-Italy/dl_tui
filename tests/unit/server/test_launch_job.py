@@ -46,7 +46,7 @@ def test_just_search(config_server: Config, config_hpc: Config, setup_testfiles_
 
     stdout, stderr, slurm_job_id = launch_job(json_path="input.json")
 
-    assert stdout[:19] == "Submitted batch job"
+    assert stdout == f"Submitted batch job {slurm_job_id}\n"
     assert stderr == ""
 
     while True:
@@ -59,10 +59,10 @@ def test_just_search(config_server: Config, config_hpc: Config, setup_testfiles_
         ):
             break
 
-    # checking that results file is present
+    # checking that results folder is present
     assert (
         os.system(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DLAAS-TUI-TEST/results_DLAAS-TUI-TEST.zip'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DLAAS-TUI-TEST/results'"
         )
         == 0
     ), "Results file not found."
@@ -75,21 +75,10 @@ def test_just_search(config_server: Config, config_hpc: Config, setup_testfiles_
         == 0
     ), "Upload script not found."
 
-    # checking zip content
-    assert (
-        "test1.txt"
-        in os.popen(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'unzip -l ~/DLAAS-TUI-TEST/results_DLAAS-TUI-TEST.zip'"
-        )
-        .read()
-        .split()
-        and "test2.txt"
-        in os.popen(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'unzip -l ~/DLAAS-TUI-TEST/results_DLAAS-TUI-TEST.zip'"
-        )
-        .read()
-        .split()
-    ), "Missing output file."
+    # checking results content
+    assert os.popen(
+        f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DLAAS-TUI-TEST/results'"
+    ).read().split() == ["query_DLAAS-TUI-TEST.txt", "test1.txt", "test2.txt"], "Missing output files."
 
     # checking that slurm output is empty
     assert (
@@ -122,7 +111,7 @@ def test_full_path(config_server: Config, config_hpc: Config, setup_testfiles_HP
 
     stdout, stderr, slurm_job_id = launch_job(json_path=f"{os.getcwd()}/input.json")
 
-    assert stdout[:19] == "Submitted batch job"
+    assert stdout == f"Submitted batch job {slurm_job_id}\n"
     assert stderr == ""
 
     while True:
@@ -138,7 +127,7 @@ def test_full_path(config_server: Config, config_hpc: Config, setup_testfiles_HP
     # checking that results file is present
     assert (
         os.system(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DLAAS-TUI-TEST/results_DLAAS-TUI-TEST.zip'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DLAAS-TUI-TEST/results'"
         )
         == 0
     ), "Results file not found."
@@ -151,21 +140,10 @@ def test_full_path(config_server: Config, config_hpc: Config, setup_testfiles_HP
         == 0
     ), "Upload script not found."
 
-    # checking zip content
-    assert (
-        "test1.txt"
-        in os.popen(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'unzip -l ~/DLAAS-TUI-TEST/results_DLAAS-TUI-TEST.zip'"
-        )
-        .read()
-        .split()
-        and "test2.txt"
-        in os.popen(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'unzip -l ~/DLAAS-TUI-TEST/results_DLAAS-TUI-TEST.zip'"
-        )
-        .read()
-        .split()
-    ), "Missing output file."
+    # checking results content
+    assert os.popen(
+        f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DLAAS-TUI-TEST/results'"
+    ).read().split() == ["query_DLAAS-TUI-TEST.txt", "test1.txt", "test2.txt"], "Missing output files."
 
     # checking that slurm output is empty
     assert (
@@ -186,7 +164,7 @@ def test_return_first(config_server: Config, config_hpc: Config, setup_testfiles
             {
                 "id": "DLAAS-TUI-TEST",
                 "sql_query": "SELECT * FROM metadata WHERE id = '1' OR id = '2'",
-                "script": "user_script.py",
+                "script_path": "user_script.py",
                 "config_server": config_server.__dict__,
                 "config_hpc": config_hpc.__dict__,
             },
@@ -201,7 +179,7 @@ def test_return_first(config_server: Config, config_hpc: Config, setup_testfiles
 
     stdout, stderr, slurm_job_id = launch_job(json_path="input.json")
 
-    assert stdout[:19] == "Submitted batch job"
+    assert stdout == f"Submitted batch job {slurm_job_id}\n"
     assert stderr == ""
 
     while True:
@@ -217,7 +195,7 @@ def test_return_first(config_server: Config, config_hpc: Config, setup_testfiles
     # checking that results file is present
     assert (
         os.system(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DLAAS-TUI-TEST/results_DLAAS-TUI-TEST.zip'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DLAAS-TUI-TEST/run_script_*/results'"
         )
         == 0
     ), "Results file not found."
@@ -225,20 +203,19 @@ def test_return_first(config_server: Config, config_hpc: Config, setup_testfiles
     # checking that the upload script is present
     assert (
         os.system(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DLAAS-TUI-TEST/upload_results_DLAAS-TUI-TEST.py'"
+            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DLAAS-TUI-TEST/run_script_*/upload_results_DLAAS-TUI-TEST.py'"
         )
         == 0
     ), "Upload script not found."
 
-    # checking zip content
-    assert (
-        "test1.txt"
-        in os.popen(
-            f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'unzip -l ~/DLAAS-TUI-TEST/results_DLAAS-TUI-TEST.zip'"
-        )
-        .read()
-        .split()
-    ), "Missing output file."
+    # checking results content
+    assert os.popen(
+        f"ssh -i {config_server.ssh_key} {config_server.user}@{config_server.host} 'ls ~/DLAAS-TUI-TEST/run_script_*/results'"
+    ).read().split() == [
+        "query_DLAAS-TUI-TEST.txt",
+        "test1.txt",
+        "user_script_DLAAS-TUI-TEST.py",
+    ], "Missing output files."
 
     # checking that slurm output is empty
     assert (
@@ -270,7 +247,7 @@ def test_invalid_script(config_server: Config, config_hpc: Config, setup_testfil
 
     stdout, stderr, slurm_job_id = launch_job(json_path="input.json")
 
-    assert stdout[:19] == "Submitted batch job"
+    assert stdout == f"Submitted batch job {slurm_job_id}\n"
     assert stderr == ""
 
     while True:

@@ -75,7 +75,7 @@ def test_just_search(config_server: Config, config_hpc: Config, setup_testfiles_
 
     stdout, stderr = upload_results(json_path="input.json", slurm_job_id=slurm_job_id)
 
-    assert stdout[:19] == "Submitted batch job"
+    assert stdout == f"Submitted batch job {slurm_job_id+1}\n"
     assert stderr == ""
 
     check_status()
@@ -104,7 +104,7 @@ def test_full_path(config_server: Config, config_hpc: Config, setup_testfiles_HP
                 "id": "DLAAS-TUI-TEST",
                 "sql_query": "SELECT * FROM metadata WHERE id = '1' OR id = '2'",
                 "config_server": config_server.__dict__,
-                "config": config_hpc.__dict__,
+                "config_hpc": config_hpc.__dict__,
             },
             f,
         )
@@ -116,7 +116,7 @@ def test_full_path(config_server: Config, config_hpc: Config, setup_testfiles_HP
 
     stdout, stderr = upload_results(json_path=f"{os.getcwd()}/input.json", slurm_job_id=slurm_job_id)
 
-    assert stdout[:19] == "Submitted batch job"
+    assert stdout == f"Submitted batch job {slurm_job_id+1}\n"
     assert stderr == ""
 
     check_status()
@@ -131,6 +131,53 @@ def test_full_path(config_server: Config, config_hpc: Config, setup_testfiles_HP
             "query_DLAAS-TUI-TEST.txt",
             "test1.txt",
             "test2.txt",
+        ], "Results archive does not contain the expected files."
+
+
+def test_return_first(config_server: Config, config_hpc: Config, setup_testfiles_HPC):
+    """
+    Search for two specific files and only return the first item
+    """
+
+    with open("input.json", "w") as f:
+        json.dump(
+            {
+                "id": "DLAAS-TUI-TEST",
+                "sql_query": "SELECT * FROM metadata WHERE id = '1' OR id = '2'",
+                "script_path": "user_script.py",
+                "config_server": config_server.__dict__,
+                "config_hpc": config_hpc.__dict__,
+            },
+            f,
+        )
+
+    with open("user_script.py", "w") as f:
+        f.write("def main(files_in):\n files_out=files_in.copy()\n return [files_out[0]]")
+
+    create_remote_directory(json_path=f"{os.getcwd()}/input.json")
+    copy_json_input(json_path=f"{os.getcwd()}/input.json")
+    copy_user_script(json_path=f"{os.getcwd()}/input.json")
+    _, _, slurm_job_id = launch_job(json_path=f"{os.getcwd()}/input.json")
+
+    stdout, stderr = upload_results(json_path=f"{os.getcwd()}/input.json", slurm_job_id=slurm_job_id)
+
+    assert stdout == f"Submitted batch job {slurm_job_id+1}\n"
+    assert stderr == ""
+
+    check_status()
+
+    # checking results archive
+    assert os.path.exists(f"results_DLAAS-TUI-TEST.zip"), "Zipped archive was not created."
+
+    with ZipFile(f"results_DLAAS-TUI-TEST.zip", "r") as archive:
+        archive = archive.namelist()
+        archive.sort()
+        assert archive == [
+            "query_DLAAS-TUI-TEST.txt",
+            f"slurm-{slurm_job_id}.out",
+            f"slurm-{slurm_job_id+1}.out",
+            "test1.txt",
+            "user_script_DLAAS-TUI-TEST.py",
         ], "Results archive does not contain the expected files."
 
 

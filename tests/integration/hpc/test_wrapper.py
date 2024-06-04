@@ -36,21 +36,24 @@ def test_search_specific_files(mock_mongodb):
         job_id=1,
     )
 
-    assert len(glob("results_1.zip")) == 1, "Zipped archive was not created."
+    assert len(glob("results")) == 1, "Results folder was not created."
 
-    with ZipFile("results_1.zip", "r") as archive:
-        archive = archive.namelist()
-        archive.sort()
-        assert archive == [
-            "query_1.txt",
-            "test1.txt",
-            "test2.txt",
-        ], "Results archive does not contain the expected files."
+    results = os.listdir("results")
+    results.sort()
+    assert results == [
+        "query_1.txt",
+        "test1.txt",
+        "test2.txt",
+    ], "Results archive does not contain the expected files."
 
     assert len(glob("upload_results_1.py")) == 1, "Upload script was not created."
 
     with open(glob("upload_results_1.py")[0], "r") as f:
-        expected = "import boto3\n"
+        expected = "import os, boto3, shutil, glob\n"
+        expected += 'for match in glob.glob("../slurm-*"):\n'
+        expected += ' shutil.copy(match, f"results/{os.path.basename(match)}")\n'
+        expected += 'shutil.make_archive("results_1", "zip", "results")\n'
+        expected += 'shutil.rmtree("results")\n'
         expected += 's3 = boto3.client(service_name="s3", endpoint_url="https://testurl.com/")\n'
         expected += 's3.upload_file(Filename="results_1.zip", Bucket="test", Key="results_1.zip")'
 
@@ -79,21 +82,24 @@ def test_search_specific_files_return_only_first(mock_mongodb):
         script=script,
     )
 
-    assert len(glob("*/results_2.zip")) == 1, "Zipped archive was not created."
+    assert len(glob("*/results")) == 1, "Results folder was not created."
 
-    with ZipFile(glob("*/results_2.zip")[0], "r") as archive:
-        archive = archive.namelist()
-        archive.sort()
-        assert archive == [
-            "query_2.txt",
-            "test1.txt",
-            "user_script_2.py",
-        ], "Results archive does not contain the expected files."
+    results = os.listdir(glob("*/results")[0])
+    results.sort()
+    assert results == [
+        "query_2.txt",
+        "test1.txt",
+        "user_script_2.py",
+    ], "Results archive does not contain the expected files."
 
     assert len(glob("*/upload_results_2.py")) == 1, "Upload script was not created."
 
     with open(glob("*/upload_results_2.py")[0], "r") as f:
-        expected = "import boto3\n"
+        expected = "import os, boto3, shutil, glob\n"
+        expected += 'for match in glob.glob("../slurm-*"):\n'
+        expected += ' shutil.copy(match, f"results/{os.path.basename(match)}")\n'
+        expected += 'shutil.make_archive("results_2", "zip", "results")\n'
+        expected += 'shutil.rmtree("results")\n'
         expected += 's3 = boto3.client(service_name="s3", endpoint_url="https://testurl.com/")\n'
         expected += 's3.upload_file(Filename="results_2.zip", Bucket="test", Key="results_2.zip")'
 

@@ -98,8 +98,11 @@ def test_return_first(config_server: Config, setup_testfiles_HPC):
     with ZipFile(f"results_DLAAS-TUI-TEST.zip", "r") as archive:
         archive = archive.namelist()
         archive.sort()
+        job_id = int(archive[1].replace("slurm-", "").replace(".out", ""))
         assert archive == [
             "query_DLAAS-TUI-TEST.txt",
+            f"slurm-{job_id}.out",
+            f"slurm-{job_id+1}.out",
             "test1.txt",
             "user_script_DLAAS-TUI-TEST.py",
         ], "Results archive does not contain the expected files."

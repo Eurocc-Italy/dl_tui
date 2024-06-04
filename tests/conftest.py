@@ -65,6 +65,8 @@ def cleanup(config_server):
         shutil.rmtree(match)
     for match in glob("results_*.zip"):
         os.remove(match)
+    if os.path.exists("results"):
+        shutil.rmtree("results")
     for match in glob("upload_results_*.py"):
         os.remove(match)
     if os.path.exists("user_script.py"):
@@ -171,7 +173,7 @@ def config_server():
             "upload_partition": "g100_all_serial",
             "account": "EUCC_staff_2",
             "qos": "normal",
-            "mail": "Nope",
+            "mail": "m.rossi@cineca.it",
             "walltime": "00:05:00",
             "nodes": 1,
             "ntasks_per_node": 1,

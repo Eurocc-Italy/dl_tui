@@ -31,25 +31,27 @@ def test_save_output(mock_mongodb):
         collection=mock_mongodb,
     )
 
-    assert os.path.exists("results_1.zip"), "Zipped archive was not created."
+    assert os.path.exists("results"), "Results folder was not created."
 
-    with ZipFile(f"results_1.zip", "r") as archive:
-        archive = archive.namelist()
-        archive.sort()
-        assert archive == [
-            "query_1.txt",
-            "test1.txt",
-            "test2.txt",
-            "user_script_1.py",
-        ], "Results archive does not contain the expected files."
+    results = os.listdir("results")
+    results.sort()
+    assert results == [
+        "query_1.txt",
+        "test1.txt",
+        "test2.txt",
+        "user_script_1.py",
+    ], "Results folder does not contain the expected files."
 
     assert os.path.exists("upload_results_1.py"), "Upload script was not created."
 
     with open("upload_results_1.py", "r") as f:
-        expected = "import boto3\n"
+        expected = "import os, boto3, shutil, glob\n"
+        expected += 'for match in glob.glob("../slurm-*"):\n'
+        expected += ' shutil.copy(match, f"results/{os.path.basename(match)}")\n'
+        expected += 'shutil.make_archive("results_1", "zip", "results")\n'
+        expected += 'shutil.rmtree("results")\n'
         expected += 's3 = boto3.client(service_name="s3", endpoint_url="https://testurl.com/")\n'
         expected += 's3.upload_file(Filename="results_1.zip", Bucket="test", Key="results_1.zip")'
-
         actual = f.read()
         assert actual == expected
 
@@ -77,15 +79,20 @@ def test_nonexistent_files(mock_mongodb):
         collection=mock_mongodb,
     )
 
-    assert os.path.exists("results_2.zip"), "Zipped archive was not created."
+    assert os.path.exists("results"), "Results folder was not created."
 
-    with ZipFile(f"results_2.zip", "r") as archive:
-        assert archive.namelist() == ["query_2.txt"], "Results archive contains unexpected items."
+    results = os.listdir("results")
+    results.sort()
+    assert results == ["query_2.txt"], "Results folder contains unexpected items."
 
     assert os.path.exists("upload_results_2.py"), "Upload script was not created."
 
     with open("upload_results_2.py", "r") as f:
-        expected = "import boto3\n"
+        expected = "import os, boto3, shutil, glob\n"
+        expected += 'for match in glob.glob("../slurm-*"):\n'
+        expected += ' shutil.copy(match, f"results/{os.path.basename(match)}")\n'
+        expected += 'shutil.make_archive("results_2", "zip", "results")\n'
+        expected += 'shutil.rmtree("results")\n'
         expected += 's3 = boto3.client(service_name="s3", endpoint_url="https://testurl.com/")\n'
         expected += 's3.upload_file(Filename="results_2.zip", Bucket="test", Key="results_2.zip")'
 
