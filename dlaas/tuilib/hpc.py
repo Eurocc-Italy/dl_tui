@@ -13,7 +13,6 @@ import sys
 import shutil
 from sh import pushd
 from tempfile import mkdtemp
-from glob import glob
 
 from typing import List, Dict, Tuple
 from pymongo.collection import Collection
