@@ -21,7 +21,9 @@ setup(
     install_requires=[
         "sh",
         "wheel",
-        "pymongo",
+        "pymongo==4.5.0",
+        "python-dateutil==2.6.0",
+        "urllib3==1.26",
         "pyparsing",
         "sqlparse @ git+https://github.com/lbabetto/sqlparse",
         "boto3",
