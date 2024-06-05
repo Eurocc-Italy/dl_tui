@@ -15,6 +15,58 @@ import re
 from typing import Dict
 
 
+def sanitize_dictionary(dictionary) -> None:
+    """Sanitize dictionary input to make sure no OS command injection is possible.
+    For each keyword it performs a regex match to ensure the expected format is found, for example the
+    value of the keyword "walltime" must be something like DD-HH:MM:SS, or HH:MM:SS, or MM:SS.
+
+    Raises
+    ------
+    SyntaxError
+        if any keyword does not match the expected regex format, raise exception and stop code execution.
+    """
+
+    keyword_formats = {
+        "version": ["server", "hpc"],
+        # config_hpc
+        "user": [r"[a-zA-Z0-9_]+"],  # any single word (word: character sequence containing alphanumerics or _)
+        "password": [r"[a-zA-Z0-9_]+"],  # any single word
+        "ip": [
+            r"([a-zA-Z0-9_-]+\.)+[a-zA-Z0-9_-]+"
+        ],  # any word sequence (with -) delimited by dots, but not ending with one
+        "port": [r"\d+"],  # any number
+        "database": [r"[a-zA-Z0-9_]+"],  # any single word
+        "collection": [r"[a-zA-Z0-9_]+"],  # any single word
+        "s3_endpoint_url": [r"(https?://)?([a-zA-Z0-9_-]+\.)+[a-zA-Z0-9_-]+/?"],  # "https://XXX.(XXX.)*n.XXX/",
+        "s3_bucket": [r"[a-zA-Z0-9_]+"],  # any single word
+        "pfs_prefix_path": [r"/([a-zA-Z0-9_-]+/?)+"],  # any word sequence (no .) delimited by slashes, starting with /
+        # config_server
+        "user": [r"[a-zA-Z0-9_]+"],  # any single word (word: character sequence containing alphanumerics or _)
+        "host": [
+            r"([a-zA-Z0-9_-]+\.)+[a-zA-Z0-9_-]+"
+        ],  # any word sequence (with -) delimited by dots, but not ending with one
+        "venv_path": [r"^(~)?/([a-zA-Z0-9_.-]+/?)+"],  # any word sequence delimited by slashes, can start with ~ or /
+        "ssh_key": [r"^(~)?/([a-zA-Z0-9_.-]+/?)+"],  # any word sequence delimited by slashes, can start with ~ or /
+        "compute_partition": [r"[a-zA-Z0-9_]+"],  # any single word,
+        "upload_partition": [r"[a-zA-Z0-9_]+"],  # any single word
+        "account": [r"[a-zA-Z0-9_]+"],  # any single word
+        "qos": [r"[a-zA-Z0-9_]+"],  # any single word
+        "mail": [r"[a-zA-Z0-9_\.]+@[a-zA-Z0-9_\.]+"],  # any valid email type (no dashes or pluses)
+        "walltime": [r"(\d+-)?(\d+:)?(\d+:)?\d+"],  # DD-HH:MM:SS
+        "nodes": [r"\d+(k|m)?"],  # any number, possibly ending with k or m
+        "ntasks_per_node": [r"\d+"],  # any number
+    }
+
+    # make sure keyword values match the expected format
+    for key, value in dictionary.items():
+        for pattern in keyword_formats[key]:
+            match = re.fullmatch(pattern, str(value))
+            if match:
+                break
+        else:
+            raise SyntaxError(f"Unexpected format for keyword '{key}': {value}")
+
+
 class UserInput:
     """Class containing command-line input arguments passed as JSON-formatted dictionary
 
@@ -142,87 +194,10 @@ class Config:
         for key, value in default.items():
             setattr(self, key, value)
 
+        sanitize_dictionary(self.__dict__)
+
     def __str__(self):
         return str(self.__dict__)
-
-    def sanitize(self) -> None:
-        """Sanitize configuration to make sure no OS command injection is possible.
-        First, the function checks for illegal characters such as `()|&<>;{}?" and if found, raises an exception.
-        Then, for each keyword it performs a regex match to ensure the expected format is found, for example the
-        value of the keyword "walltime" must be something like DD-HH:MM:SS, or HH:MM:SS, or MM:SS.
-
-        Raises
-        ------
-        SyntaxError
-            if any keyword contains an illegal character, raise exception and stop code execution.
-        """
-
-        character_denylist = [
-            "`",
-            '"',
-            "'",
-            "^",
-            "+",
-            "(",
-            ")",
-            "[",
-            "]",
-            "{",
-            "}",
-            "<",
-            ">",
-            "|",
-            "&",
-            "$",
-            "?",
-            ";",
-            "\\",
-        ]
-
-        # Checking if illegal characters are present in configuration
-        for key, value in self.__dict__.items():
-            if any(char in str(value) for char in character_denylist):
-                raise SyntaxError(
-                    f"{self.version.capitalize()} configuration, illegal character in keyword '{key}': {value}"
-                )
-
-        keyword_formats = {
-            "version": ["server", "hpc"],
-            # config_hpc
-            "user": [r"\w+"],  # any single word (word: character sequence containing alphanumerics or _)
-            "password": [r"\w+"],  # any single word
-            "ip": [r"([\w-]+\.)+[\w-]+"],  # any word sequence (with -) delimited by dots, but not ending with one
-            "port": [r"\d+"],  # any number
-            "database": [r"\w+"],  # any single word
-            "collection": [r"\w+"],  # any single word
-            "s3_endpoint_url": [r"(https?://)?([\w-]+\.)+[\w-]+/?"],  # "https://XXX.(XXX.)*n.XXX/",
-            "s3_bucket": [r"\w+"],  # any single word
-            "pfs_prefix_path": [r"/([\w-]+/?)+"],  # any word sequence (no .) delimited by slashes, starting with /
-            # config_server
-            "user": [r"\w+"],  # any single word (word: character sequence containing alphanumerics or _)
-            "host": [r"([\w-]+\.)+[\w-]+"],  # any word sequence (with -) delimited by dots, but not ending with one
-            "venv_path": [r"^(~)?/([\w.-]+/?)+"],  # any word sequence delimited by slashes, can start with ~ or /
-            "ssh_key": [r"^(~)?/([\w.-]+/?)+"],  # any word sequence delimited by slashes, can start with ~ or /
-            "compute_partition": [r"\w+"],  # any single word,
-            "upload_partition": [r"\w+"],  # any single word
-            "account": [r"\w+"],  # any single word
-            "qos": [r"\w+"],  # any single word
-            "mail": [r"[\w+\.]+@[\w+\.]+"],  # any valid email type (no dashes or pluses)
-            "walltime": [r"(\d+-)?(\d+:)?(\d+:)?\d+"],  # DD-HH:MM:SS
-            "nodes": [r"\d+(k|m)?"],  # any number, possibly ending with k or m
-            "ntasks_per_node": [r"\d+"],  # any number
-        }
-
-        # make sure keyword values match the expected format
-        for key, value in self.__dict__.items():
-            for pattern in keyword_formats[key]:
-                match = re.fullmatch(pattern, str(value))
-                if match:
-                    break
-            else:
-                raise SyntaxError(
-                    f"{self.version.capitalize()} configuration, unexpected format for keyword '{key}': {value}"
-                )
 
     def load_default_config(self, version: str) -> Dict[str, str]:
         """Load default configuration as found in /etc/default.
@@ -251,6 +226,8 @@ class Config:
 
             base_config.update(config)
 
+        sanitize_dictionary(base_config)
+
         return base_config
 
     def load_custom_config(self, custom_config: Dict[str, str]):
@@ -265,3 +242,5 @@ class Config:
             if key not in self.__dict__:
                 raise KeyError(f"Unknown parameter in custom configuration: '{key}'")
         self.__dict__.update(custom_config)
+
+        sanitize_dictionary(self.__dict__)

