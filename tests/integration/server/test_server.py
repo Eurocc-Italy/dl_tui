@@ -29,6 +29,7 @@ def check_status():
         job identifier for file downloads
     """
     while True:
+        sleep(1)
         # checking that results file has been uploaded
         response = browse(ip=ip, token=token, filter="job_id = DLAAS-TUI-TEST").text
 

@@ -29,6 +29,7 @@ def check_status(job_id):
         job identifier for file downloads
     """
     while True:
+        sleep(1)
         # checking that results file has been uploaded
         response = browse(ip=ip, token=token, filter=f"job_id = {job_id}").text
 

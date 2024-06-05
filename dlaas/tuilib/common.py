@@ -32,9 +32,9 @@ def sanitize_dictionary(dictionary) -> None:
         "user": [r"[a-zA-Z0-9_]+"],  # any single word (word: character sequence containing alphanumerics or _)
         "password": [r"[a-zA-Z0-9_]+"],  # any single word
         "ip": [
-            r"([a-zA-Z0-9_-]+\.)+[a-zA-Z0-9_-]+"
-        ],  # any word sequence (with -) delimited by dots, but not ending with one
-        "port": [r"\d+"],  # any number
+            r"[a-zA-Z0-9_\.-]+[a-zA-Z0-9_-]+"
+        ],  # any word sequence (with - and _) optionally delimited by dots, but not ending with one
+        "port": [r"[0-9]+"],  # any number
         "database": [r"[a-zA-Z0-9_]+"],  # any single word
         "collection": [r"[a-zA-Z0-9_]+"],  # any single word
         "s3_endpoint_url": [r"(https?://)?([a-zA-Z0-9_-]+\.)+[a-zA-Z0-9_-]+/?"],  # "https://XXX.(XXX.)*n.XXX/",
@@ -43,8 +43,8 @@ def sanitize_dictionary(dictionary) -> None:
         # config_server
         "user": [r"[a-zA-Z0-9_]+"],  # any single word (word: character sequence containing alphanumerics or _)
         "host": [
-            r"([a-zA-Z0-9_-]+\.)+[a-zA-Z0-9_-]+"
-        ],  # any word sequence (with -) delimited by dots, but not ending with one
+            r"[a-zA-Z0-9_\.-]+[a-zA-Z0-9_-]+"
+        ],  # any word sequence (with - and _) optionally delimited by dots, but not ending with one
         "venv_path": [r"^(~)?/([a-zA-Z0-9_.-]+/?)+"],  # any word sequence delimited by slashes, can start with ~ or /
         "ssh_key": [r"^(~)?/([a-zA-Z0-9_.-]+/?)+"],  # any word sequence delimited by slashes, can start with ~ or /
         "compute_partition": [r"[a-zA-Z0-9_]+"],  # any single word,
@@ -52,9 +52,9 @@ def sanitize_dictionary(dictionary) -> None:
         "account": [r"[a-zA-Z0-9_]+"],  # any single word
         "qos": [r"[a-zA-Z0-9_]+"],  # any single word
         "mail": [r"[a-zA-Z0-9_\.]+@[a-zA-Z0-9_\.]+"],  # any valid email type (no dashes or pluses)
-        "walltime": [r"(\d+-)?(\d+:)?(\d+:)?\d+"],  # DD-HH:MM:SS
-        "nodes": [r"\d+(k|m)?"],  # any number, possibly ending with k or m
-        "ntasks_per_node": [r"\d+"],  # any number
+        "walltime": [r"([0-9]+-)?([0-9]+:)?([0-9]+:)?[0-9]+"],  # DD-HH:MM:SS
+        "nodes": [r"[0-9]+(k|m)?"],  # any number, possibly ending with k or m
+        "ntasks_per_node": [r"[0-9]+"],  # any number
     }
 
     # make sure keyword values match the expected format
