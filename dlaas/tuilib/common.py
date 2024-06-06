@@ -15,10 +15,16 @@ import re
 from typing import Dict
 
 
-def sanitize_dictionary(dictionary) -> None:
-    """Sanitize dictionary input to make sure no OS command injection is possible.
+def sanitize_dictionary(dictionary: Dict[str, str]) -> None:
+    """Sanitize dictionary input to make sure no OS command injection is possible. It is intended to
+    be used on the self.__dict__ dictionary of Config("server") or Config("hpc") instances.
     For each keyword it performs a regex match to ensure the expected format is found, for example the
     value of the keyword "walltime" must be something like DD-HH:MM:SS, or HH:MM:SS, or MM:SS.
+
+    Parameters
+    ----------
+    dictionary : Dict[str, str]
+        Dictionary to be checked. Should be the self.__dict__ of Config("server") or Config("hpc")
 
     Raises
     ------
