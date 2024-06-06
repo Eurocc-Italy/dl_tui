@@ -330,7 +330,7 @@ Example commands [arguments within parentheses are optional]:
             filter=args.filter,
         )
         if response.status_code == 200:
-            files = literal_eval(response.text)
+            files = json.loads(response.text)["files"]
             msg = f"Filter: {args.filter}\n"
             msg += f"Files:\n  - "
             msg += ("\n  - ").join(files)
