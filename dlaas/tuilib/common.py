@@ -43,16 +43,18 @@ def sanitize_dictionary(dictionary: Dict[str, str]) -> None:
         "port": [r"[0-9]+"],  # any number
         "database": [r"[a-zA-Z0-9_]+"],  # any single word
         "collection": [r"[a-zA-Z0-9_]+"],  # any single word
-        "s3_endpoint_url": [r"(https?://)?([a-zA-Z0-9_-]+\.)+[a-zA-Z0-9_-]+/?"],  # "https://XXX.(XXX.)*n.XXX/",
+        "s3_endpoint_url": [r"(https?:\/\/)?([a-zA-Z0-9_-]+\.)+[a-zA-Z0-9_-]+\/?"],  # "https://XXX.(XXX.)*n.XXX/",
         "s3_bucket": [r"[a-zA-Z0-9_]+"],  # any single word
-        "pfs_prefix_path": [r"/([a-zA-Z0-9_-]+/?)+"],  # any word sequence (no .) delimited by slashes, starting with /
+        "pfs_prefix_path": [
+            r"\/([a-zA-Z0-9_-]+\/?)+"
+        ],  # any word sequence (no .) delimited by slashes, starting with /
         # config_server
         "user": [r"[a-zA-Z0-9_]+"],  # any single word (word: character sequence containing alphanumerics or _)
         "host": [
             r"[a-zA-Z0-9_\.-]+[a-zA-Z0-9_-]+"
         ],  # any word sequence (with - and _) optionally delimited by dots, but not ending with one
-        "venv_path": [r"^(~)?/([a-zA-Z0-9_.-]+/?)+"],  # any word sequence delimited by slashes, can start with ~ or /
-        "ssh_key": [r"^(~)?/([a-zA-Z0-9_.-]+/?)+"],  # any word sequence delimited by slashes, can start with ~ or /
+        "venv_path": [r"^(~)?\/([a-zA-Z0-9_.-]+\/?)+"],  # any word sequence delimited by slashes, can start with ~ or /
+        "ssh_key": [r"^(~)?\/([a-zA-Z0-9_.-]+\/?)+"],  # any word sequence delimited by slashes, can start with ~ or /
         "compute_partition": [r"[a-zA-Z0-9_]+"],  # any single word,
         "upload_partition": [r"[a-zA-Z0-9_]+"],  # any single word
         "account": [r"[a-zA-Z0-9_]+"],  # any single word
