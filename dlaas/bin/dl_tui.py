@@ -18,7 +18,6 @@ logger.addHandler(fh)
 
 import os
 import json
-from ast import literal_eval
 
 import argparse
 
