@@ -9,12 +9,10 @@ Author: @lbabetto
 import logging
 
 logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
-fh = logging.FileHandler("tui.log", mode="w")
-fh.setLevel(logging.DEBUG)
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-fh.setFormatter(formatter)
-logger.addHandler(fh)
+handler = logging.StreamHandler()
+formatter = logging.Formatter("> %(name)s - %(levelname)s - %(message)s")
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 
 import os
 import json
@@ -152,8 +150,21 @@ Example commands [arguments within parentheses are optional]:
         default=None,
     )
 
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="count",
+        default=0,
+        help="sets verbosity of output (in order: WARNING (default) | INFO | DEBUG).",
+    )
+
     # Parsing args
     args = parser.parse_args()
+
+    if args.verbose == 1:
+        logger.setLevel(logging.INFO)
+    if args.verbose > 1:
+        logger.setLevel(logging.DEBUG)
 
     # Printing selected action in logger
     for key, val in (args.__dict__).items():
@@ -178,7 +189,6 @@ Example commands [arguments within parentheses are optional]:
         )
         if response.status_code == 201:
             msg = f"Successfully uploaded file {args.file}."
-            logger.info(msg)
             print(msg)
         else:
             print(response.text)
@@ -201,7 +211,6 @@ Example commands [arguments within parentheses are optional]:
         )
         if response.status_code == 201:
             msg = f"Successfully replaced file {args.file}."
-            logger.info(msg)
             print(msg)
         else:
             print(response.text)
@@ -224,7 +233,6 @@ Example commands [arguments within parentheses are optional]:
         )
         if response.status_code == 201:
             msg = f"Successfully updated metadata for file {args.key}."
-            logger.info(msg)
             print(msg)
         else:
             print(response.text)
@@ -244,7 +252,6 @@ Example commands [arguments within parentheses are optional]:
         )
         if response.status_code == 200:
             msg = f"Successfully downloaded file {args.key}."
-            logger.info(msg)
             print(msg)
         else:
             print(response.text)
@@ -264,7 +271,6 @@ Example commands [arguments within parentheses are optional]:
         )
         if response.status_code == 200:
             msg = f"Successfully deleted file {args.key}."
-            logger.info(msg)
             print(msg)
         else:
             print(response.text)
@@ -310,11 +316,9 @@ Example commands [arguments within parentheses are optional]:
                 )
             else:
                 msg = f"Successfully launched query {open(args.query_file).read()}."
-            logger.info(msg)
             print(msg)
 
             msg = f"Job ID: {response.text.replace('Files processed successfully, ID: ', '')}"
-            logger.info(msg)
             print(msg)
         else:
             print(response.text)
@@ -333,7 +337,6 @@ Example commands [arguments within parentheses are optional]:
             msg = f"Filter: {args.filter}\n"
             msg += f"Files:\n  - "
             msg += ("\n  - ").join(files)
-            logger.info(msg)
             print(msg)
         else:
             print(response.text)
