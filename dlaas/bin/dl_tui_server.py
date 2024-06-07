@@ -9,10 +9,13 @@ Author: @lbabetto
 
 # setting up logging
 import logging
+import os
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
-fh = logging.FileHandler("server.log", mode="w")
+if not os.path.exists("/var/log/datalake"):
+    os.makedirs("/var/log/datalake")
+fh = logging.FileHandler("/var/log/datalake/dl-tui.log", mode="a")
 fh.setLevel(logging.DEBUG)
 formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 fh.setFormatter(formatter)
