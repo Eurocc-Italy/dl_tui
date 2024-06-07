@@ -311,8 +311,8 @@ def upload_results(json_path: str, slurm_job_id: int):
     logger.debug(f"stdout: {stdout}")
     logger.debug(f"stderr: {stderr}")
 
-    logger.info(f"Results are available on S3 with the key: results_{slurm_job_id}.zip")
-    logger.info(f'Results are available on MongoDB with the key: "job_id": {slurm_job_id}')
+    logger.info(f"Results are available on S3 with the key: results_{user_input.id}.zip")
+    logger.info(f'Results are available on MongoDB with the key: "job_id": {user_input.id}')
 
     if "Submitted batch job" not in stdout:
         raise RuntimeError(f"Something gone wrong, job was not launched.\nstdout: {stdout}\nstderr: {stderr}")
