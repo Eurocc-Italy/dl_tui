@@ -14,8 +14,11 @@ import os
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 if not os.path.exists("/var/log/datalake"):
-    os.makedirs("/var/log/datalake")
-fh = logging.FileHandler("/var/log/datalake/dl-tui.log", mode="a")
+    try:
+        os.makedirs("/var/log/datalake")
+        fh = logging.FileHandler("/var/log/datalake/dl-tui.log", mode="a")
+    except PermissionError:
+        fh = logging.FileHandler("dl-tui.log", mode="w")
 fh.setLevel(logging.DEBUG)
 formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 fh.setFormatter(formatter)
