@@ -52,7 +52,7 @@ def upload(
         "json_data": (os.path.basename(json_data), open(json_data, "r"), "application/json"),
     }
 
-    response = requests.post(f"http://{ip}:8080/v1/upload", headers=headers, files=files)
+    response = requests.post(f"https://{ip}/v1/upload", headers=headers, files=files)
 
     logger.info(f"Uploading file {file} to Data Lake. Response: {response.status_code}")
 
@@ -94,7 +94,7 @@ def replace(
         "json_data": (os.path.basename(json_data), open(json_data, "r"), "application/json"),
     }
 
-    response = requests.put(f"http://{ip}:8080/v1/replace", headers=headers, files=files)
+    response = requests.put(f"https://{ip}/v1/replace", headers=headers, files=files)
 
     logger.info(f"Replacing file {file} in Data Lake. Response: {response.status_code}")
 
@@ -139,7 +139,7 @@ def update(
         "json_data": (os.path.basename(json_data), open(json_data, "r"), "application/json"),
     }
 
-    response = requests.patch(f"http://{ip}:8080/v1/update", headers=headers, data=data, files=files)
+    response = requests.patch(f"https://{ip}/v1/update", headers=headers, data=data, files=files)
 
     logger.info(f"Updating metadata for file {file} in Data Lake. Response: {response.status_code}")
 
@@ -174,7 +174,7 @@ def download(
         "Authorization": f"Bearer {token}",
     }
 
-    response = requests.get(f"http://{ip}:8080/v1/download", headers=headers, params={"file_name": file})
+    response = requests.get(f"https://{ip}/v1/download", headers=headers, params={"file_name": file})
 
     logger.info(f"Downloading file {file} from Data Lake. Response: {response.status_code}")
 
@@ -212,7 +212,7 @@ def delete(
         "Authorization": f"Bearer {token}",
     }
 
-    response = requests.delete(f"http://{ip}:8080/v1/delete", headers=headers, params={"file_name": file})
+    response = requests.delete(f"https://{ip}/v1/delete", headers=headers, params={"file_name": file})
 
     logger.info(f"Deleting file {file} from Data Lake. Response: {response.status_code}")
 
@@ -263,7 +263,7 @@ def query(
         }
 
     response = requests.post(
-        f"http://{ip}:8080/v1/query_and_process",
+        f"https://{ip}/v1/query_and_process",
         headers=headers,
         files=files,
         data={"config_json": json.dumps(config_json)},
@@ -306,7 +306,7 @@ def browse(
         "Authorization": f"Bearer {token}",
     }
 
-    response = requests.get(f"http://{ip}:8080/v1/browse_files", headers=headers, params={"filter": filter})
+    response = requests.get(f"https://{ip}/v1/browse_files", headers=headers, params={"filter": filter})
 
     logger.info(f"Bwowsing files in from Data Lake. Filter: {filter}. Response: {response.status_code}")
 
