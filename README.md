@@ -1,6 +1,14 @@
 # dl_tui
 
-This is the user guide for Cineca's Data Lake as a Service Text User Interface (`dl_tui`) Python library. This TUI is used to run queries and processing scripts on the Data Lake files, as well as interacting with the API server administering the Data Lake infrastructure.
+This is the user guide for EuroCC-Italy's Data Lake as a Service Text User Interface (`dl_tui`) Python library. This TUI is used to run queries and processing scripts on the Data Lake files, as well as interacting with the API server administering the Data Lake infrastructure.
+
+This repository is part of the EuroCC-Italy Data Lake as a Service codebase. The repositories in this codebase are:
+
+- [`dl_tui`](https://github.com/Eurocc-Italy/dl_tui): (Text User Interface)
+- [`dl_api`](https://github.com/Eurocc-Italy/dl_api): (API)
+- [`dl_deploy`](https://github.com/Eurocc-Italy/dl_deploy): (Ansible playbook for self-deploy)
+
+The User Guide can be found in PDF form in the [dl_deploy](https://github.com/Eurocc-Italy/dl_deploy) repository.
 
 ## Data Lake as a Service
 
