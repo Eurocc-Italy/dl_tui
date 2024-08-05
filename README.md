@@ -1,6 +1,6 @@
-# dl-tui
+# dl_tui
 
-This is the user guide for Cineca's Data Lake as a Service Text User Interface (`dl-tui`) Python library. This TUI is used to run queries and processing scripts on the Data Lake files, as well as interacting with the API server administering the Data Lake infrastructure.
+This is the user guide for Cineca's Data Lake as a Service Text User Interface (`dl_tui`) Python library. This TUI is used to run queries and processing scripts on the Data Lake files, as well as interacting with the API server administering the Data Lake infrastructure.
 
 ## Data Lake as a Service
 
@@ -17,7 +17,7 @@ The software stack is composed of three main components:
 - An [API](https://github.com/Eurocc-Italy/dl_api) server, which accepts the user requests and carries out operations on the Data Lake (file upload/download, querying, etc.);
 - The TUI (this library), which is utilized by the end users to interface with the API, as well as by the API itself to interface with the HPC system.
 
-## Text User Interface (`dl-tui`)
+## Text User Interface (`dl_tui`)
 
 This library consists of three executables: `dl_tui`, `dl_tui_hpc` and `dl_tui_server`.
 
@@ -64,7 +64,7 @@ After having set up and activated your virtual environment, follow these steps t
   
   ```bash
   git clone https://github.com/Eurocc-Italy/dl_tui  
-  pip install dl-tui/
+  pip install dl_tui/
   ```
 
 ### API interface (`dl_tui`)
