@@ -1,8 +1,8 @@
 # dl_tui
 
-This is the user guide for EuroCC-Italy's Data Lake as a Service Text User Interface (`dl_tui`) Python library. This TUI is used to run queries and processing scripts on the Data Lake files, as well as interacting with the API server administering the Data Lake infrastructure.
+This is the user guide for EuroCC-Italy's Data Lake Ready to Use Text User Interface (`dl_tui`) Python library. This TUI is used to run queries and processing scripts on the Data Lake files, as well as interacting with the API server administering the Data Lake infrastructure.
 
-This repository is part of the EuroCC-Italy Data Lake as a Service codebase. The repositories in this codebase are:
+This repository is part of the EuroCC-Italy Data Lake Ready to Use codebase. The repositories in this codebase are:
 
 - [`dl_tui`](https://github.com/Eurocc-Italy/dl_tui): (Text User Interface)
 - [`dl_api`](https://github.com/Eurocc-Italy/dl_api): (API)
@@ -10,9 +10,9 @@ This repository is part of the EuroCC-Italy Data Lake as a Service codebase. The
 
 The User Guide can be found in PDF form at this [link](https://github.com/Eurocc-Italy/dl_deploy/blob/main/Data_Lake_Ready_To_Use_V1.0.pdf).
 
-## Data Lake as a Service
+## Data Lake Ready to Use
 
-The Data Lake as a Service provides a fast deploy system for the core components of the Data Lake and its interface. It is designed to deliver a customizable infrastructure according to the needs of the requesting user and integrate it with High Performance Computing (HPC) systems, enabling high-performance analytics on extensive datasets, increasing throughput and/or reducing time to solution.
+The Data Lake Ready to Use provides a fast deploy system for the core components of the Data Lake and its interface. It is designed to deliver a customizable infrastructure according to the needs of the requesting user and integrate it with High Performance Computing (HPC) systems, enabling high-performance analytics on extensive datasets, increasing throughput and/or reducing time to solution.
 
 The service provides for two hardware endpoints:
 
