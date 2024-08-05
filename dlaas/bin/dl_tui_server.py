@@ -34,7 +34,7 @@ def main():
 
     parser = argparse.ArgumentParser(
         description="Server-side executable for Cineca's Data Lake as a Service.",
-        epilog="For further information, please consult the code repository (https://gitlab.hpc.cineca.it/lbabetto/dlaas-tui)",
+        epilog="For further information, please consult the code repository (https://github.com/Eurocc-Italy/dl_tui)",
     )
 
     parser.add_argument(

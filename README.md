@@ -13,8 +13,8 @@ The service provides for two hardware endpoints:
 
 The software stack is composed of three main components:
 
-- A [repository](https://gitlab.hpc.cineca.it/eurocc/dl-deploy) containing the Ansible deployment scripts for setting up the infrastructure;
-- An [API](https://gitlab.hpc.cineca.it/eurocc/dl-api) server, which accepts the user requests and carries out operations on the Data Lake (file upload/download, querying, etc.);
+- A [repository](https://github.com/Eurocc-Italy/dl_deploy) containing the Ansible deployment scripts for setting up the infrastructure;
+- An [API](https://github.com/Eurocc-Italy/dl_api) server, which accepts the user requests and carries out operations on the Data Lake (file upload/download, querying, etc.);
 - The TUI (this library), which is utilized by the end users to interface with the API, as well as by the API itself to interface with the HPC system.
 
 ## Text User Interface (`dl-tui`)
@@ -63,7 +63,7 @@ We highly recommend installing the software in a custom Python virtual environme
 After having set up and activated your virtual environment, follow these steps to install the DTaaS TUI:
   
   ```bash
-  git clone https://gitlab.hpc.cineca.it/eurocc/dl-tui  
+  git clone https://github.com/Eurocc-Italy/dl_tui  
   pip install dl-tui/
   ```
 

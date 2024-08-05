@@ -30,7 +30,7 @@ def main():
         description="""
 Text User Interface for Cineca's Data Lake as a Service. 
 
-For further information, please consult the code repository (https://gitlab.hpc.cineca.it/lbabetto/dlaas-tui).
+For further information, please consult the code repository (https://github.com/Eurocc-Italy/dl_tui).
 """,
         epilog="""
 Example commands [arguments within parentheses are optional]:
