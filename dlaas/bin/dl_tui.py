@@ -138,7 +138,7 @@ Example commands [arguments within parentheses are optional]:
     )
 
     parser.add_argument(
-        "--container_path",
+        "--container_file",
         help="[--query] | path to the Singularity container to be run on the files matching the query. \
         (--query only). Please see the User Guide for the script syntax requirements",
         default=None,
@@ -352,14 +352,14 @@ Example commands [arguments within parentheses are optional]:
                 ip=args.ip,
                 token=args.token,
                 query_file=args.query_file,
-                container_path=args.container_path,
+                container_path=args.container_file,
                 exec_command=args.exec_command,
                 config_json=config_json,
             )
 
             if response.status_code == 200:
                 if args.python_file:
-                    msg = f"Successfully launched Singularity container {args.container_path} with command {args.exec_command} on query {open(args.query_file).read()}."
+                    msg = f"Successfully launched Singularity container {args.container_file} with command {args.exec_command} on query {open(args.query_file).read()}."
                 else:
                     msg = f"Successfully launched query {open(args.query_file).read()}."
                 print(msg)
