@@ -318,7 +318,7 @@ def query_container(
     if container_path:
         files = {
             "query_file": (os.path.basename(query_file), open(query_file, "r"), "text/plain"),
-            "container_path": (os.path.basename(container_path), open(container_path, "rb")),
+            "container_file": (os.path.basename(container_path), open(container_path, "rb")),
         }
     else:
         files = {
