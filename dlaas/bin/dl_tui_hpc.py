@@ -48,6 +48,11 @@ For further information, please consult the code repository (https://github.com/
 """,
     )
 
+    parser.add_argument(
+        "json_path",
+        help="path to the JSON file containing the HPC job information",
+    )
+
     args = parser.parse_args()
     json_path = args.json_path
 
