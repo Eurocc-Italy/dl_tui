@@ -298,9 +298,9 @@ Example commands [arguments within parentheses are optional]:
         if not args.query_file:
             raise KeyError("Required argument is missing: --query_file")
 
-        if args.container_path:
+        if args.container_file:
             # Check that user did not give both Python and container options
-            if args.python_path:
+            if args.python_file:
                 raise KeyError(
                     "Analysis with both a Python script and a Singularity container were requested. The two modes are mutually exclusive."
                 )
