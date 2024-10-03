@@ -29,10 +29,8 @@ import argparse
 from dlaas.tuilib.server import (
     create_remote_directory,
     copy_json_input,
-    copy_user_script,
-    copy_user_container,
-    launch_python,
-    launch_container,
+    copy_user_executable,
+    launch_job,
     upload_results,
 )
 
@@ -46,28 +44,7 @@ Server-side executable for Cineca's Data Lake as a Service.
         
 For further information, please consult the code repository (https://github.com/Eurocc-Italy/dl_tui)
 """,
-        epilog="""
-Example commands [arguments within parentheses are optional]:
-
-    PYTHON SCRIPT           | dl_tui_server --python launch.json
-    SINGULARITY CONTAINER   | dl_tui_server --container launch.json
-    """,
         formatter_class=argparse.RawDescriptionHelpFormatter,
-    )
-
-    # Setting up actions
-    actions = parser.add_mutually_exclusive_group()
-
-    actions.add_argument(
-        "--python",
-        help="launch a Python script on HPC",
-        action="store_true",
-    )
-
-    actions.add_argument(
-        "--container",
-        help="launch a Singularity container on HPC",
-        action="store_true",
     )
 
     parser.add_argument(
@@ -81,12 +58,8 @@ Example commands [arguments within parentheses are optional]:
     create_remote_directory(json_path=json_path)
     copy_json_input(json_path=json_path)
 
-    if args.python:
-        copy_user_script(json_path=json_path)
-        stdout, stderr, slurm_job_id = launch_python(json_path=json_path)
-    elif args.container:
-        copy_user_container(json_path=json_path)
-        stdout, stderr, slurm_job_id = launch_container(json_path=json_path)
+    copy_user_executable(json_path=json_path)
+    stdout, stderr, slurm_job_id = launch_job(json_path=json_path)
 
     # FIXME uncomment for production
     # upload_results(json_path=json_path, slurm_job_id=slurm_job_id)
