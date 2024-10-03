@@ -464,7 +464,12 @@ def container_wrapper(
         )
         # moving to temporary directory and working within the context manager
         with pushd(tdir):
-            files_out = run_container(container_path=container_path, exec_command=exec_command, files_in=files_in)
+            files_out = run_container(
+                container_path=container_path,
+                exec_command=exec_command,
+                pfs_prefix_path=pfs_prefix_path,
+                files_in=files_in,
+            )
             # FIXME uncomment for production
             # save_container_output(
             #     sql_query=sql_query,
