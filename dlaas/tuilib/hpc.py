@@ -328,7 +328,7 @@ def run_container(
         cmd += f"module load {module}; "
 
     # Bind folders
-    cmd += f"export SINGULARITY_BIND={pfs_prefix_path}:/assets,$PWD/output:/output"  # FIXME "assets" should be renamed "input"
+    cmd += f"export SINGULARITY_BIND={pfs_prefix_path}:/assets,$PWD/output:/output; "  # FIXME "assets" should be renamed "input"
 
     # Launch command (with mpirun if nprocs > 1)
     # FIXME: make sure this is desired behaviour
