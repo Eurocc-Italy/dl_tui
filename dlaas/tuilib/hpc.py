@@ -320,12 +320,12 @@ def run_container(
     nthreads = 1  # FIXME actually implement this
     module_list = ["openmpi/4.1.6--nvhpc--23.11"]  # FIXME actually implement this
 
+    # Set up multithreading
+    cmd = f"export OMP_NUM_THREADS={nthreads}; "
+
     # Load modules
     for module in module_list:
         cmd += f"module load {module}; "
-
-    # Set up multithreading
-    cmd = f"export OMP_NUM_THREADS={nthreads}; "
 
     # Bind folders
     cmd += f"export SINGULARITY_BIND={pfs_prefix_path}:/assets,$PWD/output:/output"  # FIXME "assets" should be renamed "input"
