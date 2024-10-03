@@ -34,20 +34,40 @@ from pymongo import MongoClient
 
 import argparse
 from dlaas.tuilib.common import Config, UserInput
-from dlaas.tuilib.hpc import wrapper
+from dlaas.tuilib.hpc import python_wrapper, container_wrapper
 
 
 def main():
     """Executable intended to run on HPC"""
 
     parser = argparse.ArgumentParser(
-        description="HPC-side executable for Cineca's Data Lake as a Service.",
-        epilog="For further information, please consult the code repository (https://github.com/Eurocc-Italy/dl_tui)",
+        description="""
+HPC-side executable for Cineca's Data Lake as a Service.
+        
+For further information, please consult the code repository (https://github.com/Eurocc-Italy/dl_tui)
+""",
+        epilog="""
+Example commands [arguments within parentheses are optional]:
+
+    PYTHON SCRIPT           | dl_tui_hpc --python launch.json
+    SINGULARITY CONTAINER   | dl_tui_hpc --container launch.json
+    """,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
 
-    parser.add_argument(
-        "json_path",
-        help="path to the JSON file containing the HPC job information",
+    # Setting up actions
+    actions = parser.add_mutually_exclusive_group()
+
+    actions.add_argument(
+        "--python",
+        help="launch a Python script",
+        action="store_true",
+    )
+
+    actions.add_argument(
+        "--container",
+        help="launch a Singularity container",
+        action="store_true",
     )
 
     args = parser.parse_args()
@@ -73,21 +93,34 @@ def main():
     logger.info(f"Loading database {config.database}, collection {config.collection}")
     collection = client[config.database][config.collection]
 
-    if user_input.script_path:
-        with open(user_input.script_path, "r") as f:
-            script = f.read()
-    else:
-        script = None
+    if args.python:
+        if user_input.script_path:
+            with open(user_input.script_path, "r") as f:
+                script = f.read()
+        else:
+            script = None
 
-    wrapper(
-        collection=collection,
-        sql_query=user_input.sql_query,
-        pfs_prefix_path=config.pfs_prefix_path,
-        s3_endpoint_url=config.s3_endpoint_url,
-        s3_bucket=config.s3_bucket,
-        job_id=user_input.id,
-        script=script,
-    )
+        python_wrapper(
+            collection=collection,
+            sql_query=user_input.sql_query,
+            pfs_prefix_path=config.pfs_prefix_path,
+            s3_endpoint_url=config.s3_endpoint_url,
+            s3_bucket=config.s3_bucket,
+            job_id=user_input.id,
+            script=script,
+        )
+
+    elif args.container:
+        container_wrapper(
+            collection=collection,
+            sql_query=user_input.sql_query,
+            pfs_prefix_path=config.pfs_prefix_path,
+            s3_endpoint_url=config.s3_endpoint_url,
+            s3_bucket=config.s3_bucket,
+            job_id=user_input.id,
+            container_path=user_input.container_path,
+            exec_command=user_input.exec_command,
+        )
 
 
 if __name__ == "__main__":

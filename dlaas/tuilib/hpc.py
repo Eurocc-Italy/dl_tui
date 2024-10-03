@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 import os
 import sys
+import subprocess
 import shutil
 from sh import pushd
 from tempfile import mkdtemp
@@ -141,7 +142,7 @@ def run_script(script: str, files_in: List[str]) -> List[str]:
     return files_out
 
 
-def save_output(
+def save_python_output(
     sql_query: str,
     script: str,
     files_out: List[str],
@@ -189,8 +190,7 @@ def save_output(
 
     for file in files_out:
         try:
-            # consider using shutil.move to save space, here and when copying the results
-            shutil.copy(file, f"results/{os.path.basename(file)}")
+            shutil.move(file, f"results/{os.path.basename(file)}")
         except FileNotFoundError:
             logger.error(f"No such file or directory: '{file}'")
 
@@ -213,7 +213,7 @@ def save_output(
     )
 
 
-def wrapper(
+def python_wrapper(
     collection: Collection,
     sql_query: str,
     pfs_prefix_path: str,
@@ -257,14 +257,14 @@ def wrapper(
     if script:
         # creating unique temporary directory
         tdir = mkdtemp(
-            prefix="run_script_",
+            prefix="run_job_",
             suffix=None,
             dir=os.getcwd(),
         )
         # moving to temporary directory and working within the context manager
         with pushd(tdir):
             files_out = run_script(script=script, files_in=files_in)
-            save_output(
+            save_python_output(
                 sql_query=sql_query,
                 script=script,
                 files_out=files_out,
@@ -275,7 +275,7 @@ def wrapper(
                 collection=collection,
             )
     else:  # if no script is provided, return the query matches
-        save_output(
+        save_python_output(
             sql_query=sql_query,
             script=script,
             files_out=files_in,
@@ -285,3 +285,205 @@ def wrapper(
             job_id=job_id,
             collection=collection,
         )
+
+
+def run_container(
+    container_path: str,
+    exec_command: str,
+    pfs_prefix_path: str,
+    files_in: List[str],
+) -> List[str]:
+    """Runs the user-provided Singularity container, feeding the paths containted in files_in.
+
+    Parameters
+    ----------
+    container_path : str
+        path to the Singularity container provided by the user
+    exec_command : str
+        command to be launched within the container (with its own options and flags if needed)
+    files_in : List[str]
+        list of paths with the files on which to run the executable
+
+    Returns
+    -------
+    List[str]
+        list of paths with the output/processed files the user wants to save
+
+    """
+
+    logger.info(f"User container path: {container_path}")
+
+    # Create output folder, if it doesn't exist
+    os.makedirs(f"output", exist_ok=True)
+
+    nprocs = 1  # FIXME actually implement this
+    nthreads = 1  # FIXME actually implement this
+    module_list = ["openmpi/4.1.6--nvhpc--23.11"]  # FIXME actually implement this
+
+    # Load modules
+    for module in module_list:
+        cmd += f"module load {module}; "
+
+    # Set up multithreading
+    cmd = f"export OMP_NUM_THREADS={nthreads}; "
+
+    # Bind folders
+    cmd += f"export SINGULARITY_BIND={pfs_prefix_path}:/assets,$PWD/output:/output"  # FIXME "assets" should be renamed "input"
+
+    # Launch command (with mpirun if nprocs > 1)
+    # FIXME: make sure this is desired behaviour
+    if nprocs == 1:
+        cmd += f"singularity exec {container_path} {exec_command} {' '.join(files_in)}"
+    else:
+        cmd += f"mpirun -np {nprocs} singularity exec {container_path} {exec_command} {' '.join(files_in)}"
+
+    logger.debug(f"Launching command:\n{cmd}")
+
+    stdout, stderr = subprocess.Popen(
+        cmd,
+        shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    ).communicate()
+
+    # Save all files in output folder
+    files_out = os.listdir("./output")
+
+    # converting to absolute paths (useful for save_output func)
+    files_out = [os.path.abspath(file) for file in files_out]
+
+    return files_out
+
+
+def save_container_output(
+    sql_query: str,
+    pfs_prefix_path: str,
+    files_out: List[str],
+    s3_endpoint_url: str,
+    s3_bucket: str,
+    job_id: str,
+    collection: Collection,
+):
+    """Take the content of the output folder and saves it into a zipped archive, updating the MongoDB database
+    with the relevant data for the job (path oh parallel filesystem, s3 key, job identifier), which is supposed to be
+    launched via a subsequent job on HPC with access to the S3 bucket.
+
+    Parameters
+    ----------
+    sql_query : str
+        SQL query (for saving in results folder)
+    pfs_prefix_path : str
+        path prefix for the location on the parallel filesystem
+    files_out : List[str]
+        list containing the paths to the files to be saved
+    s3_endpoint_url : str
+        endpoint url at which the S3 bucket can be found
+    s3_bucket : str
+        name of the S3 bucket in which the results need to be saved
+    job_id : str
+        unique job identifier, used to create the S3 object key
+    collection : Collection
+        MongoDB collection on which to save the results metadata
+    """
+
+    logger.debug(f"Processed results: {' '.join(files_out)}")
+
+    # copying query and processing script to results folder
+    with open(f"output/query_{job_id}.txt", "w") as f:
+        f.write(sql_query)
+
+    with open(f"upload_results_{job_id}.py", "w") as f:
+        content = "import os, boto3, shutil, glob\n"
+        content += 'for match in glob.glob("../slurm-*"):\n'
+        content += ' shutil.copy(match, f"output/{os.path.basename(match)}")\n'
+        content += f'shutil.make_archive("results_{job_id}", "zip", "output")\n'
+        content += 'shutil.rmtree("output")\n'
+        content += f's3 = boto3.client(service_name="s3", endpoint_url="{s3_endpoint_url}")\n'
+        content += f's3.upload_file(Filename="results_{job_id}.zip", Bucket="{s3_bucket}", Key="results_{job_id}.zip")'
+        f.write(content)
+
+    collection.insert_one(
+        {
+            "job_id": job_id,
+            "s3_key": f"results_{job_id}.zip",
+            "path": f"{pfs_prefix_path}/results_{job_id}.zip",
+        }
+    )
+
+
+def container_wrapper(
+    collection: Collection,
+    sql_query: str,
+    pfs_prefix_path: str,
+    s3_endpoint_url: str,
+    s3_bucket: str,
+    job_id: str,
+    container_path: str = None,
+    exec_command: str = None,
+):
+    """Get the SQL query and script, convert them to MongoDB spec, run the process query on the DB retrieving matching
+    files, run the user-provided Singularity container (if present) in a temporary directory, save the files and zip
+    them in an archive. This archive is then moved to the parallel filesystem at the location
+    {pfs_prefix_path}/results_{job_id}.zip. Finally, the S3 bucket is synced via curl and the results are uploaded to
+    the MongoDB database with key results_{job_id}.zip
+
+    Parameters
+    ----------
+    collection : Collection
+        MongoDB collection on which to run the query and save the results metadata
+    sql_query : str
+        SQL query
+    pfs_prefix_path: str
+        path prefix for the location on the parallel filesystem
+    s3_endpoint_url : str
+        endpoint url at which the S3 bucket can be found
+    s3_bucket : str
+        name of the S3 bucket in which the results need to be saved
+    job_id : str
+        unique job identifier, used to create the S3 object key
+    container_path : str
+        path to the Singularity container provided by the user
+    exec_command : str
+        command to be launched within the container (with its own options and flags if needed)
+    """
+
+    query_filters, query_fields = convert_SQL_to_mongo(sql_query=sql_query)
+
+    files_in = retrieve_files(
+        collection=collection,
+        query_filters=query_filters,
+        query_fields=query_fields,
+    )
+
+    if container_path:
+        # creating unique temporary directory
+        tdir = mkdtemp(
+            prefix="run_job_",
+            suffix=None,
+            dir=os.getcwd(),
+        )
+        # moving to temporary directory and working within the context manager
+        with pushd(tdir):
+            files_out = run_container(container_path=container_path, exec_command=exec_command, files_in=files_in)
+            # FIXME uncomment for production
+            # save_container_output(
+            #     sql_query=sql_query,
+            #     files_out=files_out,
+            #     pfs_prefix_path=pfs_prefix_path,
+            #     s3_endpoint_url=s3_endpoint_url,
+            #     s3_bucket=s3_bucket,
+            #     job_id=job_id,
+            #     collection=collection,
+            # )
+    else:  # if no container is provided, return the query matches
+        pass
+        # FIXME uncomment for production
+        # save_container_output(
+        #     sql_query=sql_query,
+        #     files_out=files_in,
+        #     pfs_prefix_path=pfs_prefix_path,
+        #     s3_endpoint_url=s3_endpoint_url,
+        #     s3_bucket=s3_bucket,
+        #     job_id=job_id,
+        #     collection=collection,
+        # )

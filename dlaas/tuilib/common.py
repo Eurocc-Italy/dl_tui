@@ -81,11 +81,15 @@ class UserInput:
     Attributes
     ----------
     id : str
-        Unique id of the run (preferably of the UUID.hex type)
+        unique id of the run (preferably of the UUID.hex type)
     sql_query : str
         SQL query
     script_path : str
-        Path to the Python script with the analysis on the files returned by the SQL query
+        path to the Python script with the analysis on the files returned by the SQL query
+    container_path : str
+        path to the Singularity container provided by the user
+    exec_command : str
+        command to be launched within the container (with its own options and flags if needed)
     config_hpc : dict
         dictionary with custom configuration options for hpc version
     config_server : dict
@@ -109,6 +113,16 @@ class UserInput:
             self.script_path = None
 
         try:
+            self.container_path = data["container_path"]
+        except KeyError:  # no container provided
+            self.container_path = None
+
+        try:
+            self.exec_command = data["exec_command"]
+        except KeyError:  # no script provided
+            self.exec_command = None
+
+        try:
             self.config_hpc = json.loads(data["config_hpc"].replace("'", '"'))
         except KeyError:  # no custom config provided
             self.config_hpc = None
@@ -125,6 +139,8 @@ class UserInput:
         logger.debug(f"UserInput.id: {self.id}")
         logger.debug(f"UserInput.sql_query: {self.sql_query}")
         logger.debug(f"UserInput.script_path: {self.script_path}")
+        logger.debug(f"UserInput.container_path: {self.container_path}")
+        logger.debug(f"UserInput.exec_command: {self.exec_command}")
         logger.debug(f"UserInput.config_hpc: {self.config_hpc}")
         logger.debug(f"UserInput.config_server: {self.config_server}")
 

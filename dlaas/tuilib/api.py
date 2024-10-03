@@ -219,7 +219,7 @@ def delete(
     return response
 
 
-def query(
+def query_python(
     ip: str,
     token: str,
     query_file: str,
@@ -272,6 +272,69 @@ def query(
     if python_file:
         logger.info(
             f"Running analysis script {python_file} on files matching query {query_file}. Response: {response.status_code}"
+        )
+    else:
+        logger.info(f"Running query {query_file}. Response: {response.status_code}")
+
+    return response
+
+
+def query_container(
+    ip: str,
+    token: str,
+    query_file: str,
+    config_json: Dict[str, Dict[str, str]],
+    container_path: str = None,
+    exec_command: str = None,
+) -> Response:
+    """Upload file to Data Lake using the DLaaS API.
+
+    Parameters
+    ----------
+    ip : str
+        IP address of the machine running the API
+    token : str
+        Authorization token for running commands via the API
+    query_file : str
+        Path of the file containing the SQL query to be launched
+    config_json: Dict[str, Dict[str, str]]
+        Dictionary containing the config_hpc and config_server configuration dictionaries
+    container_path : str, optional
+        Path to the Singularity container provided by the user
+    exec_command : str, optional
+        Command to be launched within the container (with its own options and flags if needed)
+
+    Returns
+    -------
+    Response
+        Response of the server request
+    """
+
+    token = token.rstrip("\n")
+    headers = {
+        "Authorization": f"Bearer {token}",
+    }
+
+    if container_path:
+        files = {
+            "query_file": (os.path.basename(query_file), open(query_file, "r"), "text/plain"),
+            "container_path": (os.path.basename(container_path), open(container_path, "rb")),
+        }
+    else:
+        files = {
+            "query_file": (os.path.basename(query_file), open(query_file, "r"), "text/plain"),
+        }
+
+    response = requests.post(
+        f"https://{ip}.nip.io/v1/launch_container",
+        headers=headers,
+        files=files,
+        data={"config_json": json.dumps(config_json), "exec_command": exec_command},
+    )
+
+    if container_path:
+        logger.info(
+            f"Running Singularity container {container_path} with command {exec_command} on files matching query {query_file}. Response: {response.status_code}"
         )
     else:
         logger.info(f"Running query {query_file}. Response: {response.status_code}")

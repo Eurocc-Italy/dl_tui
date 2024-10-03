@@ -20,7 +20,7 @@ import json
 import argparse
 
 from dlaas.tuilib.common import Config
-from dlaas.tuilib.api import upload, replace, update, download, delete, query, browse
+from dlaas.tuilib.api import upload, replace, update, download, delete, query_python, query_container, browse
 
 
 def main():
@@ -40,8 +40,9 @@ Example commands [arguments within parentheses are optional]:
     UPDATE   | dl_tui --update --key=file.jpg --metadata=path/to/metadata.json
     DOWNLOAD | dl_tui --download --key=file.jpg
     DELETE   | dl_tui --delete --key=file.jpg
-    QUERY    | dl_tui --query --query_file=/path/to/query.txt [--python_file=/path/to/script.py] [--config_json=/path/to/config.json]
     BROWSE   | dl_tui --browse [--filter="category = dog"]
+    QUERY (PYTHON)    | dl_tui --query --query_file=/path/to/query.txt [--python_file=/path/to/script.py] [--config_json=/path/to/config.json]
+    QUERY (CONTAINER) | dl_tui --query --query_file=/path/to/query.txt [--container_path=/path/to/container.sif] [--exec_command="command to be executed within the container"] [--config_json=/path/to/config.json]
     """,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
@@ -87,7 +88,7 @@ Example commands [arguments within parentheses are optional]:
 
     actions.add_argument(
         "--query",
-        help="launch a query, with an optional analysis script",
+        help="launch a query, with an optional Python analysis script or Singularity container",
         action="store_true",
     )
 
@@ -132,6 +133,20 @@ Example commands [arguments within parentheses are optional]:
     parser.add_argument(
         "--python_file",
         help="[--query] | path to the Python analysis script to be run on the files matching the query. \
+        (--query only). Please see the User Guide for the script syntax requirements",
+        default=None,
+    )
+
+    parser.add_argument(
+        "--container_path",
+        help="[--query] | path to the Singularity container to be run on the files matching the query. \
+        (--query only). Please see the User Guide for the script syntax requirements",
+        default=None,
+    )
+
+    parser.add_argument(
+        "--exec_command",
+        help="[--query] | command to be executed within the Singularity container. \
         (--query only). Please see the User Guide for the script syntax requirements",
         default=None,
     )
@@ -279,9 +294,19 @@ Example commands [arguments within parentheses are optional]:
     # Run query
     elif args.query:
 
-        # checking for missing options
+        # Check for missing query file
         if not args.query_file:
             raise KeyError("Required argument is missing: --query_file")
+
+        if args.container_path:
+            # Check that user did not give both Python and container options
+            if args.python_path:
+                raise KeyError(
+                    "Analysis with both a Python script and a Singularity container were requested. The two modes are mutually exclusive."
+                )
+            # Check that execution command was provided
+            if not args.exec_command:
+                raise KeyError("Required argument is missing: --exec_command")
 
         # loading default options
         config_json = {
@@ -301,28 +326,49 @@ Example commands [arguments within parentheses are optional]:
         logger.debug(f"config_hpc: {config_json['config_hpc']}")
         logger.debug(f"config_server: {config_json['config_server']}")
 
-        response = query(
-            ip=args.ip,
-            token=args.token,
-            query_file=args.query_file,
-            python_file=args.python_file,
-            config_json=config_json,
-        )
+        if args.python_file:
+            response = query_python(
+                ip=args.ip,
+                token=args.token,
+                query_file=args.query_file,
+                python_file=args.python_file,
+                config_json=config_json,
+            )
 
-        if response.status_code == 200:
-            if args.python_file:
+            if response.status_code == 200:
                 msg = (
                     f"Successfully launched analysis script {args.python_file} on query {open(args.query_file).read()}."
                 )
-            else:
-                msg = f"Successfully launched query {open(args.query_file).read()}."
-            print(msg)
+                print(msg)
 
-            msg = f"Job ID: {response.text.replace('Files processed successfully, ID: ', '')}"
-            print(msg)
+                msg = f"Job ID: {response.text.replace('Files processed successfully, ID: ', '')}"
+                print(msg)
+            else:
+                print(response.text)
+                response.raise_for_status()
+
         else:
-            print(response.text)
-            response.raise_for_status()
+            response = query_container(
+                ip=args.ip,
+                token=args.token,
+                query_file=args.query_file,
+                container_path=args.container_path,
+                exec_command=args.exec_command,
+                config_json=config_json,
+            )
+
+            if response.status_code == 200:
+                if args.python_file:
+                    msg = f"Successfully launched Singularity container {args.container_path} with command {args.exec_command} on query {open(args.query_file).read()}."
+                else:
+                    msg = f"Successfully launched query {open(args.query_file).read()}."
+                print(msg)
+
+                msg = f"Job ID: {response.text.replace('Files processed successfully, ID: ', '')}"
+                print(msg)
+            else:
+                print(response.text)
+                response.raise_for_status()
 
     # Browse files
     elif args.browse:
