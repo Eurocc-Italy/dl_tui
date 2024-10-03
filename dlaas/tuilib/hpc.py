@@ -261,6 +261,7 @@ def python_wrapper(
             suffix=None,
             dir=os.getcwd(),
         )
+        # FIXME: consider working directly in the job tempdir, shouldn't be necessary to make another tmpdir
         # moving to temporary directory and working within the context manager
         with pushd(tdir):
             files_out = run_script(script=script, files_in=files_in)
@@ -456,14 +457,6 @@ def container_wrapper(
     )
 
     if container_path:
-        # creating unique temporary directory
-        # tdir = mkdtemp(
-        #     prefix="run_job_",
-        #     suffix=None,
-        #     dir=os.getcwd(),
-        # )
-        # # moving to temporary directory and working within the context manager
-        # with pushd(tdir):
         files_out = run_container(
             container_path=container_path,
             exec_command=exec_command,
