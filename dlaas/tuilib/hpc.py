@@ -457,29 +457,29 @@ def container_wrapper(
 
     if container_path:
         # creating unique temporary directory
-        tdir = mkdtemp(
-            prefix="run_job_",
-            suffix=None,
-            dir=os.getcwd(),
+        # tdir = mkdtemp(
+        #     prefix="run_job_",
+        #     suffix=None,
+        #     dir=os.getcwd(),
+        # )
+        # # moving to temporary directory and working within the context manager
+        # with pushd(tdir):
+        files_out = run_container(
+            container_path=container_path,
+            exec_command=exec_command,
+            pfs_prefix_path=pfs_prefix_path,
+            files_in=files_in,
         )
-        # moving to temporary directory and working within the context manager
-        with pushd(tdir):
-            files_out = run_container(
-                container_path=container_path,
-                exec_command=exec_command,
-                pfs_prefix_path=pfs_prefix_path,
-                files_in=files_in,
-            )
-            # FIXME uncomment for production
-            # save_container_output(
-            #     sql_query=sql_query,
-            #     files_out=files_out,
-            #     pfs_prefix_path=pfs_prefix_path,
-            #     s3_endpoint_url=s3_endpoint_url,
-            #     s3_bucket=s3_bucket,
-            #     job_id=job_id,
-            #     collection=collection,
-            # )
+        # FIXME uncomment for production
+        # save_container_output(
+        #     sql_query=sql_query,
+        #     files_out=files_out,
+        #     pfs_prefix_path=pfs_prefix_path,
+        #     s3_endpoint_url=s3_endpoint_url,
+        #     s3_bucket=s3_bucket,
+        #     job_id=job_id,
+        #     collection=collection,
+        # )
     else:  # if no container is provided, return the query matches
         pass
         # FIXME uncomment for production
