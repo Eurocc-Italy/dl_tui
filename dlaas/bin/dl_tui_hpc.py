@@ -46,28 +46,6 @@ HPC-side executable for Cineca's Data Lake as a Service.
         
 For further information, please consult the code repository (https://github.com/Eurocc-Italy/dl_tui)
 """,
-        epilog="""
-Example commands [arguments within parentheses are optional]:
-
-    PYTHON SCRIPT           | dl_tui_hpc --python launch.json
-    SINGULARITY CONTAINER   | dl_tui_hpc --container launch.json
-    """,
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-    )
-
-    # Setting up actions
-    actions = parser.add_mutually_exclusive_group()
-
-    actions.add_argument(
-        "--python",
-        help="launch a Python script",
-        action="store_true",
-    )
-
-    actions.add_argument(
-        "--container",
-        help="launch a Singularity container",
-        action="store_true",
     )
 
     args = parser.parse_args()
@@ -93,12 +71,9 @@ Example commands [arguments within parentheses are optional]:
     logger.info(f"Loading database {config.database}, collection {config.collection}")
     collection = client[config.database][config.collection]
 
-    if args.python:
-        if user_input.script_path:
-            with open(user_input.script_path, "r") as f:
-                script = f.read()
-        else:
-            script = None
+    if user_input.script_path:
+        with open(user_input.script_path, "r") as f:
+            script = f.read()
 
         python_wrapper(
             collection=collection,
@@ -110,7 +85,8 @@ Example commands [arguments within parentheses are optional]:
             script=script,
         )
 
-    elif args.container:
+    # This should take care of both cases in which container is ran, and just the query is given
+    else:
         container_wrapper(
             collection=collection,
             sql_query=user_input.sql_query,
