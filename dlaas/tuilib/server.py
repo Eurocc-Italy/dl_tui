@@ -131,7 +131,7 @@ def copy_user_executable(json_path: str):
     if user_input.script_path:
         logger.debug(f"Python script: \n{user_input.script_path}")
         ssh_cmd = f"scp -i {config.ssh_key} {user_input.script_path} {config.user}@{config.host}:~/{user_input.id}/{basename(user_input.script_path)}"
-    
+
     elif user_input.container_path:
         logger.debug(f"Container path: \n{user_input.container_path}")
         ssh_cmd = f"scp -i {config.ssh_key} {user_input.container_path} {config.user}@{config.host}:~/{user_input.id}/{basename(user_input.container_path)}"
@@ -200,12 +200,9 @@ def launch_job(json_path: str):
     # NOTE: it is probably not necessary to source the environment as the executable can be ran safely via the
     # `{config.venv_path}/bin/dl_tui_hpc` call. Still, it is safer to do so if a custom python script is provided,
     # since we are sure the correct libraries will be available to the executable
-    if user_input.script_path:
-        wrap_cmd = f"module load python; "  # TODO: placeholder for G100, as Python is not available by default.
-        wrap_cmd += f"source {config.venv_path}/bin/activate; "
-        wrap_cmd += f"dl_tui_hpc --python {basename(json_path)}; "
-    elif user_input.container_path:
-        wrap_cmd += f"dl_tui_hpc --container {basename(json_path)}; "
+    wrap_cmd = f"module load python; "
+    wrap_cmd += f"source {config.venv_path}/bin/activate; "
+    wrap_cmd += f"dl_tui_hpc {basename(json_path)}; "
     wrap_cmd += "touch JOB_DONE"
 
     # Generating SSH command
