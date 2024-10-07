@@ -327,11 +327,11 @@ def run_container(
     os.makedirs(f"output", exist_ok=True)
 
     # Set up multithreading
-    cmd = f"export OMP_NUM_THREADS={omp_num_threads}; echo 'Running on $OMP_NUM_THREADS threads' > output/logfile.log; "
+    cmd = f"export OMP_NUM_THREADS={omp_num_threads}; "
 
     # Load modules
     for module in modules:
-        cmd += f"module load {module} >> output/logfile.log 2>>&1; "
+        cmd += f"module load {module}; "
 
     # Bind folders
     cmd += f"export SINGULARITY_BIND={pfs_prefix_path}:/assets,$PWD/output:/output; "  # FIXME "assets" should be renamed "input"
@@ -339,9 +339,9 @@ def run_container(
     # Launch command (with mpirun if mpi_np > 1)
     # FIXME: make sure this is desired behaviour
     if mpi_np == 1:
-        cmd += f"singularity exec {container_path} {exec_command} {' '.join(files_in)} >> output/logfile.log 2>>&1"
+        cmd += f"singularity exec {container_path} {exec_command} {' '.join(files_in)} > output/logfile.log 2>>&1"
     else:
-        cmd += f"mpirun -np {mpi_np} singularity exec {container_path} {exec_command} {' '.join(files_in)} >> output/logfile.log 2>>&1"
+        cmd += f"mpirun -np {mpi_np} singularity exec {container_path} {exec_command} {' '.join(files_in)} > output/logfile.log 2>>&1"
 
     logger.debug(f"Launching command:\n{cmd}")
 
