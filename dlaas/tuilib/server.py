@@ -236,8 +236,6 @@ def launch_job(json_path: str):
     except ValueError:  # exception is raised during conversion of empty string to int
         raise RuntimeError(f"Something gone wrong, job was not launched.\nstdout: {stdout}\nstderr: {stderr}")
 
-    print(stdout)
-
     return stdout, stderr, slurm_job_id
 
 
