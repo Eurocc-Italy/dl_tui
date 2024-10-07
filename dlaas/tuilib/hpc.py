@@ -327,7 +327,7 @@ def run_container(
     os.makedirs(f"output", exist_ok=True)
 
     # Set up multithreading
-    cmd = f"export OMP_NUM_THREADS={omp_num_threads}; "
+    cmd = f"export OMP_NUM_THREADS={omp_num_threads}; echo 'Running on $OMP_NUM_THREADS threads' > output/logfile.log"
 
     # Load modules
     for module in modules:
