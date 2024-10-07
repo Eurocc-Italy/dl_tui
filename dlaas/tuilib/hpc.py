@@ -353,9 +353,9 @@ def run_container(
     ).communicate()
 
     with open("output/logfile.log", "wb") as f:
-        f.write(b"===== STDOUT ===== \n")
+        f.write(b"===== STDOUT ===== \n\n")
         f.write(stdout)
-        f.write(b"\n\n===== STDERR ===== \n")
+        f.write(b"\n\n===== STDERR ===== \n\n")
         f.write(stderr)
 
     # Save all files in output folder
