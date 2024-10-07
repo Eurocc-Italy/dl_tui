@@ -334,9 +334,9 @@ def run_container(
     # Launch command (with mpirun if nprocs > 1)
     # FIXME: make sure this is desired behaviour
     if nprocs == 1:
-        cmd += f"singularity exec {container_path} {exec_command} {' '.join(files_in)}"
+        cmd += f"singularity exec {container_path} {exec_command} {' '.join(files_in)} > output/logfile.log"
     else:
-        cmd += f"mpirun -np {nprocs} singularity exec {container_path} {exec_command} {' '.join(files_in)}"
+        cmd += f"mpirun -np {nprocs} singularity exec {container_path} {exec_command} {' '.join(files_in)} > output/logfile.log"
 
     logger.debug(f"Launching command:\n{cmd}")
 
