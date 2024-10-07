@@ -48,6 +48,9 @@ def sanitize_dictionary(dictionary: Dict[str, str]) -> None:
         "pfs_prefix_path": [
             r"\/([a-zA-Z0-9_-]+\/?)+"
         ],  # any word sequence (no .) delimited by slashes, starting with /
+        "omp_num_threads": [r"[0-9]+"],  # any number,
+        "mpi_np": [r"[0-9]+"],  # any number,
+        "modules": [r"([a-zA-Z0-9_.-]+\/?)+"],  # any word sequence delimited by slashes
         # config_server
         "user": [r"[a-zA-Z0-9_]+"],  # any single word (word: character sequence containing alphanumerics or _)
         "host": [
