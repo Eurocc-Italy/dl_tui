@@ -352,6 +352,12 @@ def run_container(
         stderr=subprocess.PIPE,
     ).communicate()
 
+    with open("stdout.txt", "wb") as f:
+        f.write(stdout)
+
+    with open("stderr.txt", "wb") as f:
+        f.write(stderr)
+
     # Save all files in output folder
     files_out = os.listdir("./output")
 
