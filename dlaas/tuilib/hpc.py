@@ -339,9 +339,9 @@ def run_container(
     # Launch command (with mpirun if mpi_np > 1)
     # FIXME: make sure this is desired behaviour
     if mpi_np == 1:
-        cmd += f"singularity exec {container_path} {exec_command} {' '.join(files_in)} > output/logfile.log"
+        cmd += f"singularity exec {container_path} {exec_command} {' '.join(files_in)}"
     else:
-        cmd += f"mpirun -np {mpi_np} singularity exec {container_path} {exec_command} {' '.join(files_in)} > output/logfile.log"
+        cmd += f"mpirun -np {mpi_np} singularity exec {container_path} {exec_command} {' '.join(files_in)}"
 
     logger.debug(f"Launching command:\n{cmd}")
 
@@ -352,10 +352,10 @@ def run_container(
         stderr=subprocess.PIPE,
     ).communicate()
 
-    with open("stdout.txt", "wb") as f:
+    with open("output/logfile.log", "wb") as f:
+        f.write(b"===== STDOUT ===== \n")
         f.write(stdout)
-
-    with open("stderr.txt", "wb") as f:
+        f.write(b"\n\n===== STDERR ===== \n")
         f.write(stderr)
 
     # Save all files in output folder
