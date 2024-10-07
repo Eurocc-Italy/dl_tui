@@ -63,7 +63,7 @@ For further information, please consult the code repository (https://github.com/
     config = Config(version="hpc")
     if user_input.config_hpc:
         config.load_custom_config(user_input.config_hpc)
-    logger.debug(config)
+    logger.debug(f"HPC config: {config}")
 
     # setting up MongoDB URI
     mongodb_uri = f"mongodb://{config.user}:{config.password}@{config.ip}:{config.port}/"
@@ -101,6 +101,9 @@ For further information, please consult the code repository (https://github.com/
             job_id=user_input.id,
             container_path=user_input.container_path,
             exec_command=user_input.exec_command,
+            omp_num_threads=config.omp_num_threads,
+            mpi_np=config.mpi_np,
+            modules=config.modules,
         )
 
 

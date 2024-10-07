@@ -291,6 +291,9 @@ def python_wrapper(
 def run_container(
     container_path: str,
     exec_command: str,
+    omp_num_threads: int,
+    mpi_np: int,
+    modules: List[str],
     pfs_prefix_path: str,
     files_in: List[str],
 ) -> List[str]:
@@ -302,6 +305,12 @@ def run_container(
         path to the Singularity container provided by the user
     exec_command : str
         command to be launched within the container (with its own options and flags if needed)
+    omp_num_threads : int
+        will be exported as OMP_NUM_THREADS environment variable
+    mpi_np : int
+        number of MPI processes which the mpirun command will use
+    modules : List[str]
+        list of modules to be loaded on HPC
     files_in : List[str]
         list of paths with the files on which to run the executable
 
@@ -317,26 +326,22 @@ def run_container(
     # Create output folder, if it doesn't exist
     os.makedirs(f"output", exist_ok=True)
 
-    nprocs = 1  # FIXME actually implement this
-    nthreads = 1  # FIXME actually implement this
-    module_list = ["openmpi/4.1.6--nvhpc--23.11"]  # FIXME actually implement this
-
     # Set up multithreading
-    cmd = f"export OMP_NUM_THREADS={nthreads}; "
+    cmd = f"export OMP_NUM_THREADS={omp_num_threads}; "
 
     # Load modules
-    for module in module_list:
+    for module in modules:
         cmd += f"module load {module}; "
 
     # Bind folders
     cmd += f"export SINGULARITY_BIND={pfs_prefix_path}:/assets,$PWD/output:/output; "  # FIXME "assets" should be renamed "input"
 
-    # Launch command (with mpirun if nprocs > 1)
+    # Launch command (with mpirun if mpi_np > 1)
     # FIXME: make sure this is desired behaviour
-    if nprocs == 1:
+    if mpi_np == 1:
         cmd += f"singularity exec {container_path} {exec_command} {' '.join(files_in)} > output/logfile.log"
     else:
-        cmd += f"mpirun -np {nprocs} singularity exec {container_path} {exec_command} {' '.join(files_in)} > output/logfile.log"
+        cmd += f"mpirun -np {mpi_np} singularity exec {container_path} {exec_command} {' '.join(files_in)} > output/logfile.log"
 
     logger.debug(f"Launching command:\n{cmd}")
 
@@ -421,6 +426,9 @@ def container_wrapper(
     job_id: str,
     container_path: str = None,
     exec_command: str = None,
+    omp_num_threads: int = 1,
+    mpi_np: int = 1,
+    modules: List[str] = [],
 ):
     """Get the SQL query and script, convert them to MongoDB spec, run the process query on the DB retrieving matching
     files, run the user-provided Singularity container (if present) in a temporary directory, save the files and zip
@@ -446,6 +454,12 @@ def container_wrapper(
         path to the Singularity container provided by the user
     exec_command : str
         command to be launched within the container (with its own options and flags if needed)
+    omp_num_threads : int
+        will be exported as OMP_NUM_THREADS environment variable
+    mpi_np : int
+        number of MPI processes which the mpirun command will use
+    modules : List[str]
+        list of modules to be loaded on HPC
     """
 
     query_filters, query_fields = convert_SQL_to_mongo(sql_query=sql_query)
@@ -460,6 +474,9 @@ def container_wrapper(
         files_out = run_container(
             container_path=container_path,
             exec_command=exec_command,
+            omp_num_threads=omp_num_threads,
+            mpi_np=mpi_np,
+            modules=modules,
             pfs_prefix_path=pfs_prefix_path,
             files_in=files_in,
         )
