@@ -503,6 +503,7 @@ def container_wrapper(
         sql_query=sql_query,
         files_out=files_out,
         pfs_prefix_path=pfs_prefix_path,
+        exec_command=exec_command,
         s3_endpoint_url=s3_endpoint_url,
         s3_bucket=s3_bucket,
         job_id=job_id,
