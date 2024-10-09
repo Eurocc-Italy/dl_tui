@@ -14,6 +14,7 @@ import subprocess
 import shutil
 from sh import pushd
 from tempfile import mkdtemp
+from datetime import datetime
 
 from typing import List, Dict, Tuple
 from pymongo.collection import Collection
@@ -209,6 +210,7 @@ def save_python_output(
             "job_id": job_id,
             "s3_key": f"results_{job_id}.zip",
             "path": f"{pfs_prefix_path}/results_{job_id}.zip",
+            "upload_date": str(datetime.now()),
         }
     )
 
@@ -323,6 +325,10 @@ def run_container(
 
     logger.info(f"User container path: {container_path}")
 
+    # Raise exception if command was not passed
+    if not exec_command:
+        raise SyntaxError("No command was given to be run within the container.")
+
     # Create output folder, if it doesn't exist
     os.makedirs(f"output", exist_ok=True)
 
@@ -370,6 +376,7 @@ def run_container(
 def save_container_output(
     sql_query: str,
     pfs_prefix_path: str,
+    exec_command: str,
     files_out: List[str],
     s3_endpoint_url: str,
     s3_bucket: str,
@@ -386,6 +393,8 @@ def save_container_output(
         SQL query (for saving in results folder)
     pfs_prefix_path : str
         path prefix for the location on the parallel filesystem
+    exec_command : str
+        command launched within the container (with its own options and flags), used for logging
     files_out : List[str]
         list containing the paths to the files to be saved
     s3_endpoint_url : str
@@ -400,10 +409,12 @@ def save_container_output(
 
     logger.debug(f"Processed results: {' '.join(files_out)}")
 
-    # copying query and processing script to results folder
-    with open(f"output/query_{job_id}.txt", "w") as f:
-        f.write(sql_query)
+    # Log query and execution command
+    with open(f"output/{job_id}.log", "w") as f:
+        f.write(f"SQL query: {sql_query}\n")
+        f.write(f"Command launched within the container: {exec_command}\n")
 
+    # Write Python script for uploading to S3
     with open(f"upload_results_{job_id}.py", "w") as f:
         content = "import os, boto3, shutil, glob\n"
         content += 'for match in glob.glob("../slurm-*"):\n'
@@ -414,11 +425,13 @@ def save_container_output(
         content += f's3.upload_file(Filename="results_{job_id}.zip", Bucket="{s3_bucket}", Key="results_{job_id}.zip")'
         f.write(content)
 
+    # Insert metadata to MongoDB
     collection.insert_one(
         {
             "job_id": job_id,
             "s3_key": f"results_{job_id}.zip",
             "path": f"{pfs_prefix_path}/results_{job_id}.zip",
+            "upload_date": str(datetime.now()),
         }
     )
 
@@ -430,8 +443,8 @@ def container_wrapper(
     s3_endpoint_url: str,
     s3_bucket: str,
     job_id: str,
-    container_path: str = None,
-    exec_command: str = None,
+    container_path: str,
+    exec_command: str,
     omp_num_threads: int = 1,
     mpi_np: int = 1,
     modules: List[str] = [],
@@ -460,12 +473,12 @@ def container_wrapper(
         path to the Singularity container provided by the user
     exec_command : str
         command to be launched within the container (with its own options and flags if needed)
-    omp_num_threads : int
-        will be exported as OMP_NUM_THREADS environment variable
-    mpi_np : int
+    omp_num_threads : int, optional
+        will be exported as OMP_NUM_THREADS environment variable, 1 by default
+    mpi_np : int, optional, 1 by default
         number of MPI processes which the mpirun command will use
-    modules : List[str]
-        list of modules to be loaded on HPC
+    modules : List[str], optional
+        list of modules to be loaded on HPC, none by default
     """
 
     query_filters, query_fields = convert_SQL_to_mongo(sql_query=sql_query)
@@ -476,35 +489,22 @@ def container_wrapper(
         query_fields=query_fields,
     )
 
-    if container_path:
-        files_out = run_container(
-            container_path=container_path,
-            exec_command=exec_command,
-            omp_num_threads=omp_num_threads,
-            mpi_np=mpi_np,
-            modules=modules,
-            pfs_prefix_path=pfs_prefix_path,
-            files_in=files_in,
-        )
-        # FIXME uncomment for production
-        # save_container_output(
-        #     sql_query=sql_query,
-        #     files_out=files_out,
-        #     pfs_prefix_path=pfs_prefix_path,
-        #     s3_endpoint_url=s3_endpoint_url,
-        #     s3_bucket=s3_bucket,
-        #     job_id=job_id,
-        #     collection=collection,
-        # )
-    else:  # if no container is provided, return the query matches
-        pass
-        # FIXME uncomment for production
-        # save_container_output(
-        #     sql_query=sql_query,
-        #     files_out=files_in,
-        #     pfs_prefix_path=pfs_prefix_path,
-        #     s3_endpoint_url=s3_endpoint_url,
-        #     s3_bucket=s3_bucket,
-        #     job_id=job_id,
-        #     collection=collection,
-        # )
+    files_out = run_container(
+        container_path=container_path,
+        exec_command=exec_command,
+        omp_num_threads=omp_num_threads,
+        mpi_np=mpi_np,
+        modules=modules,
+        pfs_prefix_path=pfs_prefix_path,
+        files_in=files_in,
+    )
+
+    save_container_output(
+        sql_query=sql_query,
+        files_out=files_out,
+        pfs_prefix_path=pfs_prefix_path,
+        s3_endpoint_url=s3_endpoint_url,
+        s3_bucket=s3_bucket,
+        job_id=job_id,
+        collection=collection,
+    )

@@ -76,22 +76,8 @@ For further information, please consult the code repository (https://github.com/
     logger.info(f"Loading database {config.database}, collection {config.collection}")
     collection = client[config.database][config.collection]
 
-    if user_input.script_path:
-        with open(user_input.script_path, "r") as f:
-            script = f.read()
-
-        python_wrapper(
-            collection=collection,
-            sql_query=user_input.sql_query,
-            pfs_prefix_path=config.pfs_prefix_path,
-            s3_endpoint_url=config.s3_endpoint_url,
-            s3_bucket=config.s3_bucket,
-            job_id=user_input.id,
-            script=script,
-        )
-
-    # This should take care of both cases in which container is ran, and just the query is given
-    else:
+    # Launch Singularity container
+    if user_input.container_path:
         container_wrapper(
             collection=collection,
             sql_query=user_input.sql_query,
@@ -104,6 +90,22 @@ For further information, please consult the code repository (https://github.com/
             omp_num_threads=config.omp_num_threads,
             mpi_np=config.mpi_np,
             modules=config.modules,
+        )
+
+    # Launch Python script (if missing, should just return the query matches)
+    else:
+        if user_input.script_path:
+            with open(user_input.script_path, "r") as f:
+                script = f.read()
+
+        python_wrapper(
+            collection=collection,
+            sql_query=user_input.sql_query,
+            pfs_prefix_path=config.pfs_prefix_path,
+            s3_endpoint_url=config.s3_endpoint_url,
+            s3_bucket=config.s3_bucket,
+            job_id=user_input.id,
+            script=script,
         )
 
 
