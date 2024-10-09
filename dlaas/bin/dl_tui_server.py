@@ -61,8 +61,7 @@ For further information, please consult the code repository (https://github.com/
     copy_user_executable(json_path=json_path)
     stdout, stderr, slurm_job_id = launch_job(json_path=json_path)
 
-    # FIXME uncomment for production
-    # upload_results(json_path=json_path, slurm_job_id=slurm_job_id)
+    upload_results(json_path=json_path, slurm_job_id=slurm_job_id)
 
 
 if __name__ == "__main__":
