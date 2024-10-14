@@ -360,6 +360,7 @@ Example commands [arguments within parentheses are optional]:
                 token=args.token,
                 query_file=args.query_file,
                 container_path=args.container_file,
+                container_url=args.container_url,
                 exec_command=args.exec_command,
                 config_json=config_json,
             )
