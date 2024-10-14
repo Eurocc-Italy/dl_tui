@@ -313,6 +313,8 @@ def query_container(
         Response of the server request
     """
 
+    print(container_path, container_url)
+
     token = token.rstrip("\n")
     headers = {
         "Authorization": f"Bearer {token}",
