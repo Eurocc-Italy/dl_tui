@@ -132,7 +132,7 @@ def copy_user_executable(json_path: str):
 
     elif user_input.container_url:
         logger.debug(f"Container URL: \n{user_input.container_url}")
-        ssh_cmd = f'ssh -i {config.ssh_key} {config.user}@{config.host} "singularity build {user_input.id}/{user_input.container_url.split("/")[-1]}.sif"'
+        ssh_cmd = f'ssh -i {config.ssh_key} {config.user}@{config.host} "singularity build {user_input.id}/container_{user_input.id}.sif"'
 
     else:
         return "", ""
