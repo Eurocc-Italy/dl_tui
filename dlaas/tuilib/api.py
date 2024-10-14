@@ -326,7 +326,6 @@ def query_container(
         files = {
             "query_file": (os.path.basename(query_file), open(query_file, "r"), "text/plain"),
             "container_file": (os.path.basename(container_path), open(container_path, "rb")),
-            "container_url": container_url,
         }
     else:
         files = {
@@ -337,7 +336,7 @@ def query_container(
         f"https://{ip}.nip.io/v1/launch_container",
         headers=headers,
         files=files,
-        data={"config_json": json.dumps(config_json), "exec_command": exec_command},
+        data={"config_json": json.dumps(config_json), "exec_command": exec_command, "container_url": container_url},
     )
 
     if container_path or container_url:
