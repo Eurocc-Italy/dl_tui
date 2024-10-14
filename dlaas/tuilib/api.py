@@ -285,6 +285,7 @@ def query_container(
     query_file: str,
     config_json: Dict[str, Dict[str, str]],
     container_path: str = None,
+    container_url: str = None,
     exec_command: str = None,
 ) -> Response:
     """Upload file to Data Lake using the DLaaS API.
@@ -301,6 +302,8 @@ def query_container(
         Dictionary containing the config_hpc and config_server configuration dictionaries
     container_path : str, optional
         Path to the Singularity container provided by the user
+    container_url : str
+        URL to the Docker/Singularity container provided by the user
     exec_command : str, optional
         Command to be launched within the container (with its own options and flags if needed)
 
@@ -316,6 +319,10 @@ def query_container(
     }
 
     if container_path:
+        if container_url:
+            raise KeyError(
+                "Either provide the path to a local container or a URL to a pre-built one. Cannot process both."
+            )
         files = {
             "query_file": (os.path.basename(query_file), open(query_file, "r"), "text/plain"),
             "container_file": (os.path.basename(container_path), open(container_path, "rb")),
@@ -329,12 +336,12 @@ def query_container(
         f"https://{ip}.nip.io/v1/launch_container",
         headers=headers,
         files=files,
-        data={"config_json": json.dumps(config_json), "exec_command": exec_command},
+        data={"config_json": json.dumps(config_json), "exec_command": exec_command, "container_url": container_url},
     )
 
-    if container_path:
+    if container_path or container_url:
         logger.info(
-            f"Running Singularity container {container_path} with command {exec_command} on files matching query {query_file}. Response: {response.status_code}"
+            f"Running Singularity container {container_path or container_url} with command {exec_command} on files matching query {query_file}. Response: {response.status_code}"
         )
     else:
         logger.info(f"Running query {query_file}. Response: {response.status_code}")

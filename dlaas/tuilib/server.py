@@ -34,9 +34,6 @@ def create_remote_directory(json_path: str) -> Tuple[str, str]:
     logger.info(f"Creating remote directory: {user_input.id}")
     logger.debug(f"Full user input: {user_input.__dict__}")
 
-    if user_input.script_path:
-        logger.debug(f"Script name: \n{user_input.script_path}")
-
     # loading server config
     config = Config("server")
     if user_input.config_server:
@@ -78,9 +75,6 @@ def copy_json_input(json_path: str):
     user_input = UserInput.from_json(json_path=json_path)
     logger.info(f"Copying user input in JSON form to HPC")
     logger.debug(f"Full user input: {user_input.__dict__}")
-
-    if user_input.script_path:
-        logger.debug(f"Script name: \n{user_input.script_path}")
 
     # loading server config
     config = Config("server")
@@ -135,6 +129,10 @@ def copy_user_executable(json_path: str):
     elif user_input.container_path:
         logger.debug(f"Container path: \n{user_input.container_path}")
         ssh_cmd = f"scp -i {config.ssh_key} {user_input.container_path} {config.user}@{config.host}:~/{user_input.id}/{basename(user_input.container_path)}"
+
+    elif user_input.container_url:
+        logger.debug(f"Container URL: \n{user_input.container_url}")
+        ssh_cmd = f'ssh -i {config.ssh_key} {config.user}@{config.host} "singularity build {user_input.id}/{user_input.container_url.split("/")[-1]}.sif"'
 
     else:
         return "", ""

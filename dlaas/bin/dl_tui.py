@@ -42,7 +42,7 @@ Example commands [arguments within parentheses are optional]:
     DELETE   | dl_tui --delete --key=file.jpg
     BROWSE   | dl_tui --browse [--filter="category = dog"]
     QUERY (PYTHON)    | dl_tui --query --query_file=/path/to/query.txt [--python_file=/path/to/script.py] [--config_json=/path/to/config.json]
-    QUERY (CONTAINER) | dl_tui --query --query_file=/path/to/query.txt [--container_path=/path/to/container.sif] [--exec_command="command to be executed within the container"] [--config_json=/path/to/config.json]
+    QUERY (CONTAINER) | dl_tui --query --query_file=/path/to/query.txt [--container_path=/path/to/container.sif] [--container_url=docker://url/to/container.sif] [--exec_command="command to be executed within the container"] [--config_json=/path/to/config.json]
     """,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
@@ -88,7 +88,7 @@ Example commands [arguments within parentheses are optional]:
 
     actions.add_argument(
         "--query",
-        help="launch a query, with an optional Python analysis script or Singularity container",
+        help="launch a query, with an optional Python analysis script or Docker/Singularity container",
         action="store_true",
     )
 
@@ -140,6 +140,13 @@ Example commands [arguments within parentheses are optional]:
     parser.add_argument(
         "--container_file",
         help="[--query] | path to the Singularity container to be run on the files matching the query. \
+        (--query only). Please see the User Guide for the script syntax requirements",
+        default=None,
+    )
+
+    parser.add_argument(
+        "--container_url",
+        help="[--query] | URL to the Docker/Singularity container to be run on the files matching the query. \
         (--query only). Please see the User Guide for the script syntax requirements",
         default=None,
     )
@@ -298,7 +305,7 @@ Example commands [arguments within parentheses are optional]:
         if not args.query_file:
             raise KeyError("Required argument is missing: --query_file")
 
-        if args.container_file:
+        if args.container_file or args.container_url:
             # Check that user did not give both Python and container options
             if args.python_file:
                 raise KeyError(
@@ -358,8 +365,8 @@ Example commands [arguments within parentheses are optional]:
             )
 
             if response.status_code == 200:
-                if args.python_file:
-                    msg = f"Successfully launched Singularity container {args.container_file} with command {args.exec_command} on query {open(args.query_file).read()}."
+                if args.container_file or args.container_url:
+                    msg = f"Successfully launched Singularity container {args.container_file or args.container_url} with command {args.exec_command} on query {open(args.query_file).read()}."
                 else:
                     msg = f"Successfully launched query {open(args.query_file).read()}."
                 print(msg)

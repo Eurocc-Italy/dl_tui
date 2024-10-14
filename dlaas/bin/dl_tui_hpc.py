@@ -76,8 +76,8 @@ For further information, please consult the code repository (https://github.com/
     logger.info(f"Loading database {config.database}, collection {config.collection}")
     collection = client[config.database][config.collection]
 
-    # Launch Singularity container
-    if user_input.container_path:
+    # Launch Singularity container (with path or URL, path takes precedence)
+    if user_input.container_path or user_input.container_url:
         container_wrapper(
             collection=collection,
             sql_query=user_input.sql_query,
@@ -85,7 +85,7 @@ For further information, please consult the code repository (https://github.com/
             s3_endpoint_url=config.s3_endpoint_url,
             s3_bucket=config.s3_bucket,
             job_id=user_input.id,
-            container_path=user_input.container_path,
+            container_path=(user_input.container_path or user_input.container_url),
             exec_command=user_input.exec_command,
             omp_num_threads=config.omp_num_threads,
             mpi_np=config.mpi_np,
