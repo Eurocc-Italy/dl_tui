@@ -321,3 +321,110 @@ def upload_results(json_path: str, slurm_job_id: int):
         raise RuntimeError(f"Something gone wrong, job was not launched.\nstdout: {stdout}\nstderr: {stderr}")
 
     return stdout, stderr
+
+
+def check_jobs_status(json_path: str):
+    """Check jobs status on HPC. Returns a list of dictionaries with the job info:
+    - ACCOUNT
+    - TRES_PER_NODE
+    - MIN_CPUS
+    - MIN_TMP_DISK
+    - END_TIME
+    - FEATURES
+    - GROUP
+    - OVER_SUBSCRIBE
+    - JOBID
+    - NAME
+    - COMMENT
+    - TIME_LIMIT
+    - MIN_MEMORY
+    - REQ_NODES
+    - COMMAND
+    - PRIORITY
+    - QOS
+    - REASON
+    - ST
+    - USER
+    - RESERVATION
+    - WCKEY
+    - EXC_NODES
+    - NICE
+    - S:C:T
+    - JOBID
+    - EXEC_HOST
+    - CPUS
+    - NODES
+    - DEPENDENCY
+    - ARRAY_JOB_ID
+    - GROUP
+    - SOCKETS_PER_NODE
+    - CORES_PER_SOCKET
+    - THREADS_PER_CORE
+    - ARRAY_TASK_ID
+    - TIME_LEFT
+    - TIME
+    - NODELIST
+    - CONTIGUOUS
+    - PARTITION
+    - PRIORITY
+    - NODELIST(REASON)
+    - START_TIME
+    - STATE
+    - UID
+    - SUBMIT_TIME
+    - LICENSES
+    - CORE_SPEC
+    - SCHEDNODES
+    - WORK_DIR
+
+    Parameters
+    ----------
+    json_path : str
+        Path to the JSON file with the user input
+
+    Returns
+    -------
+    List[Dict[str, str]]
+        list containing dictionaries with job infos
+    """
+
+    user_input = UserInput.from_json(json_path=json_path)
+    logger.info(f"Checking status for jobs on HPC")
+    logger.debug(f"Full user input: {user_input.__dict__}")
+
+    # loading server config
+    config = Config("server")
+    if user_input.config_server:
+        config.load_custom_config(user_input.config_server)
+
+    logger.debug(f"Server config: {config.__dict__}")
+
+    ssh_cmd = rf'ssh -i {config.ssh_key} {config.user}@{config.host} "squeue --format=%all -u {config.user}"'
+
+    logger.debug(f"Launching command via ssh:\n{ssh_cmd}")
+
+    stdout, stderr = subprocess.Popen(
+        ssh_cmd,
+        shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    ).communicate()
+
+    stdout = str(stdout, encoding="utf-8")
+    stderr = str(stderr, encoding="utf-8")
+    logger.debug(f"stdout: {stdout}")
+    logger.debug(f"stderr: {stderr}")
+
+    lines = stdout.split("\n")
+    lines.remove("")  # removing empty lines
+
+    fields = lines.pop(0).split("|")  # fields are separated by vertical bars
+
+    jobs = []
+    for line in lines:
+        job_info = {}
+        for i, field in enumerate(fields):
+            job_info[field] = line.split("|")[i]
+            jobs.append(job_info)
+
+    return jobs
