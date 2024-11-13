@@ -163,7 +163,7 @@ class UserInput:
         Returns
         -------
         UserInput
-            UserInput instance initialized directly from command-line
+            UserInput instance
         """
         user_input = " ".join(sys.argv[1:])
         logger.info(f"Received input from CLI: {user_input}")
@@ -183,7 +183,7 @@ class UserInput:
         Returns
         -------
         UserInput
-            UserInput instance initialized directly from command-line
+            UserInput instance
 
         Raises
         ------
@@ -196,6 +196,28 @@ class UserInput:
 
         with open(json_path, "r") as f:
             data = json.load(f)
+        logger.info(f"Received input from JSON file: {data}")
+
+        return cls(data)
+
+    @classmethod
+    def from_dict(cls, json_dict: str):
+        """Class constructor from dictionary.
+        Expects a JSON-formatted dictionary as command line argument
+
+        Parameters
+        ----------
+        json_dict : str
+            JSON-formatted dictionary with the input info
+
+        Returns
+        -------
+        UserInput
+            UserInput instance
+
+        """
+
+        data = json.loads(json_dict)
         logger.info(f"Received input from JSON file: {data}")
 
         return cls(data)
