@@ -323,7 +323,7 @@ def upload_results(json_path: str, slurm_job_id: int):
     return stdout, stderr
 
 
-def check_jobs_status(json_path: str):
+def check_jobs_status(json_dict: str):
     """Check jobs status on HPC. Returns a list of dictionaries with the job info:
     - ACCOUNT
     - TRES_PER_NODE
@@ -379,8 +379,8 @@ def check_jobs_status(json_path: str):
 
     Parameters
     ----------
-    json_path : str
-        Path to the JSON file with the user input
+    json_dict : str
+        JSON-formatted dictionary with the user input
 
     Returns
     -------
@@ -388,7 +388,7 @@ def check_jobs_status(json_path: str):
         list containing dictionaries with job infos
     """
 
-    user_input = UserInput.from_json(json_path=json_path)
+    user_input = UserInput.from_dict(json_dict=json_dict)
     logger.info(f"Checking status for jobs on HPC")
     logger.debug(f"Full user input: {user_input.__dict__}")
 
