@@ -230,7 +230,7 @@ def launch_job(json_path: str):
 
     try:
         slurm_job_id = int(stdout.lstrip("Submitted batch job "))
-        logger.info(f"Launched job on HPC with ID: {slurm_job_id}")
+        logger.info(f"Launched job on HPC. Job ID | Slurm ID: {user_input.id} | {slurm_job_id}")
     except ValueError:  # exception is raised during conversion of empty string to int
         raise RuntimeError(f"Something gone wrong, job was not launched.\nstdout: {stdout}\nstderr: {stderr}")
 
@@ -323,7 +323,7 @@ def upload_results(json_path: str, slurm_job_id: int):
     return stdout, stderr
 
 
-def check_jobs_status(json_dict: str):
+def check_jobs_status():
     """Check jobs status on HPC. Returns a list of dictionaries with the job info:
     - ACCOUNT
     - TRES_PER_NODE
@@ -377,29 +377,18 @@ def check_jobs_status(json_dict: str):
     - SCHEDNODES
     - WORK_DIR
 
-    Parameters
-    ----------
-    json_dict : str
-        JSON-formatted dictionary with the user input
-
     Returns
     -------
     List[Dict[str, str]]
         list containing dictionaries with job infos
     """
 
-    user_input = UserInput.from_dict(json_dict=json_dict)
-    logger.info(f"Checking status for jobs on HPC")
-    logger.debug(f"Full user input: {user_input.__dict__}")
-
-    # loading server config
+    # loading default server config
     config = Config("server")
-    if user_input.config_server:
-        config.load_custom_config(user_input.config_server)
-
     logger.debug(f"Server config: {config.__dict__}")
 
-    ssh_cmd = rf'ssh -i {config.ssh_key} {config.user}@{config.host} "squeue --format=%all -u {config.user}"'
+    # ssh_cmd = rf'ssh -i {config.ssh_key} {config.user}@{config.host} "squeue --format=%all -u {config.user}"'
+    ssh_cmd = rf'ssh -i {config.ssh_key} {config.user}@{config.host} "squeue --format=%all"'
 
     logger.debug(f"Launching command via ssh:\n{ssh_cmd}")
 

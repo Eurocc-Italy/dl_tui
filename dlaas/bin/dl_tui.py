@@ -20,7 +20,17 @@ import json
 import argparse
 
 from dlaas.tuilib.common import Config
-from dlaas.tuilib.api import upload, replace, update, download, delete, query_python, query_container, browse
+from dlaas.tuilib.api import (
+    upload,
+    replace,
+    update,
+    download,
+    delete,
+    query_python,
+    query_container,
+    browse,
+    job_status,
+)
 
 
 def main():
@@ -35,12 +45,13 @@ For further information, please consult the code repository (https://github.com/
         epilog="""
 Example commands [arguments within parentheses are optional]:
 
-    UPLOAD   | dl_tui --upload --file=path/to/file.jpg --metadata=path/to/metadata.json
-    REPLACE  | dl_tui --replace --file=path/to/file.jpg --metadata=path/to/metadata.json
-    UPDATE   | dl_tui --update --key=file.jpg --metadata=path/to/metadata.json
-    DOWNLOAD | dl_tui --download --key=file.jpg
-    DELETE   | dl_tui --delete --key=file.jpg
-    BROWSE   | dl_tui --browse [--filter="category = dog"]
+    UPLOAD      | dl_tui --upload --file=path/to/file.jpg --metadata=path/to/metadata.json
+    REPLACE     | dl_tui --replace --file=path/to/file.jpg --metadata=path/to/metadata.json
+    UPDATE      | dl_tui --update --key=file.jpg --metadata=path/to/metadata.json
+    DOWNLOAD    | dl_tui --download --key=file.jpg
+    DELETE      | dl_tui --delete --key=file.jpg
+    BROWSE      | dl_tui --browse [--filter="category = dog"]
+    JOB_STATUS  | dl_tui --job_status [--user="john"] [--config_json=/path/to/config.json]
     QUERY (PYTHON)    | dl_tui --query --query_file=/path/to/query.txt [--python_file=/path/to/script.py] [--config_json=/path/to/config.json]
     QUERY (CONTAINER) | dl_tui --query --query_file=/path/to/query.txt [--container_path=/path/to/container.sif] [--container_url=docker://url/to/container.sif] [--exec_command="command to be executed within the container"] [--config_json=/path/to/config.json]
     """,
@@ -83,6 +94,12 @@ Example commands [arguments within parentheses are optional]:
     actions.add_argument(
         "--browse",
         help="browse files in the Data Lake, optionally providing a filter",
+        action="store_true",
+    )
+
+    actions.add_argument(
+        "--job_status",
+        help="check job status on HPC, optionally filtering for specific user",
         action="store_true",
     )
 
@@ -169,6 +186,12 @@ Example commands [arguments within parentheses are optional]:
         "--filter",
         help="[--browse] | SQL-like query for filtering files, \
         where the 'SELECT * FROM metadata WHERE' part of the SQL query was removed",
+        default=None,
+    )
+
+    parser.add_argument(
+        "--user",
+        help="[--job_status] | Data Lake user for which to filter HPC jobs",
         default=None,
     )
 
@@ -386,12 +409,61 @@ Example commands [arguments within parentheses are optional]:
             token=args.token,
             filter=args.filter,
         )
+
         if response.status_code == 200:
             files = json.loads(response.text)["files"]
             msg = f"Filter: {args.filter}\n"
             msg += f"Files:\n  - "
             msg += ("\n  - ").join(files)
             print(msg)
+        else:
+            print(response.text)
+            response.raise_for_status()
+
+    # Check job status
+    elif args.job_status:
+
+        response = job_status(
+            ip=args.ip,
+            token=args.token,
+            user=args.user,
+        )
+
+        status_dict = {
+            "BF": "BOOT_FAIL",
+            "CA": "CANCELLED",
+            "CD": "COMPLETED",
+            "CF": "CONFIGURING",
+            "CG": "COMPLETING",
+            "DL": "DEADLINE",
+            "F": "FAILED",
+            "NF": "NODE_FAIL",
+            "OOM": "OUT_OF_MEMORY",
+            "PD": "PENDING",
+            "PR": "PREEMPTED",
+            "R": "RUNNING",
+            "RD": "RESV_DEL_HOLD",
+            "RF": "REQUEUE_FED",
+            "RH": "REQUEUE_HOLD",
+            "RQ": "REQUEUED",
+            "RS": "RESIZING",
+            "RV": "REVOKED",
+            "SI": "SIGNALING",
+            "SE": "SPECIAL_EXIT",
+            "SO": "STAGE_OUT",
+            "ST": "STOPPED",
+            "S": "SUSPENDED",
+            "TO": "TIMEOUT",
+        }
+
+        if response.status_code == 200:
+            jobs = json.loads(response.text)["jobs"]
+            print(f"{'JOBID':>10} | {'STATUS':12} | {'REASON'}")
+            for job in jobs:
+                print(
+                    f"{job['JOBID']:>10} | {status_dict[job['ST']]:12} | {job['REASON'] if job['REASON'] != 'None' else ''}"
+                )
+            print(jobs[-1])
         else:
             print(response.text)
             response.raise_for_status()

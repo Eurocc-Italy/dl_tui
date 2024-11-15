@@ -263,7 +263,8 @@ def query_python(
         }
 
     response = requests.post(
-        f"https://{ip}.nip.io/v1/query_and_process",
+        # f"https://{ip}.nip.io/v1/query_and_process",
+        f"http://{ip}:8080/v1/query_and_process",
         headers=headers,
         files=files,
         data={"config_json": json.dumps(config_json)},
@@ -379,5 +380,40 @@ def browse(
     response = requests.get(f"https://{ip}.nip.io/v1/browse_files", headers=headers, params={"filter": filter})
 
     logger.info(f"Bwowsing files in from Data Lake. Filter: {filter}. Response: {response.status_code}")
+
+    return response
+
+
+def job_status(
+    ip: str,
+    token: str,
+    user: str = None,
+) -> Response:
+    """Check HPC job status, optionally filtering by Data Lake user
+
+    Parameters
+    ----------
+    ip : str
+        IP address of the machine running the API
+    token : str
+        Authorization token for running commands via the API
+    user : str, optional
+        Data Lake user whose jobs you want to see
+
+    Returns
+    -------
+    Response
+        Response of the server request
+    """
+
+    token = token.rstrip("\n")
+    headers = {
+        "Authorization": f"Bearer {token}",
+    }
+
+    # response = requests.get(f"https://{ip}.nip.io/v1/job_status", headers=headers, params={"user": user})
+    response = requests.get(f"http://{ip}:8080/v1/job_status", headers=headers, params={"user": user})
+
+    logger.info(f"Checking job status on HPC. User: {filter}. Response: {response.status_code}")
 
     return response
