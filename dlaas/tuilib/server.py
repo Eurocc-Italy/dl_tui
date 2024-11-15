@@ -426,12 +426,7 @@ def check_jobs_status() -> Dict[str, Dict[str, str]]:
         for line in f:
             if "Launched job on HPC" in line:
                 data = line.split()
-                jobs[data[-1]] = {
-                    "DATA_LAKE_JOBID": data[-3],
-                    "JOBID": data[-1],
-                    "ST": "CD",  # Assume by default that if job is not running on HPC it is completed
-                    "REASON": "None",
-                }
+                jobs[data[-1]] = {"DATA_LAKE_JOBID": data[-3], "JOBID": data[-1]}
 
     # Populate jobs info from squeue output
     for line in lines:
