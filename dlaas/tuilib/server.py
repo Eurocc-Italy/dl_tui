@@ -420,30 +420,24 @@ def check_jobs_status() -> Dict[str, Dict[str, str]]:
     except IndexError:
         return None
 
-    # Populate job info from squeue output
+    # Populate job dictionary with info from logfile
     jobs = {}
+    with open("/var/log/datalake/dl-tui.log") as f:
+        for line in f:
+            if "Launched job on HPC" in line:
+                data = line.split()
+                jobs[data[-1]] = {"DATA_LAKE_JOBID": data[-3], "JOBID": data[-1]}
+
+    # Populate jobs info from squeue output
     for line in lines:
         job_info = {}
         for i, field in enumerate(fields):
             job_info[field] = line.split("|")[i]
-        jobs[job_info["JOBID"]] = job_info
 
-    # Add Data Lake job_id to job info
-    if exists("/var/log/datalake/dl-tui.log"):
-        with open("/var/log/datalake/dl-tui.log") as f:
-            for line in f:
-                if "Launched job on HPC" in line:
-                    data = line.split()
-                    try:
-                        jobs[data[-1]]["DATA_LAKE_JOBID"] = data[-3]
-                    except:
-                        continue
-
-                elif "Uploading results on HPC" in line:
-                    data = line.split()
-                    try:
-                        jobs[data[-1]]["DATA_LAKE_JOBID"] = data[-3]
-                    except:
-                        continue
+        # Only if job is an "actual" job, i.e. skip jobs for result upload
+        try:
+            jobs[job_info["JOBID"]] = job_info
+        except:
+            continue
 
     return jobs

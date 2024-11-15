@@ -458,15 +458,12 @@ Example commands [arguments within parentheses are optional]:
 
         if response.status_code == 200:
             jobs = json.loads(response.text)["jobs"]
-            print(f"{'JOB ID':^32} | {'SLURM JOB':^10} | {'STATUS':^14} | {'REASON'}")
+            print(f"{'JOB ID':^34}|{'SLURM JOB':^11}|{'STATUS':^11}| {'REASON'}")
 
             if jobs:
                 for jobid, job in jobs.items():
                     print(
-                        f"{job['DATA_LAKE_JOBID']:^32} | \
-                        {job['JOBID']:^10} | \
-                        {status_dict[job['ST']]:^14} | \
-                        {job['REASON'] if job['REASON'] != 'None' else ''}"
+                        f"{job['DATA_LAKE_JOBID']:^34}|{job['JOBID']:^11}|{status_dict[job['ST']]:^11}| {job['REASON'] if job['REASON'] != 'None' else ''}"
                     )
         else:
             print(response.text)
