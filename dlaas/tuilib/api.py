@@ -411,8 +411,7 @@ def job_status(
         "Authorization": f"Bearer {token}",
     }
 
-    # response = requests.get(f"https://{ip}.nip.io/v1/job_status", headers=headers, params={"user": user})
-    response = requests.get(f"http://{ip}:8080/v1/job_status", headers=headers, params={"user": user})
+    response = requests.get(f"https://{ip}.nip.io/v1/job_status", headers=headers, params={"user": user})
 
     logger.info(f"Checking job status on HPC. User: {filter}. Response: {response.status_code}")
 

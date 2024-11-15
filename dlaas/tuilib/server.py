@@ -390,8 +390,7 @@ def check_jobs_status():
     config = Config("server")
     logger.debug(f"Server config: {config.__dict__}")
 
-    # ssh_cmd = rf'ssh -i {config.ssh_key} {config.user}@{config.host} "squeue --format=%all -u {config.user}"'
-    ssh_cmd = rf'ssh -i {config.ssh_key} {config.user}@{config.host} "squeue --format=%all"'
+    ssh_cmd = rf'ssh -i {config.ssh_key} {config.user}@{config.host} "squeue --format=%all -u {config.user}"'
 
     logger.debug(f"Launching command via ssh:\n{ssh_cmd}")
 
