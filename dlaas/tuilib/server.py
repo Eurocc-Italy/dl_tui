@@ -409,8 +409,12 @@ def check_jobs_status():
     lines = stdout.split("\n")
     lines.remove("")  # removing empty lines
 
-    fields = lines.pop(0).split("|")  # fields are separated by vertical bars
+    try:
+        fields = lines.pop(0).split("|")  # fields are separated by vertical bars
+    except IndexError:
+        return None
 
+    # Populate job info from squeue output
     jobs = {}
     for line in lines:
         job_info = {}
@@ -418,6 +422,7 @@ def check_jobs_status():
             job_info[field] = line.split("|")[i]
         jobs[job_info["JOBID"]] = job_info
 
+    # Add Data Lake job_id to job info
     if exists("/var/log/datalake/dl-tui.log"):
         with open("/var/log/datalake/dl-tui.log") as f:
             for line in f:
