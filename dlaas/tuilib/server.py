@@ -428,6 +428,9 @@ def check_jobs_status():
             for line in f:
                 if "Launched job on HPC" in line:
                     data = line.split()
-                    jobs[data[-1]]["DATA_LAKE_JOBID"] = data[-3]
+                    try:
+                        jobs[data[-1]]["DATA_LAKE_JOBID"] = data[-3]
+                    except:
+                        jobs[data[-1]] = {"DATA_LAKE_JOBID": data[-3], "ST": "COMPLETED"}
 
     return jobs
