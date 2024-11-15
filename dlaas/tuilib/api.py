@@ -263,8 +263,7 @@ def query_python(
         }
 
     response = requests.post(
-        # f"https://{ip}.nip.io/v1/query_and_process",
-        f"http://{ip}:8080/v1/query_and_process",
+        f"https://{ip}.nip.io/v1/query_and_process",
         headers=headers,
         files=files,
         data={"config_json": json.dumps(config_json)},
