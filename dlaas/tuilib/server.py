@@ -431,6 +431,10 @@ def check_jobs_status():
                     try:
                         jobs[data[-1]]["DATA_LAKE_JOBID"] = data[-3]
                     except:
-                        jobs[data[-1]] = {"DATA_LAKE_JOBID": data[-3], "ST": "COMPLETED"}
+                        jobs[data[-1]] = {
+                            "DATA_LAKE_JOBID": data[-3],
+                            "JOBID": data[-1],
+                            "ST": "COMPLETED",
+                        }
 
     return jobs
