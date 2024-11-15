@@ -10,7 +10,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-from os.path import basename
+from os.path import basename, exists
 import subprocess
 from typing import Tuple
 from dlaas.tuilib.common import Config, UserInput
@@ -377,6 +377,9 @@ def check_jobs_status():
     - SCHEDNODES
     - WORK_DIR
 
+    If a dl-tui.log logfile is found in /var/log/datalake, associates the Slurm JOBID with the Data Lake JOBID under
+    the key DATA_LAKE_JOBID
+
     Returns
     -------
     List[Dict[str, str]]
@@ -409,11 +412,18 @@ def check_jobs_status():
 
     fields = lines.pop(0).split("|")  # fields are separated by vertical bars
 
-    jobs = []
+    jobs = {}
     for line in lines:
         job_info = {}
         for i, field in enumerate(fields):
             job_info[field] = line.split("|")[i]
-            jobs.append(job_info)
+        jobs[job_info["JOBID"]] = job_info
+
+    if exists("/var/log/datalake/dl-tui.log"):
+        with open("/var/log/datalake/dl-tui.log") as f:
+            for line in f:
+                if "Launched job on HPC" in line:
+                    data = line.split()
+                    jobs[data[-1]]["DATA_LAKE_JOBID"] = data[-3]
 
     return jobs
