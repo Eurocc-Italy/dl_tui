@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 from os.path import basename, exists
 import subprocess
-from typing import Tuple
+from typing import Tuple, Dict
 from dlaas.tuilib.common import Config, UserInput
 
 
@@ -58,7 +58,7 @@ def create_remote_directory(json_path: str) -> Tuple[str, str]:
     return stdout, stderr
 
 
-def copy_json_input(json_path: str):
+def copy_json_input(json_path: str) -> Tuple[str, str]:
     """Copy .json file with the user input to remote machine
 
     Parameters
@@ -98,7 +98,7 @@ def copy_json_input(json_path: str):
     return stdout, stderr
 
 
-def copy_user_executable(json_path: str):
+def copy_user_executable(json_path: str) -> Tuple[str, str]:
     """Copy user executable file to remote machine (if present in json file)
     Executable can either be a Python script or a Singularity container
 
@@ -152,7 +152,7 @@ def copy_user_executable(json_path: str):
     return stdout, stderr
 
 
-def launch_job(json_path: str):
+def launch_job(json_path: str) -> Tuple[str, str, str]:
     """Launch job on HPC (either a Python script or a Singularity container)
 
     Parameters
@@ -237,7 +237,7 @@ def launch_job(json_path: str):
     return stdout, stderr, slurm_job_id
 
 
-def upload_results(json_path: str, slurm_job_id: int):
+def upload_results(json_path: str, slurm_job_id: int) -> Tuple[str, str]:
     """Upload results of completed job to S3 via the Python script created by the HPC version.
 
     Parameters
@@ -323,7 +323,7 @@ def upload_results(json_path: str, slurm_job_id: int):
     return stdout, stderr
 
 
-def check_jobs_status():
+def check_jobs_status() -> Dict[Dict[str, str]]:
     """Check jobs status on HPC. Returns a list of dictionaries with the job info:
     - ACCOUNT
     - TRES_PER_NODE
@@ -382,8 +382,8 @@ def check_jobs_status():
 
     Returns
     -------
-    List[Dict[str, str]]
-        list containing dictionaries with job infos
+    Dict[Dict[str, str]]
+        dictionary containing dictionaries with job infos
     """
 
     # loading default server config
@@ -434,7 +434,7 @@ def check_jobs_status():
                         jobs[data[-1]] = {
                             "DATA_LAKE_JOBID": data[-3],
                             "JOBID": data[-1],
-                            "ST": "COMPLETED",
+                            "ST": "CD",
                         }
 
     return jobs

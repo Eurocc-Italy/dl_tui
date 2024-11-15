@@ -461,7 +461,7 @@ Example commands [arguments within parentheses are optional]:
             print(f"{'JOB ID':^20} | {'SLURM JOB':^15} | {'STATUS':^14} | {'REASON'}")
 
             if jobs:
-                for job in jobs:
+                for jobid, job in jobs.items():
                     print(
                         f"{job['DATA_LAKE_JOBID']:^20} | \
                         {job['JOBID']:^15} | \
