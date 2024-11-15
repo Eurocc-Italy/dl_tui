@@ -314,6 +314,12 @@ def upload_results(json_path: str, slurm_job_id: int) -> Tuple[str, str]:
     logger.debug(f"stdout: {stdout}")
     logger.debug(f"stderr: {stderr}")
 
+    try:
+        slurm_job_id = int(stdout.lstrip("Submitted batch job "))
+        logger.info(f"Uploading results on HPC. Job ID | Slurm ID: {user_input.id} | {slurm_job_id}")
+    except ValueError:  # exception is raised during conversion of empty string to int
+        raise RuntimeError(f"Something gone wrong, job was not launched.\nstdout: {stdout}\nstderr: {stderr}")
+
     logger.info(f"Results are available on S3 with the key: results_{user_input.id}.zip")
     logger.info(f'Results are available on MongoDB with the key: "job_id": {user_input.id}')
 
@@ -427,6 +433,13 @@ def check_jobs_status() -> Dict[str, Dict[str, str]]:
         with open("/var/log/datalake/dl-tui.log") as f:
             for line in f:
                 if "Launched job on HPC" in line:
+                    data = line.split()
+                    try:
+                        jobs[data[-1]]["DATA_LAKE_JOBID"] = data[-3]
+                    except:
+                        continue
+
+                elif "Uploading results on HPC" in line:
                     data = line.split()
                     try:
                         jobs[data[-1]]["DATA_LAKE_JOBID"] = data[-3]
