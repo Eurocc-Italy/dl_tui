@@ -431,11 +431,6 @@ def check_jobs_status() -> Dict[str, Dict[str, str]]:
                     try:
                         jobs[data[-1]]["DATA_LAKE_JOBID"] = data[-3]
                     except:
-                        jobs[data[-1]] = {
-                            "DATA_LAKE_JOBID": data[-3],
-                            "JOBID": data[-1],
-                            "ST": "CD",
-                            "REASON": "None",
-                        }
+                        continue
 
     return jobs
