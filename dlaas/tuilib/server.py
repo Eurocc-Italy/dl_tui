@@ -435,6 +435,7 @@ def check_jobs_status() -> Dict[str, Dict[str, str]]:
                             "DATA_LAKE_JOBID": data[-3],
                             "JOBID": data[-1],
                             "ST": "CD",
+                            "REASON": "None",
                         }
 
     return jobs
