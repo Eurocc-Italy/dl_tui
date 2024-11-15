@@ -323,7 +323,7 @@ def upload_results(json_path: str, slurm_job_id: int) -> Tuple[str, str]:
     return stdout, stderr
 
 
-def check_jobs_status() -> Dict[Dict[str, str]]:
+def check_jobs_status() -> Dict[str, Dict[str, str]]:
     """Check jobs status on HPC. Returns a list of dictionaries with the job info:
     - ACCOUNT
     - TRES_PER_NODE
@@ -382,7 +382,7 @@ def check_jobs_status() -> Dict[Dict[str, str]]:
 
     Returns
     -------
-    Dict[Dict[str, str]]
+    Dict[str, Dict[str, str]]
         dictionary containing dictionaries with job infos
     """
 
