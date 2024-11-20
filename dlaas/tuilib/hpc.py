@@ -325,9 +325,12 @@ def run_container(
 
     logger.info(f"User container path: {container_path}")
 
-    # Raise exception if command was not passed
-    if not exec_command:
-        raise SyntaxError("No command was given to be run within the container.")
+    # If command is not passed, run the container instead of exec
+    if exec_command:
+        runtype = "exec"
+    else:
+        runtype = "run"
+        exec_command = ""
 
     # Create output folder, if it doesn't exist
     os.makedirs(f"output", exist_ok=True)
@@ -345,9 +348,9 @@ def run_container(
     # Launch command (with mpirun if mpi_np > 1)
     # FIXME: make sure this is desired behaviour
     if mpi_np == 1:
-        cmd += f"singularity exec {container_path} {exec_command} {' '.join(files_in)}"
+        cmd += f"singularity {runtype} {container_path} {exec_command} {' '.join(files_in)}"
     else:
-        cmd += f"mpirun -np {mpi_np} singularity exec {container_path} {exec_command} {' '.join(files_in)}"
+        cmd += f"mpirun -np {mpi_np} singularity {runtype} {container_path} {exec_command} {' '.join(files_in)}"
 
     logger.debug(f"Launching command:\n{cmd}")
 
