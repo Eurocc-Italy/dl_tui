@@ -101,7 +101,7 @@ For further information, please consult the code repository (https://github.com/
             s3_endpoint_url=config.s3_endpoint_url,
             s3_bucket=config.s3_bucket,
             job_id=user_input.id,
-            container_path=f"{user_input.id}.sif",
+            container_path=f"container_{user_input.id}.sif",
             exec_command=user_input.exec_command,
             omp_num_threads=config.omp_num_threads,
             mpi_np=config.mpi_np,
