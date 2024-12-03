@@ -109,12 +109,12 @@ def copy_user_executable(json_path: str) -> Tuple[str, str]:
 
     Returns
     -------
-    Tuple[str, str]
-        stdout and stderr of the ssh command
+    Tuple[str, str, str]
+        stdout and stderr of the ssh command + Slurm job ID for build job
     """
 
     user_input = UserInput.from_json(json_path=json_path)
-    logger.info(f"Copying user script to remote directory")
+    logger.info(f"Copying user script/container to remote directory")
     logger.debug(f"Full user input: {user_input.__dict__}")
 
     # loading server config
@@ -122,43 +122,76 @@ def copy_user_executable(json_path: str) -> Tuple[str, str]:
     if user_input.config_server:
         config.load_custom_config(user_input.config_server)
 
+    # SLURM parameters
+    user = config.user
+    host = config.host
+    ssh_key = config.ssh_key
+    partition = config.upload_partition
+    account = config.account
+    mail = config.mail
+
     if user_input.script_path:
         logger.debug(f"Python script: \n{user_input.script_path}")
-        ssh_cmd = f"scp -i {config.ssh_key} {user_input.script_path} {config.user}@{config.host}:~/{user_input.id}/{basename(user_input.script_path)}"
+        full_ssh_cmd = f"scp -i {ssh_key} {user_input.script_path} {user}@{host}:~/{user_input.id}/{basename(user_input.script_path)}"
 
     elif user_input.container_path:
         logger.debug(f"Container path: \n{user_input.container_path}")
-        ssh_cmd = f"scp -i {config.ssh_key} {user_input.container_path} {config.user}@{config.host}:~/{user_input.id}/{basename(user_input.container_path)}"
+        full_ssh_cmd = f"scp -i {ssh_key} {user_input.container_path} {user}@{host}:~/{user_input.id}/{basename(user_input.container_path)}"
 
     elif user_input.container_url:
         logger.debug(f"Container URL: \n{user_input.container_url}")
-        ssh_cmd = f'ssh -i {config.ssh_key} {config.user}@{config.host} "singularity build {user_input.id}/container_{user_input.id}.sif {user_input.container_url}"'
+        # Create wrap command to be passed to sbatch
+        wrap_cmd = f"singularity build {user_input.id}/container_{user_input.id}.sif {user_input.container_url}"
+
+        ssh_cmd = f"cd {user_input.id}; "
+        ssh_cmd += f"sbatch -p {partition} -A {account} "
+        ssh_cmd += f"--mail-type ALL --mail-user {mail} "
+        ssh_cmd += f"-t 00:10:00 "
+        ssh_cmd += f"--wrap '{wrap_cmd}'"
+
+        # Generate full SSH command
+        full_ssh_cmd = rf'ssh -i {ssh_key} {config.user}@{config.host} "{ssh_cmd}"'
 
     else:
         return "", ""
 
     logger.debug(f"launching command: {ssh_cmd}")
+
     stdout, stderr = subprocess.Popen(
-        ssh_cmd,
+        full_ssh_cmd,
         shell=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     ).communicate()
+
     stdout = str(stdout, encoding="utf-8")
     stderr = str(stderr, encoding="utf-8")
-    logger.debug(f"scp stdout: {stdout}")
-    logger.debug(f"scp stderr: {stderr}")
+    logger.debug(f"stdout: {stdout}")
+    logger.debug(f"stderr: {stderr}")
 
-    return stdout, stderr
+    if user_input.container_url:
+        try:
+            build_job_id = int(stdout.lstrip("Submitted batch job "))
+        except ValueError:  # exception is raised during conversion of empty string to int
+            raise RuntimeError(f"Something gone wrong, job was not launched.\nstdout: {stdout}\nstderr: {stderr}")
+
+        if "Submitted batch job" not in stdout:
+            raise RuntimeError(f"Something gone wrong, job was not launched.\nstdout: {stdout}\nstderr: {stderr}")
+    else:
+        build_job_id = None
+
+    return stdout, stderr, build_job_id
 
 
-def launch_job(json_path: str) -> Tuple[str, str, str]:
+def launch_job(json_path: str, build_job_id: str = None) -> Tuple[str, str, str]:
     """Launch job on HPC (either a Python script or a Singularity container)
 
     Parameters
     ----------
     json_path : str
         Path to the JSON file with the user input
+    build_job_id : int, optional
+        Slurm job ID used for building a remote container
 
     Returns
     -------
@@ -209,6 +242,8 @@ def launch_job(json_path: str) -> Tuple[str, str, str]:
     ssh_cmd += f"--mail-type ALL --mail-user {mail} "
     ssh_cmd += f"-t {walltime} -N {nodes} "
     ssh_cmd += f"--ntasks-per-node {ntasks_per_node} "
+    if build_job_id:
+        ssh_cmd += f"-d afterok:{build_job_id} "
     ssh_cmd += f"--wrap '{wrap_cmd}'"
 
     full_ssh_cmd = rf'ssh -i {ssh_key} {config.user}@{config.host} "{ssh_cmd}"'
