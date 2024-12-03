@@ -140,7 +140,7 @@ Example commands:
 
 The library enables high-performance analytics on the Data Lake files via the `dl_tui query` action. The TUI will fetch the list of files matching the given SQL query and will run either a user-provided Python script or a Docker/Singularity container on these files. The results will be uploaded to the Data Lake and made available for download.
 
-## Python
+#### Python
 
 The provided Python script must satisfy the following requirements:
 
@@ -183,7 +183,7 @@ def main(files_in):  # main function, expecting a list of file paths as input
 print("Done!")  # NOTE: This line will not be executed, as it is not in the `main` function!
 ```
 
-## Docker/Singularity
+#### Docker/Singularity
 
 The Docker/Singularity container must satisfy the following requirements:
 
