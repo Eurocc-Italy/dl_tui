@@ -142,7 +142,7 @@ def copy_user_executable(json_path: str) -> Tuple[str, str]:
         logger.debug(f"Container URL: \n{user_input.container_url}")
         # Create wrap command to be passed to sbatch
         wrap_cmd = "module load singularity; "  # FIXME: necessary for G100
-        wrap_cmd += f"singularity build {user_input.id}/container_{user_input.id}.sif {user_input.container_url}"
+        wrap_cmd += f"singularity build container_{user_input.id}.sif {user_input.container_url}"
 
         ssh_cmd = f"cd {user_input.id}; "
         ssh_cmd += f"sbatch -p {partition} -A {account} "

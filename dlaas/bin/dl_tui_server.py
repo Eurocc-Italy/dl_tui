@@ -58,7 +58,7 @@ For further information, please consult the code repository (https://github.com/
     create_remote_directory(json_path=json_path)
     copy_json_input(json_path=json_path)
 
-    build_job_id = copy_user_executable(json_path=json_path)
+    stdout, stderr, build_job_id = copy_user_executable(json_path=json_path)
     stdout, stderr, slurm_job_id = launch_job(json_path=json_path, build_job_id=build_job_id)
 
     upload_results(json_path=json_path, slurm_job_id=slurm_job_id)
