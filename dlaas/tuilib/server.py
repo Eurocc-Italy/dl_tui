@@ -147,7 +147,7 @@ def copy_user_executable(json_path: str) -> Tuple[str, str]:
         ssh_cmd = f"cd {user_input.id}; "
         ssh_cmd += f"sbatch -p {partition} -A {account} "
         ssh_cmd += f"--mail-type ALL --mail-user {mail} "
-        ssh_cmd += f"-t 00:10:00 "
+        ssh_cmd += f"-t 01:00:00 "
         ssh_cmd += f"--wrap '{wrap_cmd}'"
 
         # Generate full SSH command
