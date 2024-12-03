@@ -342,8 +342,11 @@ def run_container(
     for module in modules:
         cmd += f"module load {module}; "
 
+    # FIXME: needed for G100, otherwise Python won't load
+    cmd += f"unset PYTHONHOME; unset PYTHONPATH"
+
     # Bind folders
-    cmd += f"export SINGULARITY_BIND={pfs_prefix_path}:/assets,$PWD/output:/output; "  # FIXME "assets" should be renamed "input"
+    cmd += f"export SINGULARITY_BIND={pfs_prefix_path}:/input,$PWD/output:/output; "
 
     # Launch command (with mpirun if mpi_np > 1)
     # FIXME: make sure this is desired behaviour
