@@ -348,12 +348,17 @@ def run_container(
     # Bind folders
     cmd += f"export SINGULARITY_BIND={pfs_prefix_path}:/input,$PWD/output:/output; "
 
+    # Convert file paths for use in container
+    files_container = []
+    for file in files_in:
+        files_container.append(f"/input/{os.path.basename(file)}")
+
     # Launch command (with mpirun if mpi_np > 1)
     # FIXME: make sure this is desired behaviour
     if mpi_np == 1:
-        cmd += f"singularity {runtype} {container_path} {exec_command} {' '.join(files_in)}"
+        cmd += f"singularity {runtype} {container_path} {exec_command} {' '.join(files_container)}"
     else:
-        cmd += f"mpirun -np {mpi_np} singularity {runtype} {container_path} {exec_command} {' '.join(files_in)}"
+        cmd += f"mpirun -np {mpi_np} singularity {runtype} {container_path} {exec_command} {' '.join(files_container)}"
 
     logger.debug(f"Launching command:\n{cmd}")
 
