@@ -353,9 +353,6 @@ def run_container(
     for file in files_in:
         files_container.append(f"/input/{os.path.basename(file)}")
 
-    print(files_in)
-    print(files_container)
-
     # Launch command (with mpirun if mpi_np > 1)
     # FIXME: make sure this is desired behaviour
     if mpi_np == 1:
