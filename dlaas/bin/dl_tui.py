@@ -334,9 +334,6 @@ Example commands [arguments within parentheses are optional]:
                 raise KeyError(
                     "Analysis with both a Python script and a Singularity container were requested. The two modes are mutually exclusive."
                 )
-            # Check that execution command was provided
-            if not args.exec_command:
-                raise KeyError("Required argument is missing: --exec_command")
 
         # loading default options
         config_json = {
