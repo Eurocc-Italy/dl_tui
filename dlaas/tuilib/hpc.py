@@ -343,7 +343,7 @@ def run_container(
         cmd += f"module load {module}; "
 
     # FIXME: needed for G100, otherwise Python won't load
-    cmd += f"unset PYTHONHOME; unset PYTHONPATH"
+    cmd += f"unset PYTHONHOME; unset PYTHONPATH; "
 
     # Bind folders
     cmd += f"export SINGULARITY_BIND={pfs_prefix_path}:/input,$PWD/output:/output; "
