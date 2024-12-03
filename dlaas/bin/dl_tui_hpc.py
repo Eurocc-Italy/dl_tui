@@ -76,7 +76,7 @@ For further information, please consult the code repository (https://github.com/
     logger.info(f"Loading database {config.database}, collection {config.collection}")
     collection = client[config.database][config.collection]
 
-    # Launch Singularity container (with path or URL, path takes precedence)
+    # Launch Singularity container (with path)
     if user_input.container_path:
         container_wrapper(
             collection=collection,
@@ -91,6 +91,8 @@ For further information, please consult the code repository (https://github.com/
             mpi_np=config.mpi_np,
             modules=config.modules,
         )
+
+    # Launch Singularity container (with URL)
     elif user_input.container_url:
         container_wrapper(
             collection=collection,
