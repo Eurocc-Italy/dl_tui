@@ -141,7 +141,8 @@ def copy_user_executable(json_path: str) -> Tuple[str, str]:
     elif user_input.container_url:
         logger.debug(f"Container URL: \n{user_input.container_url}")
         # Create wrap command to be passed to sbatch
-        wrap_cmd = f"singularity build {user_input.id}/container_{user_input.id}.sif {user_input.container_url}"
+        wrap_cmd = "module load singularity; "  # FIXME: necessary for G100
+        wrap_cmd += f"singularity build {user_input.id}/container_{user_input.id}.sif {user_input.container_url}"
 
         ssh_cmd = f"cd {user_input.id}; "
         ssh_cmd += f"sbatch -p {partition} -A {account} "
@@ -155,7 +156,7 @@ def copy_user_executable(json_path: str) -> Tuple[str, str]:
     else:
         return "", ""
 
-    logger.debug(f"launching command: {ssh_cmd}")
+    logger.debug(f"launching command: {full_ssh_cmd}")
 
     stdout, stderr = subprocess.Popen(
         full_ssh_cmd,
@@ -171,16 +172,17 @@ def copy_user_executable(json_path: str) -> Tuple[str, str]:
 
     if user_input.container_url:
         try:
-            build_job_id = int(stdout.lstrip("Submitted batch job "))
+            slurm_job_id = int(stdout.lstrip("Submitted batch job "))
+            logger.info(f"Building container on HPC. Job ID | Slurm ID: {user_input.id} | {slurm_job_id}")
         except ValueError:  # exception is raised during conversion of empty string to int
             raise RuntimeError(f"Something gone wrong, job was not launched.\nstdout: {stdout}\nstderr: {stderr}")
 
         if "Submitted batch job" not in stdout:
             raise RuntimeError(f"Something gone wrong, job was not launched.\nstdout: {stdout}\nstderr: {stderr}")
     else:
-        build_job_id = None
+        slurm_job_id = None
 
-    return stdout, stderr, build_job_id
+    return stdout, stderr, slurm_job_id
 
 
 def launch_job(json_path: str, build_job_id: str = None) -> Tuple[str, str, str]:
