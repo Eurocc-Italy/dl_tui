@@ -138,7 +138,7 @@ Example commands:
 
 ### High-performance analytics
 
-The library enables high-performance analytics on the Data Lake files via the `dl_tui query` action. The TUI will fetch the list of files matching the given SQL query and will run either a user-provided Python script or a Docker/Singularity container on these files. The results will be uploaded to the Data Lake and made available for download.
+The library enables high-performance analytics on the Data Lake files via the `dl_tui --query` action. The TUI will fetch the list of files matching the given SQL query and will run either a user-provided Python script or a Docker/Singularity container on these files. The results will be uploaded to the Data Lake and made available for download.
 
 #### Python
 
