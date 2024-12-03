@@ -180,27 +180,27 @@ def save_python_output(
 
     logger.debug(f"Processed results: {files_out}")
 
-    os.makedirs(f"results", exist_ok=True)
+    os.makedirs("output", exist_ok=True)
 
     # copying query and processing script to results folder
-    with open(f"results/query_{job_id}.txt", "w") as f:
+    with open(f"output/query_{job_id}.txt", "w") as f:
         f.write(sql_query)
     if script:
-        with open(f"results/user_script_{job_id}.py", "w") as f:
+        with open(f"output/user_script_{job_id}.py", "w") as f:
             f.write(script)
 
     for file in files_out:
         try:
-            shutil.move(file, f"results/{os.path.basename(file)}")
+            shutil.move(file, f"output/{os.path.basename(file)}")
         except FileNotFoundError:
             logger.error(f"No such file or directory: '{file}'")
 
     with open(f"upload_results_{job_id}.py", "w") as f:
         content = "import os, boto3, shutil, glob\n"
         content += 'for match in glob.glob("../slurm-*"):\n'
-        content += ' shutil.copy(match, f"results/{os.path.basename(match)}")\n'
-        content += f'shutil.make_archive("results_{job_id}", "zip", "results")\n'
-        content += 'shutil.rmtree("results")\n'
+        content += ' shutil.copy(match, f"output/{os.path.basename(match)}")\n'
+        content += f'shutil.make_archive("results_{job_id}", "zip", "output")\n'
+        content += 'shutil.rmtree("output")\n'
         content += f's3 = boto3.client(service_name="s3", endpoint_url="{s3_endpoint_url}")\n'
         content += f's3.upload_file(Filename="results_{job_id}.zip", Bucket="{s3_bucket}", Key="results_{job_id}.zip")'
         f.write(content)
@@ -333,7 +333,7 @@ def run_container(
         exec_command = ""
 
     # Create output folder, if it doesn't exist
-    os.makedirs(f"output", exist_ok=True)
+    os.makedirs("output", exist_ok=True)
 
     # Set up multithreading
     cmd = f"export OMP_NUM_THREADS={omp_num_threads}; "
