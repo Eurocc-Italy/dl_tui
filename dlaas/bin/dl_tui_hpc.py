@@ -77,7 +77,7 @@ For further information, please consult the code repository (https://github.com/
     collection = client[config.database][config.collection]
 
     # Launch Singularity container (with path or URL, path takes precedence)
-    if user_input.container_path or user_input.container_url:
+    if user_input.container_path:
         container_wrapper(
             collection=collection,
             sql_query=user_input.sql_query,
@@ -85,7 +85,21 @@ For further information, please consult the code repository (https://github.com/
             s3_endpoint_url=config.s3_endpoint_url,
             s3_bucket=config.s3_bucket,
             job_id=user_input.id,
-            container_path=(user_input.container_path or user_input.container_url),
+            container_path=user_input.container_path,
+            exec_command=user_input.exec_command,
+            omp_num_threads=config.omp_num_threads,
+            mpi_np=config.mpi_np,
+            modules=config.modules,
+        )
+    elif user_input.container_url:
+        container_wrapper(
+            collection=collection,
+            sql_query=user_input.sql_query,
+            pfs_prefix_path=config.pfs_prefix_path,
+            s3_endpoint_url=config.s3_endpoint_url,
+            s3_bucket=config.s3_bucket,
+            job_id=user_input.id,
+            container_path=f"{user_input.id}.sif",
             exec_command=user_input.exec_command,
             omp_num_threads=config.omp_num_threads,
             mpi_np=config.mpi_np,
