@@ -114,11 +114,11 @@ The `--download` and `--delete` _actions_ require a `--key=...` (mandatory) _opt
 
 The `--query` _action_ supports the following additional _options_:
 
-- `--query_file=...` (mandatory): path to the text file containing the SQL query to be ran on the Data Lake.
-- `--python_file=...` (optional): path to the Python file containing the processing to be ran on the files matching the query.
-- `--container_path=...` (optional): path to the Docker/Singularity container the user wishes to run on HPC on the files matching the query.
-- `--container_url=...` (optional): URL to the Docker/Singularity container the user wishes to run on HPC on the files matching the query.
-- `--exec_command=...` (optional): command to be run within the Docker/Singularity container.
+- `--query_file=...` (mandatory): path to the text file containing the SQL query to be ran on the Data Lake
+- `--python_file=...` (optional): path to the Python file containing the processing to be ran on the files matching the query
+- `--container_path=...` (optional): path to the Docker/Singularity container the user wishes to run on HPC on the files matching the query
+- `--container_url=...` (optional): URL to the Docker/Singularity container the user wishes to run on HPC on the files matching the query
+- `--exec_command=...` (optional): command to be run within the Docker/Singularity container
 
 If no Python/Docker/Singularity file is provided, the job will match the files of the query and copy them to the results archive for download.
 
@@ -144,9 +144,9 @@ The library enables high-performance analytics on the Data Lake files via the `d
 
 The provided Python script must satisfy the following requirements:
 
-- It must feature a `main` function, which will be **all** that is actually run on HPC (_i.e._, any piece of code not explicitly present in the `main` function will not be executed). Helper functions can be declared anywhere, but must be explicitly called in `main`;
-- The `main` function must accept a list of file paths as input, which will be populated with the matches of the SQL query;
-- The `main` function should return a list of file paths as output, corresponding to the files which the user wants to save from the analysis. The interface will then take this list of paths, save the corresponding files (generated _in situ_ on HPC) in an archive which is uploaded to the S3 bucket and made available to the user for download via the API.
+- It must feature a `main` function, which will be **all** that is actually run on HPC (_i.e._, any piece of code not explicitly present in the `main` function will not be executed). Helper functions can be declared anywhere, but must be explicitly called in `main`
+- The `main` function must accept a list of file paths as input, which will be populated with the matches of the SQL query
+- The `main` function should return a list of file paths as output, corresponding to the files which the user wants to save from the analysis. The interface will then take this list of paths, save the corresponding files (generated _in situ_ on HPC) in an archive which is uploaded to the S3 bucket and made available to the user for download via the API
 
 Below is an example of a valid Python script to be passed to the interface, with a `main` function taking a list of paths as input and returning a list of paths as output.
 
@@ -190,18 +190,18 @@ The Docker/Singularity container must satisfy the following requirements:
 - If no executable is explicitly provided via the `--exec_command` option, the container will run the default action (equivalent to `docker/singularity run image.sif`)
 - If the user wants to run a specific executable, the `--exec_command` option can be provided, specifying the path to the executable (equivalent to `docker/singularity exec /path/to/executable image.sif`)
 - Input files will be automatically provided by the Data Lake API to the container executable based on the query matches. An `/input` folder will be bound to the container corresponding to the folder on the parallel filesystem where Data Lake files are stored. (**WARNING**: do NOT write to the `/input` folder, as the container will have access to _all_ the files on the Data Lake at this path). The executable should expect input file paths as CLI arguments (equivalent to `docker/singularity run /input/file1.png /input/file2.png /input/file3.png ...`)
-- The container should save all results that should be uploaded to the Data Lake to the `/output` folder, which will be automatically be created and bound by the Data Lake infrastructure at runtime.
+- The container should save all results that should be uploaded to the Data Lake to the `/output` folder, which will be automatically be created and bound by the Data Lake infrastructure at runtime
 
 ### Input for `dl_tui_hpc`/`dl_tui_server` executables (API only)
 
 The input parameter of the `dl_tui_hpc` and `dl_tui_server` executables should be the path to a properly-formatted JSON document, whose content should be the following:
 
 - `id`: unique identifier characterizing the run. We recommend using the [UUID](https://docs.python.org/3/library/uuid.html) module to generate it, producing a UUID.hex string
-- `sql_query`: SQL query to be run on the MongoDB database containing the metadata. Since the Data Lake is by definition a non-relational database, and the "return" of the query is the file itself, most queries will be of the type `SELECT * FROM metadata WHERE [...]`.
-- `script_path` (optional): path to a Python script to analyse the files matching the query. This script must feature a `main` function taking as input a list of file paths, which will be populated by the interface with the files matching the query, and returning a list of file paths as output, which will be saved in a compressed archive and made available to the user.
-- `container_path` (optional): path to a Docker/Singularity container to analyse the files matching the query. The container executable should expect a list of file paths as input, and should save all relevant output to the `/output` folder.
-- `container_url` (optional): URL to a Docker/Singularity container to analyse the files matching the query. The container executable should expect a list of file paths as input, and should save all relevant output to the `/output` folder.
-- `exec_command` (optional): command to be run in the Docker/Singularity container in `exec` mode.
+- `sql_query`: SQL query to be run on the MongoDB database containing the metadata. Since the Data Lake is by definition a non-relational database, and the "return" of the query is the file itself, most queries will be of the type `SELECT * FROM metadata WHERE [...]`
+- `script_path` (optional): path to a Python script to analyse the files matching the query. This script must feature a `main` function taking as input a list of file paths, which will be populated by the interface with the files matching the query, and returning a list of file paths as output, which will be saved in a compressed archive and made available to the user
+- `container_path` (optional): path to a Docker/Singularity container to analyse the files matching the query. The container executable should expect a list of file paths as input, and should save all relevant output to the `/output` folder
+- `container_url` (optional): URL to a Docker/Singularity container to analyse the files matching the query. The container executable should expect a list of file paths as input, and should save all relevant output to the `/output` folder
+- `exec_command` (optional): command to be run in the Docker/Singularity container in `exec` mode
 - `config_hpc` (optional): a dictionary containing options for hpc-side configuration
 - `config_server` (optional): a dictionary containing options for server-side configuration
 
