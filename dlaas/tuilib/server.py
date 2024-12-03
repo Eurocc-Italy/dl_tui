@@ -39,7 +39,9 @@ def create_remote_directory(json_path: str) -> Tuple[str, str]:
     if user_input.config_server:
         config.load_custom_config(user_input.config_server)
 
-    ssh_cmd = f"ssh -i {config.ssh_key} {config.user}@{config.host} 'mkdir {user_input.id}'"
+    ssh_cmd = (
+        f"ssh -i {config.ssh_key} {config.user}@{config.host} 'mkdir {user_input.id}; mkdir {user_input.id}/output'"
+    )
     logger.debug(f"launching command: {ssh_cmd}")
     stdout, stderr = subprocess.Popen(
         ssh_cmd,
