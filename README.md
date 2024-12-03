@@ -94,6 +94,7 @@ The API interface can be called via the `dl_tui` executable, with one of the fol
 - `--delete`
 - `--query`
 - `--browse`
+- `--job_status`
 
 The IP address of the API server will be taken by the `config_hpc.json` configuration file (see the [configuration](#configuration) section for more details). Alternatively, it is possible to overwrite the default via the `--ip=...` _option_.
 
@@ -111,14 +112,19 @@ The `--update` _action_ require the following additional (mandatory) _options_:
 
 The `--download` and `--delete` _actions_ require a `--key=...` (mandatory) _option_, which similarly to the `update` _action_ should be the S3 key corresponding to the file to be downloaded/deleted.
 
-The `--query` _action_ requires the following additional _options_:
+The `--query` _action_ supports the following additional _options_:
 
 - `--query_file=...` (mandatory): path to the text file containing the SQL query to be ran on the Data Lake.
 - `--python_file=...` (optional): path to the Python file containing the processing to be ran on the files matching the query.
+- `--container_path=...` (optional): path to the Docker/Singularity container the user wishes to run on HPC on the files matching the query.
+- `--container_url=...` (optional): URL to the Docker/Singularity container the user wishes to run on HPC on the files matching the query.
+- `--exec_command=...` (optional): command to be run within the Docker/Singularity container.
 
-If no Python file is provided, the job will match the files of the query and copy them to the results archive for download.
+If no Python/Docker/Singularity file is provided, the job will match the files of the query and copy them to the results archive for download.
 
 The `--browse` _action_ allows for an additional _option_ `--filter=...` which accepts an SQL-like query string for listing the requested files, removing the `SELECT * FROM metadata WHERE` part of the query itself and only leaving the filters. For example, `SELECT * FROM metadata WHERE category = dog OR category = cat` becomes `filter="category = dog OR category = cat"`.
+
+The `--job_status` _action_ allows users to check the status of jobs running on HPC.
 
 Example commands:
 
@@ -128,12 +134,15 @@ Example commands:
 - Download: `dl_tui --download --file=file.csv`
 - Query: `dl_tui --query --query_file=/path/to/query.txt --python_file=/path/to/script.py`
 - Browse: `dl_tui --browse --filter="category = dog"`
+- Job Status: `dl_tui --job_status`
 
 ### High-performance analytics
 
-The library enables high-performance analytics on the Data Lake files via the `dl_tui query` action. The TUI will fetch the list of files matching the given SQL query and will run the user-provided Python script on these files. The results will be uploaded to the Data Lake and made available for download.
+The library enables high-performance analytics on the Data Lake files via the `dl_tui query` action. The TUI will fetch the list of files matching the given SQL query and will run either a user-provided Python script or a Docker/Singularity container on these files. The results will be uploaded to the Data Lake and made available for download.
 
-The Python script must satisfy the following requirements:
+## Python
+
+The provided Python script must satisfy the following requirements:
 
 - It must feature a `main` function, which will be **all** that is actually run on HPC (_i.e._, any piece of code not explicitly present in the `main` function will not be executed). Helper functions can be declared anywhere, but must be explicitly called in `main`;
 - The `main` function must accept a list of file paths as input, which will be populated with the matches of the SQL query;
@@ -174,6 +183,15 @@ def main(files_in):  # main function, expecting a list of file paths as input
 print("Done!")  # NOTE: This line will not be executed, as it is not in the `main` function!
 ```
 
+## Docker/Singularity
+
+The Docker/Singularity container must satisfy the following requirements:
+
+- If no executable is explicitly provided via the `--exec_command` option, the container will run the default action (equivalent to `docker/singularity run image.sif`)
+- If the user wants to run a specific executable, the `--exec_command` option can be provided, specifying the path to the executable (equivalent to `docker/singularity exec /path/to/executable image.sif`)
+- Input files will be automatically provided by the Data Lake API to the container executable based on the query matches. An `/input` folder will be bound to the container corresponding to the folder on the parallel filesystem where Data Lake files are stored. (**WARNING**: do NOT write to the `/input` folder, as the container will have access to _all_ the files on the Data Lake at this path). The executable should expect input file paths as CLI arguments (equivalent to `docker/singularity run /input/file1.png /input/file2.png /input/file3.png ...`)
+- The container should save all results that should be uploaded to the Data Lake to the `/output` folder, which will be automatically be created and bound by the Data Lake infrastructure at runtime.
+
 ### Input for `dl_tui_hpc`/`dl_tui_server` executables (API only)
 
 The input parameter of the `dl_tui_hpc` and `dl_tui_server` executables should be the path to a properly-formatted JSON document, whose content should be the following:
@@ -181,6 +199,9 @@ The input parameter of the `dl_tui_hpc` and `dl_tui_server` executables should b
 - `id`: unique identifier characterizing the run. We recommend using the [UUID](https://docs.python.org/3/library/uuid.html) module to generate it, producing a UUID.hex string
 - `sql_query`: SQL query to be run on the MongoDB database containing the metadata. Since the Data Lake is by definition a non-relational database, and the "return" of the query is the file itself, most queries will be of the type `SELECT * FROM metadata WHERE [...]`.
 - `script_path` (optional): path to a Python script to analyse the files matching the query. This script must feature a `main` function taking as input a list of file paths, which will be populated by the interface with the files matching the query, and returning a list of file paths as output, which will be saved in a compressed archive and made available to the user.
+- `container_path` (optional): path to a Docker/Singularity container to analyse the files matching the query. The container executable should expect a list of file paths as input, and should save all relevant output to the `/output` folder.
+- `container_url` (optional): URL to a Docker/Singularity container to analyse the files matching the query. The container executable should expect a list of file paths as input, and should save all relevant output to the `/output` folder.
+- `exec_command` (optional): command to be run in the Docker/Singularity container in `exec` mode.
 - `config_hpc` (optional): a dictionary containing options for hpc-side configuration
 - `config_server` (optional): a dictionary containing options for server-side configuration
 
@@ -200,7 +221,7 @@ If you wish to overwrite these defaults and customise your configuration, it is 
 
 If you wish to send custom configuration keys on the fly, it is also possible to pass configuration options to the `dl_tui_<hpc/server>` executables via the `config_hpc` and `config_server` keys in the input JSON file, also in JSON format. These will take precedence over both defaults and what is found in `~/.config/dlaas/config_<hpc/server>.json`.
 
-For the hpc version, the configurable options are relative to the server VM:
+For the hpc version, the configurable options are the following:
 
 - `user`: the user name in the MongoDB server
 - `password`: the password of the MongoDB server
@@ -211,8 +232,11 @@ For the hpc version, the configurable options are relative to the server VM:
 - `s3_endpoint_url`: URL at which the S3 bucket can be found
 - `s3_bucket`: name of the S3 bucket storing the Data Lake files
 - `pfs_prefix_path`: path at which the Data Lake files are stored on the parallel filesystem
+- `omp_num_threads`: number of OMP threads to use on HPC
+- `mpi_np`: number of MPI processes to use on HPC
+- `modules`: list of system modules to be loaded on HPC
 
-For the server version, the configurable options are relative to the HPC system:
+For the server version, the configurable options are the following:
 
 - `user`: username of the HPC account
 - `host`: address of the HPC login node
