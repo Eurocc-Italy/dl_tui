@@ -389,7 +389,7 @@ Example commands [arguments within parentheses are optional]:
                 if args.container_file or args.container_url:
                     msg = rf"Successfully launched Singularity container {args.container_file or args.container_url} with command {args.exec_command} on query {open(args.query_file).read()}"
                 else:
-                    msg = f"Successfully launched query {open(args.query_file).read()}."
+                    msg = f"Successfully launched query {open(args.query_file).read()}"
                 print(msg)
 
                 msg = f"Job ID: {response.text.replace('Files processed successfully, ID: ', '')}"
