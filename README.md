@@ -10,7 +10,7 @@ This repository is part of the EuroCC-Italy Data Lake Ready to Use codebase. The
 
 The User Guide can be found in PDF form at this [link](https://github.com/Eurocc-Italy/dl_deploy/blob/main/Data_Lake_Ready_To_Use_V1.0.pdf).
 
-# Data Lake Ready to Use
+## Data Lake Ready to Use
 
 The Data Lake Ready to Use provides a fast deploy system for the core components of the Data Lake and its interface. It is designed to deliver a customizable infrastructure according to the needs of the requesting user and integrate it with High Performance Computing (HPC) systems, enabling high-performance analytics on extensive datasets, increasing throughput and/or reducing time to solution.
 
@@ -25,7 +25,7 @@ The software stack is composed of three main components:
 - An [API](https://github.com/Eurocc-Italy/dl_api) server, which accepts the user requests and carries out operations on the Data Lake (file upload/download, querying, etc.);
 - The TUI (this library), which is utilized by the end users to interface with the API, as well as by the API itself to interface with the HPC system.
 
-# Text User Interface (`dl_tui`)
+## Text User Interface (`dl_tui`)
 
 This library consists of three executables: `dl_tui`, `dl_tui_hpc` and `dl_tui_server`.
 
@@ -35,7 +35,7 @@ This library consists of three executables: `dl_tui`, `dl_tui_hpc` and `dl_tui_s
 
 The `dl_tui` executable is intended to be used by the users themselves (see the [API Wrapper](#api-interface-dl_tui) section), while the `dl_tui_hpc` and `dl_tui_hpc` executables are intended to be used by the API server.
 
-## Code structure
+### Code structure
 
 The library code is found in the `dlaas` folder, with the following structure:
 
@@ -64,7 +64,7 @@ The `tuilib` folder contains the various functions used by the main executables.
 
 The `etc/default` folder contains some default settings, and can be taken as a template for building custom configurations.
 
-## Installation
+### Installation
 
 We highly recommend installing the software in a custom Python virtual environment. You can set up a virtual environment with third-party tools such as [Anaconda](https://docs.anaconda.com/free/anaconda/install/index.html) or with the built-in [venv](https://docs.python.org/3/library/venv.html) module.
 
@@ -75,13 +75,13 @@ After having set up and activated your virtual environment, follow these steps t
   pip install dl_tui/
   ```
 
-## API interface (`dl_tui`)
+### API interface (`dl_tui`)
 
 It is possible to use the `dl_tui` executable to interact with the API server on the VM for uploading, downloading, replacing, and updating files, as well as launching queries for processing data and browsing the contents of the Data Lake.
 
 The general syntax for command-line calls is:
 
-```
+```shell
 dl_tui --action --option1=value1 --option2=value2 ...
 ```
 
@@ -100,9 +100,9 @@ The IP address of the API server will be taken by the `config_hpc.json` configur
 
 A valid authentication token is required. If saved in the `~/.config/dlaas/api-token.txt` file, it will automatically be read by the executable. Otherwise, the token can be sent directly via the `--token=...` _option_.
 
-## Basic I/O operations
+### Basic I/O operations
 
-### Upload
+#### Upload
 
 To upload files to the Data Lake, use the `--upload` _action_. The following _options_ are available:
 
@@ -117,7 +117,7 @@ dl_tui --upload --file=/path/to/file.csv --metadata=/path/to/metadata.json
 
 >NOTE: existing files cannot be replaced with this action. To replace an existing file or its metadata, use the `--replace` or `--update` actions.
 
-### Download
+#### Download
 
 To download files from the Data Lake, use the `--download` _action_. The following _options_ are available:
 
@@ -129,7 +129,7 @@ Example:
 dl_tui --download --key=file.csv
 ```
 
-### Delete
+#### Delete
 
 To delete files from the Data Lake, use the `--delete` _action_. The following _options_ are available:
 
@@ -141,7 +141,7 @@ Example:
 dl_tui --delete --key=file.csv
 ```
 
-### Replace
+#### Replace
 
 To replace a Data Lake file and its metadata, use the `--replace` _action_. The following _options_ are available:
 
@@ -156,7 +156,7 @@ Example:
 dl_tui --replace --file=/path/to/updated/file.csv --metadata=/path/to/updated_metadata.json
 ```
 
-### Update
+#### Update
 
 To only update the metadata of a Data Lake file (without replacing the file itself), use the `--update` _action_. The following _options_ are available:
 
@@ -169,7 +169,7 @@ Example:
 dl_tui --update --key=file.csv --metadata=/path/to/updated_metadata.json
 ```
 
-## High-performance analytics
+### High-performance analytics
 
 The library enables high-performance analytics on the Data Lake files via the `--query` action. The TUI will fetch the list of files matching the given SQL query, run the analysis on these files and upload the results back to the Data Lake. The following modes are currently supported:
 
@@ -178,7 +178,7 @@ The library enables high-performance analytics on the Data Lake files via the `-
 
 Analytics are run on Data Lake files using a query system. Users can select the files to be analyzed by writing a SQL query in a text file and providing it via the `--query_file` _option_.
 
-### Simple query
+#### Simple query
 
 If only the query file is provided, the corresponding files are zipped to an archive and uploaded to the Data Lake, ready for download. A job ID will be provided after the command launch. This will be the unique identifier for the query, and results will be provided in a .zip file named `results_<JOB_ID>.zip`.
 
@@ -191,7 +191,7 @@ Successfully launched query SELECT * FROM datalake WHERE field = value
 Job ID: ddb66778cd8649f599498e5334126f9d
 ```
 
-### Python scripts
+#### Python scripts
 
 It is possible to provide a Python script for analysis, and have the Data Lake run the script on the files matching the query. The path to the Python file should be provided using the `--python_file` _option_. The script needs to satisfy the following requirements:
 
@@ -243,7 +243,7 @@ Successfully launched analysis script /path/to/script.py on query SELECT * FROM 
 Job ID: a2b8355051940f6cf09ff225d8340389
 ```
 
-### Docker/Singularity containers
+#### Docker/Singularity containers
 
 It is also possible to run a Docker/Singularity container to analyze the files matching the query. Users can either provide the path to the container image via the `--container_path` _option_, or alternatively provide the URL of the image to be used via the `--container_url` _option_. By default, containers are launched in "run" mode (equivalent to `docker/singularity run image.sif`). It is possible to provide a specific executable to be used via the `--exec_command` _option_; in this case the container is launched in "exec" mode (equivalent to `docker/singularity exec /path/to/executable image.sif`).
 
@@ -253,9 +253,9 @@ The executable should expect input file paths as CLI arguments (equivalent to `d
 
 The container should save all results that should be uploaded to the Data Lake to the `/output` folder, which will automatically be created and bound by the Data Lake infrastructure at runtime
 
-## Extra utilities
+### Extra utilities
 
-### Browse files
+#### Browse files
 
 The `--browse` _action_ allows users to browse the Data Lake content. The _option_ `--filter=...` is available, which accepts an SQL-like query string for listing the requested files, removing the `SELECT * FROM metadata WHERE` part of the query itself and only leaving the filters. For example, `SELECT * FROM metadata WHERE category = dog OR category = cat` becomes `filter="category = dog OR category = cat"`.
 
@@ -270,7 +270,7 @@ Files:
   - file_3.parquet
 ```
 
-### Check job status
+#### Check job status
 
 The `--job_status` _action_ allows users to check the status of jobs running on HPC.
 
@@ -280,7 +280,7 @@ $ dl_tui --job_status
   42684ce4c6d2440b8f9ad6647581a52d   14673377  PENDING Dependency
 ```
 
-## Configuration
+### Configuration
 
 The library first loads the default options written in the JSON files located in the `dlaas/etc/default` folder (which can be taken as a template to understand the kind of options which can be configured).
 
@@ -321,7 +321,7 @@ For the server version, the configurable options are the following:
 > **NOTE:**
 > The `config_<hpc/server>.json` file names reflect the executables which need them, not the system to which the information within pertains. _e.g._, the `config_server.json` mostly contains HPC-related information, but is used by the `dl_tui_server` executable which is supposed to run on the server VM, hence the name.
 
-## Input for `dl_tui_hpc`/`dl_tui_server` executables (API only)
+### Input for `dl_tui_hpc`/`dl_tui_server` executables (API only)
 
 The input parameter of the `dl_tui_hpc` and `dl_tui_server` executables should be the path to a properly-formatted JSON document, whose content should be the following:
 
@@ -336,7 +336,7 @@ The input parameter of the `dl_tui_hpc` and `dl_tui_server` executables should b
 
 After you prepared the JSON file (for example, called `input.json`), the program can be called as such:
 
-```
+```shell
 dl_tui_<hpc/server> input.json
 ```
 
