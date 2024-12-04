@@ -154,7 +154,7 @@ def copy_user_executable(json_path: str) -> Tuple[str, str]:
         full_ssh_cmd = rf'ssh -i {ssh_key} {config.user}@{config.host} "{ssh_cmd}"'
 
     else:
-        return "", ""
+        return "", "", None
 
     logger.debug(f"launching command: {full_ssh_cmd}")
 
