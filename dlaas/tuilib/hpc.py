@@ -338,12 +338,12 @@ def run_container(
     # Set up multithreading
     cmd = f"export OMP_NUM_THREADS={omp_num_threads}; "
 
-    # Load modules
-    for module in modules:
-        cmd += f"module load {module}; "
+    # # Load modules
+    # for module in modules:
+    #     cmd += f"module load {module}; "
 
     # FIXME: needed for G100, otherwise Python won't load
-    cmd += f"unset PYTHONHOME; unset PYTHONPATH; "
+    # cmd += f"unset PYTHONHOME; unset PYTHONPATH; "
 
     # Bind folders
     cmd += f"export SINGULARITY_BIND={pfs_prefix_path}:/input:ro,$PWD/output:/output; "
@@ -356,9 +356,9 @@ def run_container(
     # Launch command (with mpirun if mpi_np > 1)
     # FIXME: make sure this is desired behaviour
     if mpi_np == 1:
-        cmd += f"singularity {runtype} {container_path} {exec_command} {' '.join(files_container)}"
+        cmd += f"singularity {runtype} --cleanenv {container_path} {exec_command} {' '.join(files_container)}"
     else:
-        cmd += f"mpirun -np {mpi_np} singularity {runtype} {container_path} {exec_command} {' '.join(files_container)}"
+        cmd += f"mpirun -np {mpi_np} singularity {runtype} --cleanenv {container_path} {exec_command} {' '.join(files_container)}"
 
     logger.debug(f"Launching command:\n{cmd}")
 

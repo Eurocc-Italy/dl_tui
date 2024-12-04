@@ -251,7 +251,7 @@ Input files will be automatically provided by the Data Lake API to the container
 
 The executable should expect input file paths as CLI arguments (equivalent to `docker/singularity run /input/file1.png /input/file2.png /input/file3.png ...`)
 
-The container should save all results that should be uploaded to the Data Lake to the `/output` folder, which will be automatically be created and bound by the Data Lake infrastructure at runtime
+The container should save all results that should be uploaded to the Data Lake to the `/output` folder, which will automatically be created and bound by the Data Lake infrastructure at runtime
 
 ## Extra utilities
 
