@@ -346,7 +346,7 @@ def run_container(
     cmd += f"unset PYTHONHOME; unset PYTHONPATH; "
 
     # Bind folders
-    cmd += f"export SINGULARITY_BIND={pfs_prefix_path}:/input,$PWD/output:/output; "
+    cmd += f"export SINGULARITY_BIND={pfs_prefix_path}:/input:ro,$PWD/output:/output; "
 
     # Convert file paths for use in container
     files_container = []
