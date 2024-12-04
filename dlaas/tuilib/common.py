@@ -48,6 +48,9 @@ def sanitize_dictionary(dictionary: Dict[str, str]) -> None:
         "pfs_prefix_path": [
             r"\/([a-zA-Z0-9_-]+\/?)+"
         ],  # any word sequence (no .) delimited by slashes, starting with /
+        "omp_num_threads": [r"[0-9]+"],  # any number,
+        "mpi_np": [r"[0-9]+"],  # any number,
+        "modules": [r"\[('([a-zA-Z0-9_.-]+\/?)+',? ?)+\]"],  # list of module names, delmited by commas
         # config_server
         "user": [r"[a-zA-Z0-9_]+"],  # any single word (word: character sequence containing alphanumerics or _)
         "host": [
@@ -81,11 +84,17 @@ class UserInput:
     Attributes
     ----------
     id : str
-        Unique id of the run (preferably of the UUID.hex type)
+        unique id of the run (preferably of the UUID.hex type)
     sql_query : str
         SQL query
     script_path : str
-        Path to the Python script with the analysis on the files returned by the SQL query
+        path to the Python script with the analysis on the files returned by the SQL query
+    container_path : str
+        path to the Singularity container provided by the user
+    container_url : str
+        URL to the Docker/Singularity container provided by the user
+    exec_command : str
+        command to be launched within the container (with its own options and flags if needed)
     config_hpc : dict
         dictionary with custom configuration options for hpc version
     config_server : dict
@@ -109,6 +118,21 @@ class UserInput:
             self.script_path = None
 
         try:
+            self.container_path = data["container_path"]
+        except KeyError:  # no container provided
+            self.container_path = None
+
+        try:
+            self.container_url = data["container_url"]
+        except KeyError:  # no container provided
+            self.container_url = None
+
+        try:
+            self.exec_command = data["exec_command"]
+        except KeyError:  # no script provided
+            self.exec_command = None
+
+        try:
             self.config_hpc = json.loads(data["config_hpc"].replace("'", '"'))
         except KeyError:  # no custom config provided
             self.config_hpc = None
@@ -125,6 +149,9 @@ class UserInput:
         logger.debug(f"UserInput.id: {self.id}")
         logger.debug(f"UserInput.sql_query: {self.sql_query}")
         logger.debug(f"UserInput.script_path: {self.script_path}")
+        logger.debug(f"UserInput.container_path: {self.container_path}")
+        logger.debug(f"UserInput.container_url: {self.container_url}")
+        logger.debug(f"UserInput.exec_command: {self.exec_command}")
         logger.debug(f"UserInput.config_hpc: {self.config_hpc}")
         logger.debug(f"UserInput.config_server: {self.config_server}")
 
@@ -136,7 +163,7 @@ class UserInput:
         Returns
         -------
         UserInput
-            UserInput instance initialized directly from command-line
+            UserInput instance
         """
         user_input = " ".join(sys.argv[1:])
         logger.info(f"Received input from CLI: {user_input}")
@@ -156,7 +183,7 @@ class UserInput:
         Returns
         -------
         UserInput
-            UserInput instance initialized directly from command-line
+            UserInput instance
 
         Raises
         ------
@@ -169,6 +196,28 @@ class UserInput:
 
         with open(json_path, "r") as f:
             data = json.load(f)
+        logger.info(f"Received input from JSON file: {data}")
+
+        return cls(data)
+
+    @classmethod
+    def from_dict(cls, json_dict: str):
+        """Class constructor from dictionary.
+        Expects a JSON-formatted dictionary as command line argument
+
+        Parameters
+        ----------
+        json_dict : str
+            JSON-formatted dictionary with the input info
+
+        Returns
+        -------
+        UserInput
+            UserInput instance
+
+        """
+
+        data = json.loads(json_dict)
         logger.info(f"Received input from JSON file: {data}")
 
         return cls(data)

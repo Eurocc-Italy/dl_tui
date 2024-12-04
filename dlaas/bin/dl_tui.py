@@ -20,7 +20,17 @@ import json
 import argparse
 
 from dlaas.tuilib.common import Config
-from dlaas.tuilib.api import upload, replace, update, download, delete, query, browse
+from dlaas.tuilib.api import (
+    upload,
+    replace,
+    update,
+    download,
+    delete,
+    query_python,
+    query_container,
+    browse,
+    job_status,
+)
 
 
 def main():
@@ -35,13 +45,15 @@ For further information, please consult the code repository (https://github.com/
         epilog="""
 Example commands [arguments within parentheses are optional]:
 
-    UPLOAD   | dl_tui --upload --file=path/to/file.jpg --metadata=path/to/metadata.json
-    REPLACE  | dl_tui --replace --file=path/to/file.jpg --metadata=path/to/metadata.json
-    UPDATE   | dl_tui --update --key=file.jpg --metadata=path/to/metadata.json
-    DOWNLOAD | dl_tui --download --key=file.jpg
-    DELETE   | dl_tui --delete --key=file.jpg
-    QUERY    | dl_tui --query --query_file=/path/to/query.txt [--python_file=/path/to/script.py] [--config_json=/path/to/config.json]
-    BROWSE   | dl_tui --browse [--filter="category = dog"]
+    UPLOAD      | dl_tui --upload --file=path/to/file.jpg --metadata=path/to/metadata.json
+    REPLACE     | dl_tui --replace --file=path/to/file.jpg --metadata=path/to/metadata.json
+    UPDATE      | dl_tui --update --key=file.jpg --metadata=path/to/metadata.json
+    DOWNLOAD    | dl_tui --download --key=file.jpg
+    DELETE      | dl_tui --delete --key=file.jpg
+    BROWSE      | dl_tui --browse [--filter="category = dog"]
+    JOB_STATUS  | dl_tui --job_status [--user="john"] [--config_json=/path/to/config.json]
+    QUERY (PYTHON)    | dl_tui --query --query_file=/path/to/query.txt [--python_file=/path/to/script.py] [--config_json=/path/to/config.json]
+    QUERY (CONTAINER) | dl_tui --query --query_file=/path/to/query.txt [--container_path=/path/to/container.sif] [--container_url=docker://url/to/container.sif] [--exec_command="command to be executed within the container"] [--config_json=/path/to/config.json]
     """,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
@@ -86,8 +98,14 @@ Example commands [arguments within parentheses are optional]:
     )
 
     actions.add_argument(
+        "--job_status",
+        help="check job status on HPC, optionally filtering for specific user",
+        action="store_true",
+    )
+
+    actions.add_argument(
         "--query",
-        help="launch a query, with an optional analysis script",
+        help="launch a query, with an optional Python analysis script or Docker/Singularity container",
         action="store_true",
     )
 
@@ -137,6 +155,27 @@ Example commands [arguments within parentheses are optional]:
     )
 
     parser.add_argument(
+        "--container_file",
+        help="[--query] | path to the Singularity container to be run on the files matching the query. \
+        (--query only). Please see the User Guide for the script syntax requirements",
+        default=None,
+    )
+
+    parser.add_argument(
+        "--container_url",
+        help="[--query] | URL to the Docker/Singularity container to be run on the files matching the query. \
+        (--query only). Please see the User Guide for the script syntax requirements",
+        default=None,
+    )
+
+    parser.add_argument(
+        "--exec_command",
+        help="[--query] | command to be executed within the Singularity container. \
+        (--query only). Please see the User Guide for the script syntax requirements",
+        default=None,
+    )
+
+    parser.add_argument(
         "--config_json",
         help="[--query] | path to the JSON file containing the custom configuration options. \
         Please see the User Guide for further details on how to customise analysis jobs",
@@ -147,6 +186,12 @@ Example commands [arguments within parentheses are optional]:
         "--filter",
         help="[--browse] | SQL-like query for filtering files, \
         where the 'SELECT * FROM metadata WHERE' part of the SQL query was removed",
+        default=None,
+    )
+
+    parser.add_argument(
+        "--user",
+        help="[--job_status] | Data Lake user for which to filter HPC jobs",
         default=None,
     )
 
@@ -279,9 +324,16 @@ Example commands [arguments within parentheses are optional]:
     # Run query
     elif args.query:
 
-        # checking for missing options
+        # Check for missing query file
         if not args.query_file:
             raise KeyError("Required argument is missing: --query_file")
+
+        if args.container_file or args.container_url:
+            # Check that user did not give both Python and container options
+            if args.python_file:
+                raise KeyError(
+                    "Analysis with both a Python script and a Singularity container were requested. The two modes are mutually exclusive."
+                )
 
         # loading default options
         config_json = {
@@ -301,28 +353,50 @@ Example commands [arguments within parentheses are optional]:
         logger.debug(f"config_hpc: {config_json['config_hpc']}")
         logger.debug(f"config_server: {config_json['config_server']}")
 
-        response = query(
-            ip=args.ip,
-            token=args.token,
-            query_file=args.query_file,
-            python_file=args.python_file,
-            config_json=config_json,
-        )
+        if args.python_file:
+            response = query_python(
+                ip=args.ip,
+                token=args.token,
+                query_file=args.query_file,
+                python_file=args.python_file,
+                config_json=config_json,
+            )
 
-        if response.status_code == 200:
-            if args.python_file:
+            if response.status_code == 200:
                 msg = (
-                    f"Successfully launched analysis script {args.python_file} on query {open(args.query_file).read()}."
+                    f"Successfully launched analysis script {args.python_file} on query {open(args.query_file).read()}"
                 )
-            else:
-                msg = f"Successfully launched query {open(args.query_file).read()}."
-            print(msg)
+                print(msg)
 
-            msg = f"Job ID: {response.text.replace('Files processed successfully, ID: ', '')}"
-            print(msg)
+                msg = f"Job ID: {response.text.replace('Files processed successfully, ID: ', '')}"
+                print(msg)
+            else:
+                print(response.text)
+                response.raise_for_status()
+
         else:
-            print(response.text)
-            response.raise_for_status()
+            response = query_container(
+                ip=args.ip,
+                token=args.token,
+                query_file=args.query_file,
+                container_path=args.container_file,
+                container_url=args.container_url,
+                exec_command=args.exec_command,
+                config_json=config_json,
+            )
+
+            if response.status_code == 200:
+                if args.container_file or args.container_url:
+                    msg = rf"Successfully launched Singularity container {args.container_file or args.container_url} with command {args.exec_command} on query {open(args.query_file).read()}"
+                else:
+                    msg = f"Successfully launched query {open(args.query_file).read()}"
+                print(msg)
+
+                msg = f"Job ID: {response.text.replace('Files processed successfully, ID: ', '')}"
+                print(msg)
+            else:
+                print(response.text)
+                response.raise_for_status()
 
     # Browse files
     elif args.browse:
@@ -332,12 +406,65 @@ Example commands [arguments within parentheses are optional]:
             token=args.token,
             filter=args.filter,
         )
+
         if response.status_code == 200:
             files = json.loads(response.text)["files"]
             msg = f"Filter: {args.filter}\n"
             msg += f"Files:\n  - "
             msg += ("\n  - ").join(files)
             print(msg)
+        else:
+            print(response.text)
+            response.raise_for_status()
+
+    # Check job status
+    elif args.job_status:
+
+        response = job_status(
+            ip=args.ip,
+            token=args.token,
+            user=args.user,
+        )
+
+        status_dict = {
+            "BF": "BOOT_FAIL",
+            "CA": "CANCELLED",
+            "CD": "COMPLETED",
+            "CF": "CONFIGURING",
+            "CG": "COMPLETING",
+            "DL": "DEADLINE",
+            "F": "FAILED",
+            "NF": "NODE_FAIL",
+            "OOM": "OUT_OF_MEMORY",
+            "PD": "PENDING",
+            "PR": "PREEMPTED",
+            "R": "RUNNING",
+            "RD": "RESV_DEL_HOLD",
+            "RF": "REQUEUE_FED",
+            "RH": "REQUEUE_HOLD",
+            "RQ": "REQUEUED",
+            "RS": "RESIZING",
+            "RV": "REVOKED",
+            "SI": "SIGNALING",
+            "SE": "SPECIAL_EXIT",
+            "SO": "STAGE_OUT",
+            "ST": "STOPPED",
+            "S": "SUSPENDED",
+            "TO": "TIMEOUT",
+        }
+
+        if response.status_code == 200:
+            jobs = json.loads(response.text)["jobs"]
+            print(f"{'JOB ID':>34} {'SLURM JOB':>10} {'STATUS':>8} {'REASON'}")
+
+            if jobs:
+                for jobid, job in jobs.items():
+                    try:
+                        print(
+                            f"{job['DATA_LAKE_JOBID']:>34} {job['JOBID']:>10} {status_dict[job['ST']]:>8} {job['REASON'] if job['REASON'] != 'None' else ''}"
+                        )
+                    except:  # Could be a completed job or an upload job
+                        continue
         else:
             print(response.text)
             response.raise_for_status()

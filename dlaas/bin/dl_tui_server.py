@@ -26,15 +26,25 @@ fh.setFormatter(formatter)
 logger.addHandler(fh)
 
 import argparse
-from dlaas.tuilib.server import create_remote_directory, copy_json_input, copy_user_script, launch_job, upload_results
+from dlaas.tuilib.server import (
+    create_remote_directory,
+    copy_json_input,
+    copy_user_executable,
+    launch_job,
+    upload_results,
+)
 
 
 def main():
     """Executable intended to run on the server VM"""
 
     parser = argparse.ArgumentParser(
-        description="Server-side executable for Cineca's Data Lake as a Service.",
-        epilog="For further information, please consult the code repository (https://github.com/Eurocc-Italy/dl_tui)",
+        description="""
+Server-side executable for Cineca's Data Lake as a Service.
+        
+For further information, please consult the code repository (https://github.com/Eurocc-Italy/dl_tui)
+""",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
 
     parser.add_argument(
@@ -47,8 +57,10 @@ def main():
 
     create_remote_directory(json_path=json_path)
     copy_json_input(json_path=json_path)
-    copy_user_script(json_path=json_path)
-    stdout, stderr, slurm_job_id = launch_job(json_path=json_path)
+
+    stdout, stderr, build_job_id = copy_user_executable(json_path=json_path)
+    stdout, stderr, slurm_job_id = launch_job(json_path=json_path, build_job_id=build_job_id)
+
     upload_results(json_path=json_path, slurm_job_id=slurm_job_id)
 
 

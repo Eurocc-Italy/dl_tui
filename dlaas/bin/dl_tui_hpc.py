@@ -34,15 +34,18 @@ from pymongo import MongoClient
 
 import argparse
 from dlaas.tuilib.common import Config, UserInput
-from dlaas.tuilib.hpc import wrapper
+from dlaas.tuilib.hpc import python_wrapper, container_wrapper
 
 
 def main():
     """Executable intended to run on HPC"""
 
     parser = argparse.ArgumentParser(
-        description="HPC-side executable for Cineca's Data Lake as a Service.",
-        epilog="For further information, please consult the code repository (https://github.com/Eurocc-Italy/dl_tui)",
+        description="""
+HPC-side executable for Cineca's Data Lake as a Service.
+        
+For further information, please consult the code repository (https://github.com/Eurocc-Italy/dl_tui)
+""",
     )
 
     parser.add_argument(
@@ -60,7 +63,7 @@ def main():
     config = Config(version="hpc")
     if user_input.config_hpc:
         config.load_custom_config(user_input.config_hpc)
-    logger.debug(config)
+    logger.debug(f"HPC config: {config}")
 
     # setting up MongoDB URI
     mongodb_uri = f"mongodb://{config.user}:{config.password}@{config.ip}:{config.port}/"
@@ -73,21 +76,53 @@ def main():
     logger.info(f"Loading database {config.database}, collection {config.collection}")
     collection = client[config.database][config.collection]
 
-    if user_input.script_path:
-        with open(user_input.script_path, "r") as f:
-            script = f.read()
-    else:
-        script = None
+    # Launch Singularity container (with path)
+    if user_input.container_path:
+        container_wrapper(
+            collection=collection,
+            sql_query=user_input.sql_query,
+            pfs_prefix_path=config.pfs_prefix_path,
+            s3_endpoint_url=config.s3_endpoint_url,
+            s3_bucket=config.s3_bucket,
+            job_id=user_input.id,
+            container_path=user_input.container_path,
+            exec_command=user_input.exec_command,
+            omp_num_threads=config.omp_num_threads,
+            mpi_np=config.mpi_np,
+            modules=config.modules,
+        )
 
-    wrapper(
-        collection=collection,
-        sql_query=user_input.sql_query,
-        pfs_prefix_path=config.pfs_prefix_path,
-        s3_endpoint_url=config.s3_endpoint_url,
-        s3_bucket=config.s3_bucket,
-        job_id=user_input.id,
-        script=script,
-    )
+    # Launch Singularity container (with URL)
+    elif user_input.container_url:
+        container_wrapper(
+            collection=collection,
+            sql_query=user_input.sql_query,
+            pfs_prefix_path=config.pfs_prefix_path,
+            s3_endpoint_url=config.s3_endpoint_url,
+            s3_bucket=config.s3_bucket,
+            job_id=user_input.id,
+            container_path=f"container_{user_input.id}.sif",
+            exec_command=user_input.exec_command,
+            omp_num_threads=config.omp_num_threads,
+            mpi_np=config.mpi_np,
+            modules=config.modules,
+        )
+
+    # Launch Python script (if missing, should just return the query matches)
+    else:
+        if user_input.script_path:
+            with open(user_input.script_path, "r") as f:
+                script = f.read()
+
+        python_wrapper(
+            collection=collection,
+            sql_query=user_input.sql_query,
+            pfs_prefix_path=config.pfs_prefix_path,
+            s3_endpoint_url=config.s3_endpoint_url,
+            s3_bucket=config.s3_bucket,
+            job_id=user_input.id,
+            script=script,
+        )
 
 
 if __name__ == "__main__":
