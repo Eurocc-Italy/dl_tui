@@ -285,6 +285,8 @@ def query_container(
     container_path: str = None,
     container_url: str = None,
     exec_command: str = None,
+    input_json: str = None,
+    output_json: str = None,
 ) -> Response:
     """Upload file to Data Lake using the DLaaS API.
 
@@ -304,6 +306,10 @@ def query_container(
         URL to the Docker/Singularity container provided by the user
     exec_command : str, optional
         Command to be launched within the container (with its own options and flags if needed)
+    input_json : str, optional
+        Path to the JSON file containing the info on the input files to be downloaded
+    output_json : str, optional
+        Path to the JSON file containing the info on the output files to be uploaded
 
     Returns
     -------
@@ -324,10 +330,14 @@ def query_container(
         files = {
             "query_file": (os.path.basename(query_file), open(query_file, "r"), "text/plain"),
             "container_file": (os.path.basename(container_path), open(container_path, "rb")),
+            "input_json": (os.path.basename(input_json), open(input_json, "r"), "text/plain"),
+            "output_json": (os.path.basename(output_json), open(output_json, "r"), "text/plain"),
         }
     else:
         files = {
             "query_file": (os.path.basename(query_file), open(query_file, "r"), "text/plain"),
+            "input_json": (os.path.basename(input_json), open(input_json, "r"), "text/plain"),
+            "output_json": (os.path.basename(output_json), open(output_json, "r"), "text/plain"),
         }
 
     response = requests.post(

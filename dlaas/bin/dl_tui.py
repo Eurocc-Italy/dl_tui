@@ -182,6 +182,18 @@ Example commands [arguments within parentheses are optional]:
     )
 
     parser.add_argument(
+        "--input_json",
+        help="[--query] | path to the JSON file containing the input files to be downloaded.",
+        default=None,
+    )
+
+    parser.add_argument(
+        "--output_json",
+        help="[--query] | path to the JSON file containing the output files to be uploaded.",
+        default=None,
+    )
+
+    parser.add_argument(
         "--config_json",
         help="[--query] | path to the JSON file containing the custom configuration options. \
         Please see the User Guide for further details on how to customise analysis jobs",
@@ -388,10 +400,12 @@ Example commands [arguments within parentheses are optional]:
                 ip=args.ip,
                 token=args.token,
                 query_file=args.query_file,
+                config_json=config_json,
                 container_path=args.container_file,
                 container_url=args.container_url,
                 exec_command=args.exec_command,
-                config_json=config_json,
+                input_json=args.input_json,
+                output_json=args.output_json,
             )
 
             if response.status_code == 200:
