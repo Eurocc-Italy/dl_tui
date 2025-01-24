@@ -34,6 +34,7 @@ from dlaas.tuilib.server import (
     launch_job,
     upload_results,
 )
+from dlaas.tuilib.gdb import download_input_files
 
 
 def main():
@@ -60,9 +61,10 @@ For further information, please consult the code repository (https://github.com/
     copy_json_input(json_path=json_path)
 
     stdout, stderr, build_job_id = copy_user_executable(json_path=json_path)
-    stdout, stderr, slurm_job_id = launch_job(json_path=json_path, build_job_id=build_job_id)
+    stdout, stderr, slurm_job_id = download_input_files(json_path=json_path)
+    # stdout, stderr, slurm_job_id = launch_job(json_path=json_path, build_job_id=build_job_id)
 
-    upload_results(json_path=json_path, slurm_job_id=slurm_job_id)
+    # upload_results(json_path=json_path, slurm_job_id=slurm_job_id)
 
 
 if __name__ == "__main__":
