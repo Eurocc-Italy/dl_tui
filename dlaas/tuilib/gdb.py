@@ -72,7 +72,7 @@ def download_input_files(json_path: str, build_job_id: str = None) -> Tuple[str,
         f.write(content)
 
     # Create input and output folders
-    ssh_cmd = f"ssh -i {config.ssh_key} {config.user}@{config.host} 'mkdir {user_input.id}/input {user_input.id}/output'"
+    ssh_cmd = f"ssh -i {config.ssh_key} {config.user}@{config.host} 'mkdir $SCRATCH/{user_input.id}/input $SCRATCH/{user_input.id}/output'"
     logger.debug(f"launching command: {ssh_cmd}")
     stdout, stderr = subprocess.Popen(
         ssh_cmd,
@@ -86,7 +86,7 @@ def download_input_files(json_path: str, build_job_id: str = None) -> Tuple[str,
     logger.debug(f"scp download container input stderr: {stderr}")
 
     # Copy download script and input json
-    ssh_cmd = f"scp -i {config.ssh_key} input.json download_input_{user_input.id}.py {config.user}@{config.host}:~/{user_input.id}/"
+    ssh_cmd = f"scp -i {config.ssh_key} input.json download_input_{user_input.id}.py {config.user}@{config.host}:$\SCRATCH/{user_input.id}/"
     logger.debug(f"launching command: {ssh_cmd}")
     stdout, stderr = subprocess.Popen(
         ssh_cmd,
@@ -109,7 +109,7 @@ def download_input_files(json_path: str, build_job_id: str = None) -> Tuple[str,
     wrap_cmd += f"python download_input_{user_input.id}.py; "
 
     # Generating SSH command
-    ssh_cmd = f"cd {user_input.id}; "
+    ssh_cmd = f"cd $SCRATCH/{user_input.id}; "
     ssh_cmd += f"sbatch -p {partition} -A {account} "
     ssh_cmd += f"--mail-type ALL --mail-user {mail} "
     ssh_cmd += f"-t 01:00:00 "
@@ -199,7 +199,7 @@ def upload_results(json_path: str, slurm_job_id: int) -> Tuple[str, str]:
 
     # Create upload script to be copied to HPC
     with open(f"upload_output_{user_input.id}.py", "w") as f:
-        content += "import requests, json\n"
+        content = "import requests, json\n"
         content += "with open('output.json', 'r') as f:\n"
         content += "    files_dict = json.load(f)\n"
         content += "for filename, url in files_dict.items():\n"
@@ -231,7 +231,7 @@ def upload_results(json_path: str, slurm_job_id: int) -> Tuple[str, str]:
     wrap_cmd += f"python upload_output_{user_input.id}.py; "
 
     # Generating SSH command
-    ssh_cmd = f"cd {user_input.id}; "
+    ssh_cmd = f"cd $SCRATCH/{user_input.id}; "
     ssh_cmd += f"sbatch -p {partition} -A {account} "
     ssh_cmd += f"--mail-type ALL --mail-user {mail} "
     ssh_cmd += f"-t 01:00:00 "
