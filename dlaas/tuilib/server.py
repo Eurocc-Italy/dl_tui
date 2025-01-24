@@ -39,7 +39,7 @@ def create_remote_directory(json_path: str) -> Tuple[str, str]:
     if user_input.config_server:
         config.load_custom_config(user_input.config_server)
 
-    ssh_cmd = f"ssh -i {config.ssh_key} {config.user}@{config.host} 'mkdir {user_input.id}'"
+    ssh_cmd = f"ssh -i {config.ssh_key} {config.user}@{config.host} 'mkdir \$SCRATCH/{user_input.id}'"
     logger.debug(f"launching command: {ssh_cmd}")
     stdout, stderr = subprocess.Popen(
         ssh_cmd,
@@ -82,7 +82,7 @@ def copy_json_input(json_path: str) -> Tuple[str, str]:
         config.load_custom_config(user_input.config_server)
 
     # copying input JSON
-    ssh_cmd = f"scp -i {config.ssh_key} {json_path} {config.user}@{config.host}:~/{user_input.id}/{basename(json_path)}"
+    ssh_cmd = f"scp -i {config.ssh_key} {json_path} {config.user}@{config.host}:\$SCRATCH/{user_input.id}/{basename(json_path)}"
     logger.debug(f"launching command: {ssh_cmd}")
     stdout, stderr = subprocess.Popen(
         ssh_cmd,
@@ -132,11 +132,11 @@ def copy_user_executable(json_path: str) -> Tuple[str, str]:
 
     if user_input.script_path:
         logger.debug(f"Python script: \n{user_input.script_path}")
-        full_ssh_cmd = f"scp -i {ssh_key} {user_input.script_path} {user}@{host}:~/{user_input.id}/{basename(user_input.script_path)}"
+        full_ssh_cmd = f"scp -i {ssh_key} {user_input.script_path} {user}@{host}:\$SCRATCH/{user_input.id}/{basename(user_input.script_path)}"
 
     elif user_input.container_path:
         logger.debug(f"Container path: \n{user_input.container_path}")
-        full_ssh_cmd = f"scp -i {ssh_key} {user_input.container_path} {user}@{host}:~/{user_input.id}/{basename(user_input.container_path)}"
+        full_ssh_cmd = f"scp -i {ssh_key} {user_input.container_path} {user}@{host}:\$SCRATCH/{user_input.id}/{basename(user_input.container_path)}"
 
     elif user_input.container_url:
         logger.debug(f"Container URL: \n{user_input.container_url}")
@@ -144,7 +144,7 @@ def copy_user_executable(json_path: str) -> Tuple[str, str]:
         wrap_cmd = "module load singularity; "  # FIXME: necessary for G100
         wrap_cmd += f"singularity build container_{user_input.id}.sif {user_input.container_url}"
 
-        ssh_cmd = f"cd {user_input.id}; "
+        ssh_cmd = f"cd \$SCRATCH/{user_input.id}; "
         ssh_cmd += f"sbatch -p {partition} -A {account} "
         ssh_cmd += f"--mail-type ALL --mail-user {mail} "
         ssh_cmd += f"-t 01:00:00 "
@@ -239,7 +239,7 @@ def launch_job(json_path: str, build_job_id: str = None) -> Tuple[str, str, str]
     wrap_cmd += "touch JOB_DONE"
 
     # Generating SSH command
-    ssh_cmd = f"cd {user_input.id}; "
+    ssh_cmd = f"cd \$SCRATCH/{user_input.id}; "
     ssh_cmd += f"sbatch -p {partition} -A {account} --qos {qos} "
     ssh_cmd += f"--mail-type ALL --mail-user {mail} "
     ssh_cmd += f"-t {walltime} -N {nodes} "
@@ -327,7 +327,7 @@ def upload_results(json_path: str, slurm_job_id: int) -> Tuple[str, str]:
     )
 
     # Generating SSH command
-    ssh_cmd = f"cd {user_input.id}; "
+    ssh_cmd = f"cd \$SCRATCH/{user_input.id}; "
     ssh_cmd += f"sbatch -p {partition} -A {account} "
     ssh_cmd += f"--mail-type ALL --mail-user {mail} "
     ssh_cmd += f"-t 00:10:00 "
