@@ -72,7 +72,7 @@ def download_input_files(json_path: str, build_job_id: str = None) -> Tuple[str,
         f.write(content)
 
     # Create input and output folders
-    ssh_cmd = f"ssh -i {config.ssh_key} {config.user}@{config.host} 'mkdir \$SCRATCH/{user_input.id}/input \$SCRATCH/{user_input.id}/output'"
+    ssh_cmd = f"ssh -i {config.ssh_key} {config.user}@{config.host} 'mkdir $SCRATCH/{user_input.id}/input $SCRATCH/{user_input.id}/output'"
     logger.debug(f"launching command: {ssh_cmd}")
     stdout, stderr = subprocess.Popen(
         ssh_cmd,
