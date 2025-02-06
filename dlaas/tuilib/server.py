@@ -144,7 +144,7 @@ def copy_user_executable(json_path: str) -> Tuple[str, str]:
         wrap_cmd = "module load singularity; "  # FIXME: necessary for G100
         wrap_cmd += f"singularity build container_{user_input.id}.sif {user_input.container_url}"
 
-        ssh_cmd = f"cd $SCRATCH/{user_input.id}; "
+        ssh_cmd = f"cd \$SCRATCH/{user_input.id}; "
         ssh_cmd += f"sbatch -p {partition} -A {account} "
         ssh_cmd += f"--mail-type ALL --mail-user {mail} "
         ssh_cmd += f"-t 01:00:00 "
@@ -239,7 +239,7 @@ def launch_job(json_path: str, build_job_id: str = None) -> Tuple[str, str, str]
     wrap_cmd += "touch JOB_DONE"
 
     # Generating SSH command
-    ssh_cmd = f"cd $SCRATCH/{user_input.id}; "
+    ssh_cmd = f"cd \$SCRATCH/{user_input.id}; "
     ssh_cmd += f"sbatch -p {partition} -A {account} --qos {qos} "
     ssh_cmd += f"--mail-type ALL --mail-user {mail} "
     ssh_cmd += f"-t {walltime} -N {nodes} "
@@ -327,7 +327,7 @@ def upload_results(json_path: str, slurm_job_id: int) -> Tuple[str, str]:
     )
 
     # Generating SSH command
-    ssh_cmd = f"cd $SCRATCH/{user_input.id}; "
+    ssh_cmd = f"cd \$SCRATCH/{user_input.id}; "
     ssh_cmd += f"sbatch -p {partition} -A {account} "
     ssh_cmd += f"--mail-type ALL --mail-user {mail} "
     ssh_cmd += f"-t 00:10:00 "
