@@ -72,7 +72,7 @@ def download_input_files(json_path: str, build_job_id: str = None) -> Tuple[str,
         f.write(content)
 
     # Create input and output folders
-    ssh_cmd = f"ssh -i {config.ssh_key} {config.user}@{config.host} 'mkdir \$SCRATCH/{user_input.id}/input \$SCRATCH/{user_input.id}/output'"
+    ssh_cmd = f"ssh -i {config.ssh_key} {config.user}@{config.host} 'mkdir $SCRATCH/{user_input.id}/input $SCRATCH/{user_input.id}/output'"
     logger.debug(f"launching command: {ssh_cmd}")
     stdout, stderr = subprocess.Popen(
         ssh_cmd,
@@ -86,7 +86,7 @@ def download_input_files(json_path: str, build_job_id: str = None) -> Tuple[str,
     logger.debug(f"scp download container input stderr: {stderr}")
 
     # Copy download script and input json
-    ssh_cmd = f"scp -i {config.ssh_key} input.json download_input_{user_input.id}.py {config.user}@{config.host}:$\SCRATCH/{user_input.id}/"
+    ssh_cmd = f"scp -i {config.ssh_key} input.json download_input_{user_input.id}.py {config.user}@{config.host}:\$SCRATCH/{user_input.id}/"
     logger.debug(f"launching command: {ssh_cmd}")
     stdout, stderr = subprocess.Popen(
         ssh_cmd,
@@ -203,12 +203,12 @@ def upload_results(json_path: str, slurm_job_id: int) -> Tuple[str, str]:
         content += "with open('output.json', 'r') as f:\n"
         content += "    files_dict = json.load(f)\n"
         content += "for filename, url in files_dict.items():\n"
-        content += '    files = {f"{filename}": (f"{filename}", open(filename, "rb"), None)}'
+        content += '    files = {f"{filename}": (f"{filename}", open(filename, "rb"), None)}\n'
         content += "    response = requests.post(url, files=files)\n"
         f.write(content)
 
     # Copy download script and input json
-    ssh_cmd = f"scp -i {config.ssh_key} input.json upload_output_{user_input.id}.py {config.user}@{config.host}:~/{user_input.id}/"
+    ssh_cmd = f"scp -i {config.ssh_key} output.json upload_output_{user_input.id}.py {config.user}@{config.host}:\$SCRATCH/{user_input.id}/"
     logger.debug(f"launching command: {ssh_cmd}")
     stdout, stderr = subprocess.Popen(
         ssh_cmd,
