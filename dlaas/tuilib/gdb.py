@@ -203,7 +203,7 @@ def upload_results(json_path: str, slurm_job_id: int) -> Tuple[str, str]:
         content += "with open('output.json', 'r') as f:\n"
         content += "    files_dict = json.load(f)\n"
         content += "for filename, presigned_data in files_dict.items():\n"
-        content += '    files = {filename: (filename, open(f"./output/{filename}", "rb"), None)}\n'
+        content += '    files = {"file": (filename, open(f"./output/{filename}", "rb"), None)}\n'
         content += "    response = requests.post(presigned_data['url'], data=presigned_data['fields'], files=files)\n"
         f.write(content)
 
