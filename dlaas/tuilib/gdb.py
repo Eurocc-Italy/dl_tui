@@ -229,6 +229,10 @@ def upload_results(json_path: str, slurm_job_id: int) -> Tuple[str, str]:
     wrap_cmd = f"module load python; "  # TODO: placeholder for G100, as Python is not available by default.
     wrap_cmd += f"source {config.venv_path}/bin/activate; "
     wrap_cmd += f"python upload_output_{user_input.id}.py; "
+    wrap_cmd += "touch RESULTS_UPLOADED; "
+    wrap_cmd += (
+        f"rm -rf ../{user_input.id}; "  # remove temporary directory from HPC. NOTE: Comment this line for debugging
+    )
 
     # Generating SSH command
     ssh_cmd = f"cd \$SCRATCH/{user_input.id}; "
