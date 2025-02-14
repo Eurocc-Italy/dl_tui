@@ -71,7 +71,7 @@ The `config_server.json` file should be configured carefully, here are the detai
 
 Authentication is carried out via tokens created by the API. In the home directory of the machine running the API there should be a `.env` file containing the following information:
 
-```toml
+```ini
 MONGO_HOST = localhost *
 MONGO_PORT = 27017 *
 MONGO_DB_NAME = datalake *
