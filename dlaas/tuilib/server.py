@@ -433,6 +433,7 @@ def check_jobs_status() -> Dict[str, Dict[str, str]]:
     config = Config("server")
     logger.debug(f"Server config: {config.__dict__}")
 
+    # 1. First, populate completed jobs with sacct
     ssh_cmd = rf'ssh -i {config.ssh_key} {config.user}@{config.host} "sacct -P -l"'
 
     logger.debug(f"Launching command via ssh:\n{ssh_cmd}")
@@ -457,15 +458,47 @@ def check_jobs_status() -> Dict[str, Dict[str, str]]:
     except IndexError:
         return None
 
-    # Populate job info from squeue output
+    # Populate job info from output
     jobs = {}
     for line in lines:
         job_info = {}
         for i, field in enumerate(fields):
-            job_info[field] = line.split("|")[i]
+            job_info[field.upper()] = line.split("|")[i]
         jobs[job_info["JOBID"]] = job_info
 
-    # Add Data Lake job_id to job info
+    # 2. Then, populate pending jobs with squeue 
+    ssh_cmd = rf'ssh -i {config.ssh_key} {config.user}@{config.host} "squeue --format=%all -u {config.user}"'
+
+    logger.debug(f"Launching command via ssh:\n{ssh_cmd}")
+
+    stdout, stderr = subprocess.Popen(
+        ssh_cmd,
+        shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    ).communicate()
+
+    stdout = str(stdout, encoding="utf-8")
+    stderr = str(stderr, encoding="utf-8")
+    logger.debug(f"stdout: {stdout}")
+    logger.debug(f"stderr: {stderr}")
+
+    lines = stdout.split("\n")
+    lines.remove("")  # removing empty lines
+
+    try:
+        fields = lines.pop(0).split("|")  # fields are separated by vertical bars
+    except IndexError:
+        return None
+
+    # Populate job info from output
+    for line in lines:
+        job_info = {}
+        for i, field in enumerate(fields):
+            job_info[field.upper()] = line.split("|")[i]
+        jobs[job_info["JOBID"]] = job_info
+
+    # 3. Last, add Data Lake job_id to job info
     if exists("/var/log/datalake/dl-tui.log"):
         with open("/var/log/datalake/dl-tui.log") as f:
             for line in f:
@@ -473,7 +506,8 @@ def check_jobs_status() -> Dict[str, Dict[str, str]]:
                     data = line.split()
                     try:
                         jobs[data[-1]]["DATA_LAKE_JOBID"] = data[-3]
-                    except:
+                    except Exception as e:
+                        logger.debug(repr(e))
                         continue
 
     return jobs
