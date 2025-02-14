@@ -433,7 +433,7 @@ def check_jobs_status() -> Dict[str, Dict[str, str]]:
     config = Config("server")
     logger.debug(f"Server config: {config.__dict__}")
 
-    ssh_cmd = rf'ssh -i {config.ssh_key} {config.user}@{config.host} "squeue --format=%all -u {config.user}"'
+    ssh_cmd = rf'ssh -i {config.ssh_key} {config.user}@{config.host} "sacct -P -l"'
 
     logger.debug(f"Launching command via ssh:\n{ssh_cmd}")
 
