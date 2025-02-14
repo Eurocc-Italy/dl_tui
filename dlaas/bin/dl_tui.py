@@ -460,8 +460,9 @@ Example commands [arguments within parentheses are optional]:
             if jobs:
                 for jobid, job in jobs.items():
                     try:
-                        print(f"{job['DATA_LAKE_JOBID']:>34} {job['JOBID']:>10} {job['State']:>8}")
-                    except:  # Could be a completed job or an upload job
+                        print(f"{job['DATA_LAKE_JOBID']:>34} {job['JobID']:>10} {job['State']:>8}")
+                    except Exception as e:  # Could be a completed job or an upload job
+                        logger.debug(repr(e))
                         continue
         else:
             print(response.text)
