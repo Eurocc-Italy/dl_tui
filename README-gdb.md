@@ -16,7 +16,7 @@ pip install dl_api/datalake_api
 
 In the regular EuroCC Data Lake version, the API is running as a user service. The library is installed in the `/opt/dtaas` virtual environment and carries out all operations from the VM user home directory `/home/datalake`. Log files are created at the `/var/log/datalake` path, which should be accessible by the service (NOTE: these logfiles are read for cross-checking job statuses). This is the service file we use for the regular version:
 
-```toml
+```ini
 [Unit]
 Description=DTaaS API
 
