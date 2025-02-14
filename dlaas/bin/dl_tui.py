@@ -455,14 +455,12 @@ Example commands [arguments within parentheses are optional]:
 
         if response.status_code == 200:
             jobs = json.loads(response.text)["jobs"]
-            print(f"{'JOB ID':>34} {'SLURM JOB':>10} {'STATUS':>8} {'REASON'}")
+            print(f"{'JOB ID':>34} {'SLURM JOB':>10} {'STATUS':>8}")
 
             if jobs:
                 for jobid, job in jobs.items():
                     try:
-                        print(
-                            f"{job['DATA_LAKE_JOBID']:>34} {job['JOBID']:>10} {status_dict[job['ST']]:>8} {job['REASON'] if job['REASON'] != 'None' else ''}"
-                        )
+                        print(f"{job['DATA_LAKE_JOBID']:>34} {job['JOBID']:>10} {job['State']:>8}")
                     except:  # Could be a completed job or an upload job
                         continue
         else:
