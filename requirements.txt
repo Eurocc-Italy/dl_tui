@@ -2,7 +2,7 @@ sh
 wheel
 pymongo==4.5.0
 python-dateutil==2.6.0
-urllib3==1.26
+urllib3==1.26.19
 pyparsing
 sqlparse @ git+https://github.com/lbabetto/sqlparse
 boto3
