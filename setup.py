@@ -21,7 +21,7 @@ setup(
     install_requires=[
         "sh",
         "wheel",
-        "pymongo==4.5.0",
+        "pymongo==4.6.3",
         "python-dateutil==2.6.0",
         "urllib3==1.26.19",
         "pyparsing",
