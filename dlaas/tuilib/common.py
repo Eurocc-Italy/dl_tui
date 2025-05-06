@@ -43,7 +43,7 @@ def sanitize_dictionary(dictionary: Dict[str, str]) -> None:
         "port": [r"[0-9]+"],  # any number
         "database": [r"[a-zA-Z0-9_]+"],  # any single word
         "collection": [r"[a-zA-Z0-9_]+"],  # any single word
-        "s3_endpoint_url": [r"(https?:\/\/)?([a-zA-Z0-9_-]+\.)+[a-zA-Z0-9_-]+\/?"],  # "https://XXX.(XXX.)*n.XXX/",
+        "s3_endpoint_url": [r"(https?:\/\/)?([a-zA-Z0-9_-]+\.)+[a-zA-Z0-9_-]+(:[0-9]+)?\/?"],  # "https://XXX.(XXX.)*n.XXX:XXXX/",
         "s3_bucket": [r"[a-zA-Z0-9_]+"],  # any single word
         "pfs_prefix_path": [
             r"\/([a-zA-Z0-9_-]+\/?)+"
