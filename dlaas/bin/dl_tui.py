@@ -112,6 +112,12 @@ Example commands [arguments within parentheses are optional]:
     # Optional arguments
 
     parser.add_argument(
+        "--debug",
+        help="Enable debug mode (temporary folders are kept, etc.)",
+        default=False,
+    )
+
+    parser.add_argument(
         "--ip",
         help="IP address of the server hosting the Data Lake API",
         default=Config("hpc").ip,
@@ -350,6 +356,9 @@ Example commands [arguments within parentheses are optional]:
         except TypeError:
             logger.info("No custom configuration provided. Keeping defaults.")
 
+        if args.debug: # Overriding debug mode
+            config_json["config_server"]["debug"] = True
+
         logger.debug(f"config_hpc: {config_json['config_hpc']}")
         logger.debug(f"config_server: {config_json['config_server']}")
 
@@ -461,7 +470,9 @@ Example commands [arguments within parentheses are optional]:
             if jobs:
                 for jobid, job in jobs.items():
                     try:
-                        print(f"{job['DATA_LAKE_JOBID']:^34} | {job['JOBID']:^11} | {job['STATE']:^11} | {job['REASON']:^12}")
+                        print(
+                            f"{job['DATA_LAKE_JOBID']:^34} | {job['JOBID']:^11} | {job['STATE']:^11} | {job['REASON']:^12}"
+                        )
                     except KeyError as e:
                         if e.args[0] == "REASON":
                             print(f"{job['DATA_LAKE_JOBID']:^34} | {job['JOBID']:^11} | {job['STATE']:^11} | ")

@@ -12,10 +12,9 @@ import os
 import sys
 import json
 import re
-from typing import Dict
 
 
-def sanitize_dictionary(dictionary: Dict[str, str]) -> None:
+def sanitize_dictionary(dictionary: dict[str, str]) -> None:
     """Sanitize dictionary input to make sure no OS command injection is possible. It is intended to
     be used on the self.__dict__ dictionary of Config("server") or Config("hpc") instances.
     For each keyword it performs a regex match to ensure the expected format is found, for example the
@@ -23,7 +22,7 @@ def sanitize_dictionary(dictionary: Dict[str, str]) -> None:
 
     Parameters
     ----------
-    dictionary : Dict[str, str]
+    dictionary : dict[str, str]
         Dictionary to be checked. Should be the self.__dict__ of Config("server") or Config("hpc")
 
     Raises
@@ -43,7 +42,9 @@ def sanitize_dictionary(dictionary: Dict[str, str]) -> None:
         "port": [r"[0-9]+"],  # any number
         "database": [r"[a-zA-Z0-9_]+"],  # any single word
         "collection": [r"[a-zA-Z0-9_]+"],  # any single word
-        "s3_endpoint_url": [r"(https?:\/\/)?([a-zA-Z0-9_-]+\.)+[a-zA-Z0-9_-]+(:[0-9]+)?\/?"],  # "https://XXX.(XXX.)*n.XXX:XXXX/",
+        "s3_endpoint_url": [
+            r"(https?:\/\/)?([a-zA-Z0-9_-]+\.)+[a-zA-Z0-9_-]+(:[0-9]+)?\/?"
+        ],  # "https://XXX.(XXX.)*n.XXX:XXXX/",
         "s3_bucket": [r"[a-zA-Z0-9_]+"],  # any single word
         "pfs_prefix_path": [
             r"\/([a-zA-Z0-9_-]+\/?)+"
@@ -66,6 +67,7 @@ def sanitize_dictionary(dictionary: Dict[str, str]) -> None:
         "walltime": [r"([0-9]+-)?([0-9]+:)?([0-9]+:)?[0-9]+"],  # DD-HH:MM:SS
         "nodes": [r"[0-9]+(k|m)?"],  # any number, possibly ending with k or m
         "ntasks_per_node": [r"[0-9]+"],  # any number
+        "debug": [r"[a-zA-Z0-9_]+"],  # any single word
     }
 
     # make sure keyword values match the expected format
@@ -101,11 +103,11 @@ class UserInput:
         dictionary with custom configuration options for server version
     """
 
-    def __init__(self, data: Dict[str, str]) -> None:
+    def __init__(self, data: dict[str, str]) -> None:
         """_summary_
 
         Args:
-            data (Dict[str, str]): dictionary with the user input (id, sql_query, script, config)
+            data (dict[str, str]): dictionary with the user input (id, sql_query, script, config)
         """
         logger.debug(f"Received input dict: {data}")
 
@@ -256,7 +258,7 @@ class Config:
     def __str__(self):
         return str(self.__dict__)
 
-    def load_default_config(self, version: str) -> Dict[str, str]:
+    def load_default_config(self, version: str) -> dict[str, str]:
         """Load default configuration as found in /etc/default.
         If present, overwrites these defaults with the contents of ~/.config/dlaas/config_<version>.json.
 
@@ -267,15 +269,15 @@ class Config:
 
         Returns
         -------
-        Dict[str, str]
+        dict[str, str]
             dictionary with the configuration info
         """
         with open(f"{os.path.dirname(__file__)}/../etc/default/config_{version}.json", "r") as f:
-            base_config: Dict[str, str] = json.load(f)
+            base_config: dict[str, str] = json.load(f)
 
         if os.path.exists(f"{os.environ['HOME']}/.config/dlaas/config_{version}.json"):
             with open(f"{os.environ['HOME']}/.config/dlaas/config_{version}.json", "r") as f:
-                config: Dict[str, str] = json.load(f)
+                config: dict[str, str] = json.load(f)
 
             for key in config:
                 if key not in base_config:
@@ -287,12 +289,12 @@ class Config:
 
         return base_config
 
-    def load_custom_config(self, custom_config: Dict[str, str]):
+    def load_custom_config(self, custom_config: dict[str, str]):
         """Overwrites the default configurations with custom options
 
         Parameters
         ----------
-        custom_config : Dict[str, str]
+        custom_config : dict[str, str]
             dictionary containing the settings to overwrite
         """
         for key in custom_config:
