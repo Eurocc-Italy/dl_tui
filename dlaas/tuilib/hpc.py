@@ -16,14 +16,13 @@ from sh import pushd
 from tempfile import mkdtemp
 from datetime import datetime
 
-from typing import List, Dict, Tuple
 from pymongo.collection import Collection
 
 from importlib import import_module
 from sqlparse.builders.mongo_builder import MongoQueryBuilder
 
 
-def convert_SQL_to_mongo(sql_query: str) -> Tuple[Dict[str, str], Dict[str, str]]:
+def convert_SQL_to_mongo(sql_query: str) -> tuple[dict[str, str], dict[str, str]]:
     """Converts SQL query to MongoDB spec
 
     Parameters
@@ -33,7 +32,7 @@ def convert_SQL_to_mongo(sql_query: str) -> Tuple[Dict[str, str], Dict[str, str]
 
     Returns
     -------
-    Tuple[Dict[str, str], Dict[str, str]]
+    tuple[dict[str, str], dict[str, str]]
         dictionaries containing the filters (WHERE) and fields (SELECT) in MongoDB spec
     """
 
@@ -51,14 +50,14 @@ def convert_SQL_to_mongo(sql_query: str) -> Tuple[Dict[str, str], Dict[str, str]
     logger.info(f"MongoDB query filter: {query_filters}")
     logger.info(f"MongoDB query fields: {query_fields}")
 
-    return query_filters, query_fields
+    return query_filters, query_fields  # type: ignore
 
 
 def retrieve_files(
     collection: Collection,
-    query_filters: Dict[str, str],
-    query_fields: Dict[str, str],
-) -> List[str]:
+    query_filters: dict[str, str],
+    query_fields: dict[str, str],
+) -> list[str]:
     """Generate a list of paths according to user query, interrogating the MongoDB database.
     NOTE: entries must have a "path" key and must be available at that path on the filesystem.
 
@@ -66,14 +65,14 @@ def retrieve_files(
     ----------
     collection : Collection
         MongoDB collection on which to run the query
-    query_filters : Dict[str, str]
+    query_filters : dict[str, str]
         dictionary containing the query filters in MongoDB spec
-    query_fields : Dict[str, str]
+    query_fields : dict[str, str]
         dictionary containing the query fields in MongoDB spec
 
     Returns
     -------
-    List[str]
+    list[str]
         list containing the paths of the files matching the query
     """
 
@@ -87,7 +86,7 @@ def retrieve_files(
     return query_matches
 
 
-def run_script(script: str, files_in: List[str]) -> List[str]:
+def run_script(script: str, files_in: list[str]) -> list[str]:
     """Runs the `main` function in the user-provided Python script, feeding the paths containted in files_in.
     This function must take a list (of file paths) as input and return a list (of file paths) as output.
 
@@ -100,12 +99,12 @@ def run_script(script: str, files_in: List[str]) -> List[str]:
     ----------
     script : str
         content of the Python script provided by the user, to be run on the query results
-    files_in : List[str]
+    files_in : list[str]
         list of paths with the files on which to run the script
 
     Returns
     -------
-    List[str]
+    list[str]
         list of paths with the output/processed files the user wants to save
 
     Raises
@@ -146,7 +145,7 @@ def run_script(script: str, files_in: List[str]) -> List[str]:
 def save_python_output(
     sql_query: str,
     script: str,
-    files_out: List[str],
+    files_out: list[str],
     pfs_prefix_path: str,
     s3_endpoint_url: str,
     s3_bucket: str,
@@ -164,7 +163,7 @@ def save_python_output(
         SQL query (for saving in results folder)
     script : str
         content of the Python script provided by the user (for saving in results folder)
-    files_out : List[str]
+    files_out : list[str]
         list containing the paths to the files to be saved
     pfs_prefix_path : str
         path prefix for the location on the parallel filesystem
@@ -222,7 +221,7 @@ def python_wrapper(
     s3_endpoint_url: str,
     s3_bucket: str,
     job_id: str,
-    script: str = None,
+    script: str = "",
 ):
     """Get the SQL query and script, convert them to MongoDB spec, run the process query on the DB retrieving
     matching files, run the user-provided script (if present) in a temporary directory, retrieve the output
@@ -265,7 +264,7 @@ def python_wrapper(
         )
         # FIXME: consider working directly in the job tempdir, shouldn't be necessary to make another tmpdir
         # moving to temporary directory and working within the context manager
-        with pushd(tdir):
+        with pushd(tdir):  # type: ignore
             files_out = run_script(script=script, files_in=files_in)
             save_python_output(
                 sql_query=sql_query,
@@ -295,10 +294,9 @@ def run_container(
     exec_command: str,
     omp_num_threads: int,
     mpi_np: int,
-    modules: List[str],
     pfs_prefix_path: str,
-    files_in: List[str],
-) -> List[str]:
+    files_in: list[str],
+) -> list[str]:
     """Runs the user-provided Singularity container, feeding the paths containted in files_in.
 
     Parameters
@@ -311,14 +309,14 @@ def run_container(
         will be exported as OMP_NUM_THREADS environment variable
     mpi_np : int
         number of MPI processes which the mpirun command will use
-    modules : List[str]
+    modules : list[str]
         list of modules to be loaded on HPC
-    files_in : List[str]
+    files_in : list[str]
         list of paths with the files on which to run the executable
 
     Returns
     -------
-    List[str]
+    list[str]
         list of paths with the output/processed files the user wants to save
 
     """
@@ -388,7 +386,7 @@ def save_container_output(
     sql_query: str,
     pfs_prefix_path: str,
     exec_command: str,
-    files_out: List[str],
+    files_out: list[str],
     s3_endpoint_url: str,
     s3_bucket: str,
     job_id: str,
@@ -406,7 +404,7 @@ def save_container_output(
         path prefix for the location on the parallel filesystem
     exec_command : str
         command launched within the container (with its own options and flags), used for logging
-    files_out : List[str]
+    files_out : list[str]
         list containing the paths to the files to be saved
     s3_endpoint_url : str
         endpoint url at which the S3 bucket can be found
@@ -458,7 +456,7 @@ def container_wrapper(
     exec_command: str,
     omp_num_threads: int = 1,
     mpi_np: int = 1,
-    modules: List[str] = [],
+    modules: list[str] = [],
 ):
     """Get the SQL query and script, convert them to MongoDB spec, run the process query on the DB retrieving matching
     files, run the user-provided Singularity container (if present) in a temporary directory, save the files and zip
@@ -488,7 +486,7 @@ def container_wrapper(
         will be exported as OMP_NUM_THREADS environment variable, 1 by default
     mpi_np : int, optional, 1 by default
         number of MPI processes which the mpirun command will use
-    modules : List[str], optional
+    modules : list[str], optional
         list of modules to be loaded on HPC, none by default
     """
 

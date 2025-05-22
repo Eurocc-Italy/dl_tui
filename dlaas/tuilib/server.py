@@ -12,11 +12,10 @@ logger = logging.getLogger(__name__)
 
 from os.path import basename, exists
 import subprocess
-from typing import Tuple, Dict
 from dlaas.tuilib.common import Config, UserInput
 
 
-def create_remote_directory(json_path: str) -> Tuple[str, str]:
+def create_remote_directory(json_path: str) -> tuple[str, str]:
     """Create remote temporary directory on HPC
 
     Parameters
@@ -26,7 +25,7 @@ def create_remote_directory(json_path: str) -> Tuple[str, str]:
 
     Returns
     -------
-    Tuple[str, str]
+    tuple[str, str]
         stdout and stderr of the ssh command
     """
 
@@ -58,7 +57,7 @@ def create_remote_directory(json_path: str) -> Tuple[str, str]:
     return stdout, stderr
 
 
-def copy_json_input(json_path: str) -> Tuple[str, str]:
+def copy_json_input(json_path: str) -> tuple[str, str]:
     """Copy .json file with the user input to remote machine
 
     Parameters
@@ -68,7 +67,7 @@ def copy_json_input(json_path: str) -> Tuple[str, str]:
 
     Returns
     -------
-    Tuple[str, str]
+    tuple[str, str]
         stdout and stderr of the ssh command
     """
 
@@ -98,7 +97,7 @@ def copy_json_input(json_path: str) -> Tuple[str, str]:
     return stdout, stderr
 
 
-def copy_user_executable(json_path: str) -> Tuple[str, str]:
+def copy_user_executable(json_path: str) -> tuple[str, str]:
     """Copy user executable file to remote machine (if present in json file)
     Executable can either be a Python script or a Singularity container
 
@@ -109,7 +108,7 @@ def copy_user_executable(json_path: str) -> Tuple[str, str]:
 
     Returns
     -------
-    Tuple[str, str, str]
+    tuple[str, str, str]
         stdout and stderr of the ssh command + Slurm job ID for build job
     """
 
@@ -185,7 +184,7 @@ def copy_user_executable(json_path: str) -> Tuple[str, str]:
     return stdout, stderr, slurm_job_id
 
 
-def launch_job(json_path: str, build_job_id: str = None) -> Tuple[str, str, str]:
+def launch_job(json_path: str, build_job_id: str = None) -> tuple[str, str, str]:
     """Launch job on HPC (either a Python script or a Singularity container)
 
     Parameters
@@ -197,7 +196,7 @@ def launch_job(json_path: str, build_job_id: str = None) -> Tuple[str, str, str]
 
     Returns
     -------
-    Tuple[str, str, str]
+    tuple[str, str, str]
         stdout and stderr provided by the SSH command + SLURM job identifier (necessary for upload dependency)
 
     Raises
@@ -274,7 +273,7 @@ def launch_job(json_path: str, build_job_id: str = None) -> Tuple[str, str, str]
     return stdout, stderr, slurm_job_id
 
 
-def upload_results(json_path: str, slurm_job_id: int) -> Tuple[str, str]:
+def upload_results(json_path: str, slurm_job_id: int) -> tuple[str, str]:
     """Upload results of completed job to S3 via the Python script created by the HPC version.
 
     Parameters
@@ -287,7 +286,7 @@ def upload_results(json_path: str, slurm_job_id: int) -> Tuple[str, str]:
 
     Returns
     -------
-    Tuple[str, str]
+    tuple[str, str]
         stdout and stderr provided by the SSH command
 
     Raises
@@ -319,12 +318,9 @@ def upload_results(json_path: str, slurm_job_id: int) -> Tuple[str, str]:
     wrap_cmd += f"cd run_job_*; "  # if a script/container was also provided
     wrap_cmd += f"python upload_results_{user_input.id}.py; "
     wrap_cmd += "touch RESULTS_UPLOADED; "
-    wrap_cmd += (
-        f"rm -rf ../{user_input.id}; "  # remove temporary directory from HPC. NOTE: Comment this line for debugging
-    )
-    wrap_cmd += (
-        f"rm -rf ../../{user_input.id}"  # remove temporary directory from HPC. NOTE: Comment this line for debugging
-    )
+    if not config.debug:
+        wrap_cmd += f"rm -rf ../{user_input.id}; "
+        wrap_cmd += f"rm -rf ../../{user_input.id}"
 
     # Generating SSH command
     ssh_cmd = f"cd \$SCRATCH/{user_input.id}; "
@@ -366,7 +362,7 @@ def upload_results(json_path: str, slurm_job_id: int) -> Tuple[str, str]:
     return stdout, stderr
 
 
-def check_jobs_status() -> Dict[str, Dict[str, str]]:
+def check_jobs_status() -> dict[str, dict[str, str]]:
     """Check jobs status on HPC. Returns a list of dictionaries with the job info:
     - ACCOUNT
     - TRES_PER_NODE
@@ -425,7 +421,7 @@ def check_jobs_status() -> Dict[str, Dict[str, str]]:
 
     Returns
     -------
-    Dict[str, Dict[str, str]]
+    dict[str, dict[str, str]]
         dictionary containing dictionaries with job infos
     """
 
@@ -466,7 +462,7 @@ def check_jobs_status() -> Dict[str, Dict[str, str]]:
             job_info[field.upper()] = line.split("|")[i]
         jobs[job_info["JOBID"]] = job_info
 
-    # 2. Then, populate pending jobs with squeue 
+    # 2. Then, populate pending jobs with squeue
     ssh_cmd = rf'ssh -i {config.ssh_key} {config.user}@{config.host} "squeue --format=%all -u {config.user}"'
 
     logger.debug(f"Launching command via ssh:\n{ssh_cmd}")

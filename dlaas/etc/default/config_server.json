@@ -10,5 +10,6 @@
   "mail": "m.rossi@cineca.it",
   "walltime": "00:05:00",
   "nodes": 1,
-  "ntasks_per_node": 1
+  "ntasks_per_node": 1,
+  "debug": 0
 }

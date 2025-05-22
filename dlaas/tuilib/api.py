@@ -14,8 +14,6 @@ from requests import Response
 import os
 import json
 
-from typing import Dict
-
 
 def upload(
     ip: str,
@@ -223,7 +221,7 @@ def query_python(
     ip: str,
     token: str,
     query_file: str,
-    config_json: Dict[str, Dict[str, str]],
+    config_json: dict[str, dict[str, str]],
     python_file: str = None,
 ) -> Response:
     """Upload file to Data Lake using the DLaaS API.
@@ -236,7 +234,7 @@ def query_python(
         Authorization token for running commands via the API
     query_file : str
         Path of the file containing the SQL query to be launched
-    config_json: Dict[str, Dict[str, str]]
+    config_json: dict[str, dict[str, str]]
         Dictionary containing the config_hpc and config_server configuration dictionaries
     python_file : str, optional
         Path of the Python analysis script to be ran on the query results
@@ -283,7 +281,7 @@ def query_container(
     ip: str,
     token: str,
     query_file: str,
-    config_json: Dict[str, Dict[str, str]],
+    config_json: dict[str, dict[str, str]],
     container_path: str = None,
     container_url: str = None,
     exec_command: str = None,
@@ -298,7 +296,7 @@ def query_container(
         Authorization token for running commands via the API
     query_file : str
         Path of the file containing the SQL query to be launched
-    config_json: Dict[str, Dict[str, str]]
+    config_json: dict[str, dict[str, str]]
         Dictionary containing the config_hpc and config_server configuration dictionaries
     container_path : str, optional
         Path to the Singularity container provided by the user
