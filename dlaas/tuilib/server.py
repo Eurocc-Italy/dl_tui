@@ -362,7 +362,7 @@ def upload_results(json_path: str, slurm_job_id: int) -> tuple[str, str]:
     return stdout, stderr
 
 
-def check_jobs_status() -> dict[str, dict[str, str]]:
+def check_jobs_status(hpc_ip: str) -> dict[str, dict[str, str]]:
     """Check jobs status on HPC. Returns a list of dictionaries with the job info:
     - ACCOUNT
     - TRES_PER_NODE
@@ -419,6 +419,11 @@ def check_jobs_status() -> dict[str, dict[str, str]]:
     If a dl-tui.log logfile is found in /var/log/datalake, associates the Slurm JOBID with the Data Lake JOBID under
     the key DATA_LAKE_JOBID
 
+    Parameters
+    ----------
+    hpc_ip : str
+        IP of the HPC cluster for which you want to check the jobs
+
     Returns
     -------
     dict[str, dict[str, str]]
@@ -429,8 +434,13 @@ def check_jobs_status() -> dict[str, dict[str, str]]:
     config = Config("server")
     logger.debug(f"Server config: {config.__dict__}")
 
+    if not hpc_ip:
+        hpc_ip = config.host
+
+    logger.debug(f"Checking jobs on {hpc_ip}")
+
     # 1. First, populate completed jobs with sacct
-    ssh_cmd = rf'ssh -i {config.ssh_key} {config.user}@{config.host} "sacct -P -l"'
+    ssh_cmd = rf'ssh -i {config.ssh_key} {config.user}@{hpc_ip} "sacct -P -l"'
 
     logger.debug(f"Launching command via ssh:\n{ssh_cmd}")
 
@@ -445,6 +455,9 @@ def check_jobs_status() -> dict[str, dict[str, str]]:
     stderr = str(stderr, encoding="utf-8")
     logger.debug(f"stdout: {stdout}")
     logger.debug(f"stderr: {stderr}")
+
+    if stderr:
+        raise RuntimeError(f"ERROR: {stderr}")
 
     lines = stdout.split("\n")
     lines.remove("")  # removing empty lines
@@ -463,7 +476,7 @@ def check_jobs_status() -> dict[str, dict[str, str]]:
         jobs[job_info["JOBID"]] = job_info
 
     # 2. Then, populate pending jobs with squeue
-    ssh_cmd = rf'ssh -i {config.ssh_key} {config.user}@{config.host} "squeue --format=%all -u {config.user}"'
+    ssh_cmd = rf'ssh -i {config.ssh_key} {config.user}@{hpc_ip} "squeue --format=%all -u {config.user}"'
 
     logger.debug(f"Launching command via ssh:\n{ssh_cmd}")
 
