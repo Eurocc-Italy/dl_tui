@@ -296,7 +296,6 @@ def run_container(
     mpi_np: int,
     pfs_prefix_path: str,
     modules: list[str],
-    pfs_prefix_path: str,
     files_in: list[str],
 ) -> list[str]:
     """Runs the user-provided Singularity container, feeding the paths containted in files_in.
