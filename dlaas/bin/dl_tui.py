@@ -196,8 +196,8 @@ Example commands [arguments within parentheses are optional]:
     )
 
     parser.add_argument(
-        "--user",
-        help="[--job_status] | Data Lake user for which to filter HPC jobs",
+        "--hpc_ip",
+        help="[--job_status] | HPC cluster where to check your job status",
         default=None,
     )
 
@@ -356,7 +356,7 @@ Example commands [arguments within parentheses are optional]:
         except TypeError:
             logger.info("No custom configuration provided. Keeping defaults.")
 
-        if args.debug: # Overriding debug mode
+        if args.debug:  # Overriding debug mode
             config_json["config_server"]["debug"] = True
 
         logger.debug(f"config_hpc: {config_json['config_hpc']}")
@@ -432,7 +432,7 @@ Example commands [arguments within parentheses are optional]:
         response = job_status(
             ip=args.ip,
             token=args.token,
-            user=args.user,
+            hpc_ip=args.hpc_ip,
         )
 
         status_dict = {
