@@ -314,8 +314,6 @@ def run_container(
         path prefix for the location on the parallel filesystem
     modules : list[str]
         list of modules to be loaded on HPC
-    pfs_prefix_path : str
-        path prefix for the location on the parallel filesystem
     files_in : list[str]
         list of paths with the files on which to run the executable
 
