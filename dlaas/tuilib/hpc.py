@@ -340,8 +340,8 @@ def run_container(
     cmd = f"export OMP_NUM_THREADS={omp_num_threads}; "
 
     # # Load modules
-    # for module in modules:
-    #     cmd += f"module load {module}; "
+    for module in modules:
+        cmd += f"module load {module}; "
 
     # FIXME: needed for G100, otherwise Python won't load
     # cmd += f"unset PYTHONHOME; unset PYTHONPATH; "
