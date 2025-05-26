@@ -295,6 +295,7 @@ def run_container(
     omp_num_threads: int,
     mpi_np: int,
     pfs_prefix_path: str,
+    modules: list[str],
     files_in: list[str],
 ) -> list[str]:
     """Runs the user-provided Singularity container, feeding the paths containted in files_in.
@@ -309,6 +310,8 @@ def run_container(
         will be exported as OMP_NUM_THREADS environment variable
     mpi_np : int
         number of MPI processes which the mpirun command will use
+    pfs_prefix_path : str
+        path prefix for the location on the parallel filesystem
     modules : list[str]
         list of modules to be loaded on HPC
     files_in : list[str]
