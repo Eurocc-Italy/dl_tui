@@ -296,6 +296,7 @@ def run_container(
     mpi_np: int,
     pfs_prefix_path: str,
     modules: list[str],
+    pfs_prefix_path: str,
     files_in: list[str],
 ) -> list[str]:
     """Runs the user-provided Singularity container, feeding the paths containted in files_in.
@@ -314,6 +315,8 @@ def run_container(
         path prefix for the location on the parallel filesystem
     modules : list[str]
         list of modules to be loaded on HPC
+    pfs_prefix_path : str
+        path prefix for the location on the parallel filesystem
     files_in : list[str]
         list of paths with the files on which to run the executable
 
@@ -340,8 +343,8 @@ def run_container(
     cmd = f"export OMP_NUM_THREADS={omp_num_threads}; "
 
     # # Load modules
-    for module in modules:
-        cmd += f"module load {module}; "
+    # for module in modules:
+    #     cmd += f"module load {module}; "
 
     # FIXME: needed for G100, otherwise Python won't load
     # cmd += f"unset PYTHONHOME; unset PYTHONPATH; "
