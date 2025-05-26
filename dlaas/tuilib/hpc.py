@@ -354,12 +354,11 @@ def run_container(
     for file in files_in:
         files_container.append(f"/input/{os.path.basename(file)}")
 
-    # Launch command (with mpirun if mpi_np > 1)
+    # Launch command with srun
     # FIXME: make sure this is desired behaviour
-    if mpi_np == 1:
-        cmd += f"singularity {runtype} --cleanenv {container_path} {exec_command} {' '.join(files_container)}"
-    else:
-        cmd += f"mpirun -np {mpi_np} singularity {runtype} --cleanenv {container_path} {exec_command} {' '.join(files_container)}"
+    cmd += (
+        f"srun -N {mpi_np} singularity {runtype} --cleanenv {container_path} {exec_command} {' '.join(files_container)}"
+    )
 
     logger.debug(f"Launching command:\n{cmd}")
 
