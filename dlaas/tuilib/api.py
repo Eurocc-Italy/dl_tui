@@ -370,9 +370,7 @@ def browse(
     """
 
     token = token.rstrip("\n")
-    headers = {
-        "Authorization": f"Bearer {token}",
-    }
+    headers = {"Authorization": f"Bearer {token}"}
 
     response = requests.get(f"https://{ip}.nip.io/v1/browse_files", headers=headers, params={"filter": filter})
 
@@ -384,7 +382,7 @@ def browse(
 def job_status(
     ip: str,
     token: str,
-    user: str = None,
+    hpc_ip: str = "",
 ) -> Response:
     """Check HPC job status, optionally filtering by Data Lake user
 
@@ -394,8 +392,8 @@ def job_status(
         IP address of the machine running the API
     token : str
         Authorization token for running commands via the API
-    user : str, optional
-        Data Lake user whose jobs you want to see
+    hpc_ip : str, optional
+        IP of the HPC cluster where you want to check the jobs
 
     Returns
     -------
@@ -404,11 +402,9 @@ def job_status(
     """
 
     token = token.rstrip("\n")
-    headers = {
-        "Authorization": f"Bearer {token}",
-    }
+    headers = {"Authorization": f"Bearer {token}"}
 
-    response = requests.get(f"https://{ip}.nip.io/v1/job_status", headers=headers, params={"user": user})
+    response = requests.get(f"https://{ip}.nip.io/v1/job_status", headers=headers, params={"hpc_ip": hpc_ip})
 
     logger.info(f"Checking job status on HPC. User: {filter}. Response: {response.status_code}")
 
