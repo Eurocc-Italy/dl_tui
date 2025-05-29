@@ -356,9 +356,7 @@ def run_container(
 
     # Launch command with srun
     # FIXME: make sure this is desired behaviour
-    cmd += (
-        f"srun -N {mpi_np} singularity {runtype} --cleanenv {container_path} {exec_command} {' '.join(files_container)}"
-    )
+    cmd += f"srun -N {mpi_np} singularity {runtype} {container_path} {exec_command} {' '.join(files_container)}"
 
     logger.debug(f"Launching command:\n{cmd}")
 
