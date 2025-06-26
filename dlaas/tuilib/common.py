@@ -53,7 +53,7 @@ def sanitize_dictionary(dictionary: dict[str, str]) -> None:
         ],  # any word sequence (no .) delimited by slashes, starting with /
         "omp_num_threads": [r"[0-9]+"],  # any number,
         "mpi_np": [r"[0-9]+"],  # any number,
-        "modules": [r"\[('([a-zA-Z0-9_.-]+\/?)+',? ?)+\]"],  # list of module names, delmited by commas
+        "modules": [r"\[('([a-zA-Z0-9_.-]+\/?)+',? ?)*\]"],  # list of module names, delmited by commas
         #################
         # config_server #
         #################
