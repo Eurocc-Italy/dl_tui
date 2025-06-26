@@ -225,7 +225,8 @@ def launch_job(json_path: str, build_job_id: int = 0) -> tuple[str, str, int]:
     walltime = config.walltime
     mail = config.mail
     nodes = config.nodes
-    ntasks_per_node = config.ntasks_per_node
+    tasks_per_node = config.tasks_per_node
+    cpus_per_task = config.cpus_per_task
     ssh_key = config.ssh_key
 
     # Creating wrap command to be passed to sbatch
@@ -242,7 +243,8 @@ def launch_job(json_path: str, build_job_id: int = 0) -> tuple[str, str, int]:
     ssh_cmd += f"sbatch -p {partition} -A {account} --qos {qos} "
     ssh_cmd += f"--mail-type ALL --mail-user {mail} "
     ssh_cmd += f"-t {walltime} -N {nodes} "
-    ssh_cmd += f"--ntasks-per-node {ntasks_per_node} "
+    ssh_cmd += f"--ntasks-per-node {tasks_per_node} "
+    ssh_cmd += f"--cpus-per-task {cpus_per_task} "
     if build_job_id:
         ssh_cmd += f"-d afterok:{build_job_id} "
     ssh_cmd += f"--wrap '{wrap_cmd}'"
