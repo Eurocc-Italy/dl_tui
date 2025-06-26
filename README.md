@@ -299,8 +299,6 @@ For the hpc version, the configurable options are the following:
 - `s3_endpoint_url`: URL at which the S3 bucket can be found
 - `s3_bucket`: name of the S3 bucket storing the Data Lake files
 - `pfs_prefix_path`: path at which the Data Lake files are stored on the parallel filesystem
-- `omp_num_threads`: number of OMP threads to use on HPC
-- `mpi_np`: number of MPI processes to use on HPC
 - `modules`: list of system modules to be loaded on HPC
 
 For the server version, the configurable options are the following:
@@ -315,8 +313,9 @@ For the server version, the configurable options are the following:
 - `qos`: SLURM QoS for the HPC job
 - `mail`: email address to which the notifications for job start/end are sent
 - `walltime`: maximum walltime for the HPC job
-- `nodes`: number of nodes requested for the HPC job
-- `ntasks_per_node`: number of CPU cores per node requested for the HPC job
+- `nodes`: number of nodes requested for the HPC job (`srun` will automatically use this value)
+- `tasks_per_node`: number of processes per node to use for the HPC job (`srun` will automatically use this value)
+- `cpus_per_node`: number of CPU cores assigned to each process for the HPC job
 
 > **NOTE:**
 > The `config_<hpc/server>.json` file names reflect the executables which need them, not the system to which the information within pertains. _e.g._, the `config_server.json` mostly contains HPC-related information, but is used by the `dl_tui_server` executable which is supposed to run on the server VM, hence the name.
