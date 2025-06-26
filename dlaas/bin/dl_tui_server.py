@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
-Module to interface with HPC from the VM running the API server. The purpose of this module is to take the 
-user query and script, launch a HPC job which calls the `dl_tui_hpc` executable on the compute nodes and 
+Module to interface with HPC from the VM running the API server. The purpose of this module is to take the
+user query and script, launch a HPC job which calls the `dl_tui_hpc` executable on the compute nodes and
 runs the script on the query results.
 
 Author: @lbabetto
@@ -16,6 +16,7 @@ logger.setLevel(logging.DEBUG)
 if not os.path.exists("/var/log/datalake"):
     try:
         os.makedirs("/var/log/datalake")
+        fh = logging.FileHandler("/var/log/datalake/dl-tui.log", mode="a")
     except PermissionError:
         fh = logging.FileHandler("dl-tui.log", mode="w")
 else:

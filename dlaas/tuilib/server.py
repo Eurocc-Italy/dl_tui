@@ -97,7 +97,7 @@ def copy_json_input(json_path: str) -> tuple[str, str]:
     return stdout, stderr
 
 
-def copy_user_executable(json_path: str) -> tuple[str, str]:
+def copy_user_executable(json_path: str) -> tuple[str, str, int | None]:
     """Copy user executable file to remote machine (if present in json file)
     Executable can either be a Python script or a Singularity container
 
@@ -108,7 +108,7 @@ def copy_user_executable(json_path: str) -> tuple[str, str]:
 
     Returns
     -------
-    tuple[str, str, str]
+    tuple[str, str, int | None]
         stdout and stderr of the ssh command + Slurm job ID for build job
     """
 
@@ -184,7 +184,7 @@ def copy_user_executable(json_path: str) -> tuple[str, str]:
     return stdout, stderr, slurm_job_id
 
 
-def launch_job(json_path: str, build_job_id: str = None) -> tuple[str, str, str]:
+def launch_job(json_path: str, build_job_id: int | None = None) -> tuple[str, str, int]:
     """Launch job on HPC (either a Python script or a Singularity container)
 
     Parameters
@@ -196,7 +196,7 @@ def launch_job(json_path: str, build_job_id: str = None) -> tuple[str, str, str]
 
     Returns
     -------
-    tuple[str, str, str]
+    tuple[str, str, int]
         stdout and stderr provided by the SSH command + SLURM job identifier (necessary for upload dependency)
 
     Raises
@@ -362,7 +362,7 @@ def upload_results(json_path: str, slurm_job_id: int) -> tuple[str, str]:
     return stdout, stderr
 
 
-def check_jobs_status(hpc_ip: str) -> dict[str, dict[str, str]]:
+def check_jobs_status(hpc_ip: str) -> dict[str, dict[str, str]] | None:
     """Check jobs status on HPC. Returns a list of dictionaries with the job info:
     - ACCOUNT
     - TRES_PER_NODE
@@ -426,7 +426,7 @@ def check_jobs_status(hpc_ip: str) -> dict[str, dict[str, str]]:
 
     Returns
     -------
-    dict[str, dict[str, str]]
+    dict[str, dict[str, str]] | None
         dictionary containing dictionaries with job infos
     """
 

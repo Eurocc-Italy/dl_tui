@@ -292,10 +292,7 @@ def python_wrapper(
 def run_container(
     container_path: str,
     exec_command: str,
-    omp_num_threads: int,
-    mpi_np: int,
     pfs_prefix_path: str,
-    modules: list[str],
     files_in: list[str],
 ) -> list[str]:
     """Runs the user-provided Singularity container, feeding the paths containted in files_in.
@@ -306,14 +303,6 @@ def run_container(
         path to the Singularity container provided by the user
     exec_command : str
         command to be launched within the container (with its own options and flags if needed)
-    omp_num_threads : int
-        will be exported as OMP_NUM_THREADS environment variable
-    mpi_np : int
-        number of MPI processes which the mpirun command will use
-    pfs_prefix_path : str
-        path prefix for the location on the parallel filesystem
-    modules : list[str]
-        list of modules to be loaded on HPC
     files_in : list[str]
         list of paths with the files on which to run the executable
 
@@ -337,11 +326,7 @@ def run_container(
     os.makedirs("output", exist_ok=True)
 
     # Set up multithreading
-    cmd = f"export OMP_NUM_THREADS={omp_num_threads}; "
-
-    # # Load modules
-    # for module in modules:
-    #     cmd += f"module load {module}; "
+    cmd = f"export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK; "
 
     # FIXME: needed for G100, otherwise Python won't load
     # cmd += f"unset PYTHONHOME; unset PYTHONPATH; "
@@ -356,7 +341,7 @@ def run_container(
 
     # Launch command with srun
     # FIXME: make sure this is desired behaviour
-    cmd += f"srun -N {mpi_np} singularity {runtype} {container_path} {exec_command} {' '.join(files_container)}"
+    cmd += f"srun singularity {runtype} {container_path} {exec_command} {' '.join(files_container)}"
 
     logger.debug(f"Launching command:\n{cmd}")
 
@@ -454,9 +439,6 @@ def container_wrapper(
     job_id: str,
     container_path: str,
     exec_command: str,
-    omp_num_threads: int = 1,
-    mpi_np: int = 1,
-    modules: list[str] = [],
 ):
     """Get the SQL query and script, convert them to MongoDB spec, run the process query on the DB retrieving matching
     files, run the user-provided Singularity container (if present) in a temporary directory, save the files and zip
@@ -501,9 +483,6 @@ def container_wrapper(
     files_out = run_container(
         container_path=container_path,
         exec_command=exec_command,
-        omp_num_threads=omp_num_threads,
-        mpi_np=mpi_np,
-        modules=modules,
         pfs_prefix_path=pfs_prefix_path,
         files_in=files_in,
     )

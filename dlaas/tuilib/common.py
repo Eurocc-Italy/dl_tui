@@ -33,7 +33,9 @@ def sanitize_dictionary(dictionary: dict[str, str]) -> None:
 
     keyword_formats = {
         "version": ["server", "hpc"],
-        # config_hpc
+        ###############
+        #  config_hpc #
+        ###############
         "user": [r"[a-zA-Z0-9_]+"],  # any single word (word: character sequence containing alphanumerics or _)
         "password": [r"[a-zA-Z0-9_]+"],  # any single word
         "ip": [
@@ -52,7 +54,9 @@ def sanitize_dictionary(dictionary: dict[str, str]) -> None:
         "omp_num_threads": [r"[0-9]+"],  # any number,
         "mpi_np": [r"[0-9]+"],  # any number,
         "modules": [r"\[('([a-zA-Z0-9_.-]+\/?)+',? ?)+\]"],  # list of module names, delmited by commas
-        # config_server
+        #################
+        # config_server #
+        #################
         "user": [r"[a-zA-Z0-9_]+"],  # any single word (word: character sequence containing alphanumerics or _)
         "host": [
             r"[a-zA-Z0-9_\.-]+[a-zA-Z0-9_-]+"
@@ -66,7 +70,8 @@ def sanitize_dictionary(dictionary: dict[str, str]) -> None:
         "mail": [r"[a-zA-Z0-9_\.]+@[a-zA-Z0-9_\.]+"],  # any valid email type (no dashes or pluses)
         "walltime": [r"([0-9]+-)?([0-9]+:)?([0-9]+:)?[0-9]+"],  # DD-HH:MM:SS
         "nodes": [r"[0-9]+(k|m)?"],  # any number, possibly ending with k or m
-        "ntasks_per_node": [r"[0-9]+"],  # any number
+        "tasks_per_node": [r"[0-9]+"],  # any number
+        "cpus_per_task": [r"[0-9]+"],  # any number
         "debug": [r"[a-zA-Z0-9_]+"],  # any single word
     }
 

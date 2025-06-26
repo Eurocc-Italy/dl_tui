@@ -4,8 +4,8 @@ Wrapper which needs to be run from command line providing the following informat
 
   - ID: a unique ID for the job run (preferably of the UUID.hex form)
   - query: path to a file containing an SQL query
-  - script (optional): the content of a Python script. This Python script must contain a `main` function which takes 
-    as input a list (of file paths), does some user-defined analysis, and returns a list (of file paths) which the 
+  - script (optional): the content of a Python script. This Python script must contain a `main` function which takes
+    as input a list (of file paths), does some user-defined analysis, and returns a list (of file paths) which the
     wrapper then takes and stores in a compressed archive.
 
 The wrapper then does the following:
@@ -13,7 +13,7 @@ The wrapper then does the following:
   1. Takes user SQL query and converts it to Mongo spec using a custom sqlparse codebase (@lbabetto/sqlparse)
   2. Runs query on remote DB and retrieves the matching entries, generating a list with the paths to the files
   3. Takes the user-provided python script and runs it locally, feeding the input files list to the `main` function
-  4. Retrieves the output files from the `main` function and saves the files (of any kind, user-defined) in a zipped 
+  4. Retrieves the output files from the `main` function and saves the files (of any kind, user-defined) in a zipped
   archive which is then uploaded to the S3 bucket specified in the hpc config file.
 
 Author: @lbabetto
@@ -87,9 +87,6 @@ For further information, please consult the code repository (https://github.com/
             job_id=user_input.id,
             container_path=user_input.container_path,
             exec_command=user_input.exec_command,
-            omp_num_threads=config.omp_num_threads,
-            mpi_np=config.mpi_np,
-            modules=config.modules,
         )
 
     # Launch Singularity container (with URL)
@@ -103,9 +100,6 @@ For further information, please consult the code repository (https://github.com/
             job_id=user_input.id,
             container_path=f"container_{user_input.id}.sif",
             exec_command=user_input.exec_command,
-            omp_num_threads=config.omp_num_threads,
-            mpi_np=config.mpi_np,
-            modules=config.modules,
         )
 
     # Launch Python script (if missing, should just return the query matches)
