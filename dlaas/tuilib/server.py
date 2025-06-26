@@ -227,6 +227,7 @@ def launch_job(json_path: str, build_job_id: int = 0) -> tuple[str, str, int]:
     nodes = config.nodes
     tasks_per_node = config.tasks_per_node
     cpus_per_task = config.cpus_per_task
+    gpus = config.gpus
     ssh_key = config.ssh_key
 
     # Creating wrap command to be passed to sbatch
@@ -245,6 +246,8 @@ def launch_job(json_path: str, build_job_id: int = 0) -> tuple[str, str, int]:
     ssh_cmd += f"-t {walltime} -N {nodes} "
     ssh_cmd += f"--ntasks-per-node {tasks_per_node} "
     ssh_cmd += f"--cpus-per-task {cpus_per_task} "
+    if int(gpus) > 0:
+        ssh_cmd += f"--gres=gpu:{gpus} "
     if build_job_id:
         ssh_cmd += f"-d afterok:{build_job_id} "
     ssh_cmd += f"--wrap '{wrap_cmd}'"

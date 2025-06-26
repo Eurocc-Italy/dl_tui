@@ -72,6 +72,7 @@ def sanitize_dictionary(dictionary: dict[str, str]) -> None:
         "nodes": [r"[0-9]+(k|m)?"],  # any number, possibly ending with k or m
         "tasks_per_node": [r"[0-9]+"],  # any number
         "cpus_per_task": [r"[0-9]+"],  # any number
+        "gpus": [r"[0-9]+"],  # any number
         "debug": [r"[a-zA-Z0-9_]+"],  # any single word
     }
 
