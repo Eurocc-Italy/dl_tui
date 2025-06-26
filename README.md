@@ -316,6 +316,7 @@ For the server version, the configurable options are the following:
 - `nodes`: number of nodes requested for the HPC job (`srun` will automatically use this value)
 - `tasks_per_node`: number of processes per node to use for the HPC job (`srun` will automatically use this value)
 - `cpus_per_node`: number of CPU cores assigned to each process for the HPC job
+- `gpus`: number of GPUs requested for the HPC job
 
 > **NOTE:**
 > The `config_<hpc/server>.json` file names reflect the executables which need them, not the system to which the information within pertains. _e.g._, the `config_server.json` mostly contains HPC-related information, but is used by the `dl_tui_server` executable which is supposed to run on the server VM, hence the name.
