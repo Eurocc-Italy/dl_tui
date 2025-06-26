@@ -97,7 +97,7 @@ def copy_json_input(json_path: str) -> tuple[str, str]:
     return stdout, stderr
 
 
-def copy_user_executable(json_path: str) -> tuple[str, str, int | None]:
+def copy_user_executable(json_path: str) -> tuple[str, str, int]:
     """Copy user executable file to remote machine (if present in json file)
     Executable can either be a Python script or a Singularity container
 
@@ -108,7 +108,7 @@ def copy_user_executable(json_path: str) -> tuple[str, str, int | None]:
 
     Returns
     -------
-    tuple[str, str, int | None]
+    tuple[str, str, int]
         stdout and stderr of the ssh command + Slurm job ID for build job
     """
 
@@ -179,12 +179,12 @@ def copy_user_executable(json_path: str) -> tuple[str, str, int | None]:
         if "Submitted batch job" not in stdout:
             raise RuntimeError(f"Something gone wrong, job was not launched.\nstdout: {stdout}\nstderr: {stderr}")
     else:
-        slurm_job_id = None
+        slurm_job_id = 0
 
     return stdout, stderr, slurm_job_id
 
 
-def launch_job(json_path: str, build_job_id: int | None = None) -> tuple[str, str, int]:
+def launch_job(json_path: str, build_job_id: int = 0) -> tuple[str, str, int]:
     """Launch job on HPC (either a Python script or a Singularity container)
 
     Parameters
@@ -362,7 +362,7 @@ def upload_results(json_path: str, slurm_job_id: int) -> tuple[str, str]:
     return stdout, stderr
 
 
-def check_jobs_status(hpc_ip: str) -> dict[str, dict[str, str]] | None:
+def check_jobs_status(hpc_ip: str) -> dict[str, dict[str, str]]:
     """Check jobs status on HPC. Returns a list of dictionaries with the job info:
     - ACCOUNT
     - TRES_PER_NODE
@@ -426,7 +426,7 @@ def check_jobs_status(hpc_ip: str) -> dict[str, dict[str, str]] | None:
 
     Returns
     -------
-    dict[str, dict[str, str]] | None
+    dict[str, dict[str, str]]
         dictionary containing dictionaries with job infos
     """
 
@@ -465,7 +465,7 @@ def check_jobs_status(hpc_ip: str) -> dict[str, dict[str, str]] | None:
     try:
         fields = lines.pop(0).split("|")  # fields are separated by vertical bars
     except IndexError:
-        return None
+        return {}
 
     # Populate job info from output
     jobs = {}
@@ -498,7 +498,7 @@ def check_jobs_status(hpc_ip: str) -> dict[str, dict[str, str]] | None:
     try:
         fields = lines.pop(0).split("|")  # fields are separated by vertical bars
     except IndexError:
-        return None
+        return {}
 
     # Populate job info from output
     for line in lines:
