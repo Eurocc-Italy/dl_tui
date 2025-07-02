@@ -36,14 +36,14 @@ def sanitize_dictionary(dictionary: dict[str, str]) -> None:
         ###############
         #  config_hpc #
         ###############
-        "user": [r"[a-zA-Z0-9_]+"],  # any single word (word: character sequence containing alphanumerics or _)
-        "password": [r"[a-zA-Z0-9_]+"],  # any single word
+        "user": [r"[a-zA-Z0-9_-]+"],  # any single word (word: character sequence containing alphanumerics or _)
+        "password": [r"[a-zA-Z0-9_-]+"],  # any single word
         "ip": [
             r"[a-zA-Z0-9_\.-]+[a-zA-Z0-9_-]+"
         ],  # any word sequence (with - and _) optionally delimited by dots, but not ending with one
         "port": [r"[0-9]+"],  # any number
-        "database": [r"[a-zA-Z0-9_]+"],  # any single word
-        "collection": [r"[a-zA-Z0-9_]+"],  # any single word
+        "database": [r"[a-zA-Z0-9_-]+"],  # any single word
+        "collection": [r"[a-zA-Z0-9_-]+"],  # any single word
         "s3_endpoint_url": [
             r"(https?:\/\/)?([a-zA-Z0-9_-]+\.)+[a-zA-Z0-9_-]+(:[0-9]+)?\/?"
         ],  # "https://XXX.(XXX.)*n.XXX:XXXX/",
@@ -57,23 +57,23 @@ def sanitize_dictionary(dictionary: dict[str, str]) -> None:
         #################
         # config_server #
         #################
-        "user": [r"[a-zA-Z0-9_]+"],  # any single word (word: character sequence containing alphanumerics or _)
+        "user": [r"[a-zA-Z0-9_-]+"],  # any single word (word: character sequence containing alphanumerics or _)
         "host": [
             r"[a-zA-Z0-9_\.-]+[a-zA-Z0-9_-]+"
         ],  # any word sequence (with - and _) optionally delimited by dots, but not ending with one
         "venv_path": [r"^(~)?\/([a-zA-Z0-9_.-]+\/?)+"],  # any word sequence delimited by slashes, can start with ~ or /
         "ssh_key": [r"^(~)?\/([a-zA-Z0-9_.-]+\/?)+"],  # any word sequence delimited by slashes, can start with ~ or /
-        "compute_partition": [r"[a-zA-Z0-9_]+"],  # any single word,
-        "upload_partition": [r"[a-zA-Z0-9_]+"],  # any single word
-        "account": [r"[a-zA-Z0-9_]+"],  # any single word
-        "qos": [r"[a-zA-Z0-9_]+"],  # any single word
+        "compute_partition": [r"[a-zA-Z0-9_-]+"],  # any single word,
+        "upload_partition": [r"[a-zA-Z0-9_-]+"],  # any single word
+        "account": [r"[a-zA-Z0-9_-]+"],  # any single word
+        "qos": [r"[a-zA-Z0-9_-]+"],  # any single word
         "mail": [r"[a-zA-Z0-9_\.]+@[a-zA-Z0-9_\.]+"],  # any valid email type (no dashes or pluses)
         "walltime": [r"([0-9]+-)?([0-9]+:)?([0-9]+:)?[0-9]+"],  # DD-HH:MM:SS
         "nodes": [r"[0-9]+(k|m)?"],  # any number, possibly ending with k or m
         "tasks_per_node": [r"[0-9]+"],  # any number
         "cpus_per_task": [r"[0-9]+"],  # any number
         "gpus": [r"[0-9]+"],  # any number
-        "debug": [r"[a-zA-Z0-9_]+"],  # any single word
+        "debug": [r"[a-zA-Z0-9_-]+"],  # any single word
     }
 
     # make sure keyword values match the expected format
