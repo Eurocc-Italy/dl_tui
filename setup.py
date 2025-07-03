@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="dl_tui",
-    version="1.1",
+    version="1.2",
     description="Text user interface for EuroCC-Italy's Data Lake Ready to Use",
     packages=find_packages(include=["dlaas", "dlaas.*"]),
     package_data={
