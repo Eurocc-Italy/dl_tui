@@ -123,10 +123,15 @@ Example commands [arguments within parentheses are optional]:
         default=Config("hpc").ip,
     )
 
+    if os.path.exists(f"{os.environ['HOME']}/.config/dlaas/api-token.txt"):
+        token_default = open(f"{os.environ['HOME']}/.config/dlaas/api-token.txt", "r").read()
+    else:
+        token_default = "MISSING_TOKEN"
+
     parser.add_argument(
         "--token",
         help="authentication token for launching commands to the Data Lake API",
-        default=open(f"{os.environ['HOME']}/.config/dlaas/api-token.txt", "r").read(),
+        default=token_default,
     )
 
     parser.add_argument(
